@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:websocket="http://www.springframework.org/schema/websocket"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+	http://www.springframework.org/schema/websocket http://www.springframework.org/schema/websocket/spring-websocket-4.1.xsd">
+	
+	<!-- Root Context: defines shared resources visible to all other web components -->
+		
+	<!-- Jasypt Start -->
+	<bean id="encryptorConfig" class="org.jasypt.encryption.pbe.config.EnvironmentPBEConfig">
+		<!-- 사용할 암호화 알고리즘 -->
+		<property name="algorithm" value="PBEWithHmacSHA512AndAES_256" />
+		<!-- PBE (패스워드 기반 암호화) 암호 설정-->
+		<!-- 혹은 환경변수에 해당 password 값을 등록하고, 환경변수명을 value에 추가한다. -->
+		<property name="password" value="customPassword"/>
+		<property name="ivGeneratorClassName" value="org.jasypt.iv.RandomIvGenerator" />
+		<property name="keyObtentionIterations" value="1000000" />
+	</bean>  	
+	
+	<bean id="encryptor" class="org.jasypt.encryption.pbe.StandardPBEStringEncryptor">  
+		<property name="config" ref="encryptorConfig" />  
+	</bean>  
+	 
+	<bean id="propertyConfigurer" class="org.jasypt.spring4.properties.EncryptablePropertyPlaceholderConfigurer">
+		<constructor-arg ref="encryptor" />
+		<property name="locations" value="classpath:/jdbc.properties" />
+	</bean>
+	<!-- Jasypt End -->
+	
+	<!-- properties -->
+	<!-- <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations" value="classpath:/jdbc.properties" />
+		<property name="fileEncoding" value="UTF-8" />
+	</bean> -->
+	
+	<!-- JDBC-PostgreSQL -->
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="${jdbc.driverClassName}" />
+		<property name="url" value="${jdbc.url}" />
+		<property name="username" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+	</bean>
+
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean"> 
+		<property name="mapperLocations" value="classpath*:/sql/**/*.xml"/>  
+		<property name="dataSource" ref="dataSource" /> 
+	</bean> 
+	
+    <bean id="sqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate"> 
+		<constructor-arg index="0" ref="sqlSessionFactory" /> 
+	</bean>
+	
+</beans>

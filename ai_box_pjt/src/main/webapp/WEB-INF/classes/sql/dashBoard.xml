@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="dashBoard">
+	<select id="getDashBoard" resultType="java.util.Map" parameterType="java.util.Map">
+		select i.item_json ->> 'event_name' as event, d.dev_title as device, count(*)
+				from 
+					data.itemEventJson as i
+					join
+						data.devinfo as d
+						on d.dev_ch = (i.item_json ->> 'dev_channel')::integer		
+		where to_date(i.item_json ->> 'event_time', 'YYYY-MM-DD') = to_date(#{time}, 'YYYY-MM-DD')
+		<if test="event != null">
+			and i.item_json ->> 'event_name' in
+			<foreach collection="event" item="event" open="(" close=")" separator=",">
+				#{event}
+			</foreach>
+		</if>
+		<if test="device != null">
+			and d.dev_title in
+			<foreach collection="device" item="device" open="(" close=")" separator=",">
+				#{device}
+			</foreach>
+		</if>
+		group by to_date(i.item_json ->> 'event_time', 'YYYY-MM-DD'), d.dev_title, i.item_json ->> 'event_name'
+		order by dev_title asc
+	</select>
+	
+	<select id="mainCount" resultType="com.refa.ai.dto.CountDto" fetchSize="1000">
+		select *
+		from data.eventCount
+		order by event_time desc;
+	</select>
+	
+	<select id="selectBetweenDateCount" parameterType="com.refa.ai.dto.dashboard.StartEndDate" resultType="com.refa.ai.dto.dashboard.EventCountDto" fetchSize="1000">
+		select lower(split_part(regexp_split_to_table(substring(tags, 2, length(tags) - 2), ', '),'_',2)) as event, count(*)
+		from data.imageevent
+		where 
+			to_timestamp(event_time, 'YYYY-MM-DD')::timestamp between #{startDate}::timestamp and #{endDate}::timestamp
+		group by regexp_split_to_table(substring(tags, 2, length(tags) - 2), ', ')
+	</select>
+	
+	<select id="selectBetweenDateEventCount" parameterType="com.refa.ai.dto.dashboard.StartEndDate" resultType="com.refa.ai.dto.dashboard.EventCountTimeDto" fetchSize="1000">
+		SELECT time, ARRAY_TO_STRING(ARRAY_AGG(event),',') as event
+		FROM (
+			select substring(event_time, 1, 10) as time, lower(split_part(regexp_split_to_table(substring(tags, 2, length(tags) - 2), ', '),'_',2)) || '_' || count(*) || '_' || max(image_idx) as event
+			from data.imageevent
+			where 
+				to_timestamp(event_time, 'YYYY-MM-DD')::timestamp between #{startDate}::timestamp and #{endDate}::timestamp
+			group by substring(event_time, 1, 10), regexp_split_to_table(substring(tags, 2, length(tags) - 2), ', ')
+			order by time asc
+		) a
+		GROUP BY time;
+		
+		<!-- select substring(event_time, 1, 10) as time, lower(split_part(regexp_split_to_table(substring(tags, 2, length(tags) - 2), ', '),'_',2)) as event, count(*), max(image_idx) as idx
+		from data.imageevent
+		where 
+			to_timestamp(event_time, 'YYYY-MM-DD')::timestamp between #{startDate}::timestamp and #{endDate}::timestamp
+		group by substring(event_time, 1, 10), regexp_split_to_table(substring(tags, 2, length(tags) - 2), ', ')
+		order by time asc -->
+	</select>
+</mapper>

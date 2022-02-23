@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="preset">
+	<select id="findByCh" parameterType="Integer" resultType="com.refa.ai.entity.Preset">
+		select *
+		from data.presetinfo
+		where dev_ch = #{dev_ch}
+		order by pre_idx asc;
+	</select>
+
+	<update id="updatePresetTitleUseAll" parameterType="java.util.Map">
+		<foreach collection="preset" item="item" index="index" separator=";">
+			update data.presetinfo
+			set pre_title = #{item}, pre_isuse = 'Y'
+			where dev_ch = #{ch} and pre_number = #{index} + 1
+		</foreach>
+	</update>
+
+	<update id="updatePresetIsUseAll" parameterType="java.util.Map">
+		update data.presetinfo
+		set pre_isuse = case when pre_number in
+	    <foreach collection="preset" item="item" index="index" separator="," open="(" close=")">
+	        #{index} + 1
+	    </foreach>
+	    then 'Y' else 'N' end
+	    where dev_ch = #{ch};
+	</update>
+</mapper>

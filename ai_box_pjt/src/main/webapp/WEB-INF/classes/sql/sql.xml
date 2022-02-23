@@ -1,0 +1,1062 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="sql">
+	<select id="login" parameterType="com.refa.ai.entity.User" resultType="com.refa.ai.entity.User" fetchSize="1000">
+		select *
+		from data.userInfo
+		where user_id = #{user_id};
+	</select>
+	
+	<select id="selectUserChById" parameterType="java.util.Map" resultType="java.util.Map">
+		select * 
+		from data.userinfo
+		where user_id = #{login_id};
+	</select>
+	
+	<insert id="updateLoginDate" parameterType="com.refa.ai.entity.User">
+		update data.userinfo
+		set user_logindate = now()
+		where user_id = #{user_id};
+	</insert>
+	
+	<select id="userList" resultType="com.refa.ai.dto.user.UserDto" fetchSize="1000">
+		select *
+		from data.userInfo
+		where user_isuse = 'Y'
+		order by user_idx asc;
+	</select>
+	
+	<select id="selectPreset250" resultType="java.util.Map" parameterType="java.util.Map">
+		select p.*, d.dev_title
+		from 
+			data.devinfo as d
+			join
+				data.presetinfo as p
+				on p.dev_ch = d.dev_ch
+		where d.dev_title = #{dev_title} and p.pre_isuse = 'Y'
+		order by p.pre_idx asc
+		limit 250;
+	</select>
+	
+	<select id="selectUser_Tokken" resultType="String" parameterType="String" fetchSize="1000">
+		select user_tokken
+		from data.userinfo
+		where user_id = #{action_target};
+	</select>
+	
+	<select id="itemList" resultType="String">
+		select item_json
+		from data.itemEventJson
+		order by data_idx desc
+		limit 1000;  
+	</select>
+		
+	<select id="categoryList" resultType="String" parameterType="String" fetchSize="1000">
+		select category_big
+		from data.categoryAll
+		where category_small = #{class_name}
+		order by category_idx asc;
+	</select>
+		
+	<select id="selectCategoryAll" resultType="com.refa.ai.dto.CategoryDto">
+		select *
+		from data.categoryAll;
+		<!-- order by category_big asc, category_middle asc, category_small asc; -->
+	</select>
+	
+	<!-- <insert id="insertImage" parameterType="String">
+		insert into data.imageeventjson (image_json) values (#{imageInfo}::json);
+	</insert> -->
+	
+	<insert id="insertImageEvent" parameterType="com.refa.ai.dto.ImageTableDto">
+		insert into data.imageevent 
+		(login_id, dev_ch, dev_pwd, start_time, item_name, dev_ip, dev_port, event_time, dev_id, dev_web_port, image_name,
+		monitoring_tag, user_name, user_passwd, image_queue, thumb_name, width, height, color_tags, tags) 
+		values 
+		(#{login_id}, #{dev_ch}, #{dev_pwd}, #{start_time}, #{item_name}, #{dev_ip}, #{dev_port}, #{event_time}, 
+		#{dev_id}, #{dev_web_port}, #{image_name}, #{monitoring_tag}, #{user_name}, #{user_passwd}, #{image_queue}, #{thumb_name}, 
+		#{width}, #{height}, #{color_tags}, #{tags});
+	</insert>
+	
+	<select id="monitoringList" resultType="com.refa.ai.dto.MonitoringDto" parameterType="String" fetchSize="1000">
+		select *
+		from data.monitoring
+		order by monitoring_time desc, monitoring_idx desc; 
+	</select>
+	
+	<select id="searchTag" resultType="com.refa.ai.dto.ImageTableDto" parameterType="com.refa.ai.dto.ImageTableDto" fetchSize="1000">
+		select *
+		from (select (ROW_NUMBER() OVER()) AS row_num, a.*
+		from (select * from data.imageevent
+		where login_id = #{login_id} and tags LIKE '%' || #{tags} || '%'
+		order by event_time desc limit 100) a) b;
+	</select>
+	
+	<select id="searchTag3" resultType="com.refa.ai.dto.ImageTableDto" parameterType="com.refa.ai.dto.ImageTableDto" fetchSize="1000">
+		select *
+		from (select (ROW_NUMBER() OVER()) AS row_num, a.*
+		from (select * from data.imageevent
+		where login_id = #{login_id} and tags LIKE '%' || #{tags} || '%'
+		order by event_time desc) a) b
+		where b.row_num > #{row_num}
+		limit 100;
+	</select>
+	
+	<select id="searchTag2" resultType="com.refa.ai.dto.ImageTableDto" parameterType="com.refa.ai.dto.ImageTableDto" fetchSize="1000">
+		select *
+		from (select (ROW_NUMBER() OVER()) AS row_num, a.*
+		from (select * from data.imageevent
+		where login_id = #{login_id} and monitoring_tag = #{monitoring_tag}
+		order by event_time desc limit 100) a) b;
+		
+		<!-- select * from data.imageevent where login_id = #{login_id} and monitoring_tag = #{monitoring_tag}
+		order by event_time desc; -->
+		
+		<!-- select * 
+		from (SELECT (ROW_NUMBER() OVER()) AS rownum , a.*
+		FROM (select * from data.imageevent where login_id = #{login_id} and monitoring_tag = #{monitoring_tag}
+		order by event_time desc limit #{limit_num}) a) b
+		where rownum > #{row_num}; -->
+	</select>
+	
+	<select id="searchTag4" resultType="com.refa.ai.dto.ImageTableDto" parameterType="com.refa.ai.dto.ImageTableDto" fetchSize="1000">
+		select *
+		from (select (ROW_NUMBER() OVER()) AS row_num, a.*
+		from (select * from data.imageevent
+		where login_id = #{login_id} and monitoring_tag = #{monitoring_tag}
+		order by event_time desc) a) b
+		where b.row_num > #{row_num}
+		limit 100;
+	</select>
+	
+	<select id="searchDate" resultType="com.refa.ai.dto.ImageTableDto" parameterType="com.refa.ai.dto.ImageTableDto" fetchSize="1000">
+		select * from data.imageevent where login_id = #{login_id} and event_time LIKE '%' || '"' || #{event_time} || '"' || '%'
+		order by event_time desc;
+	</select>
+	
+	<select id="selectAllImage" resultType="com.refa.ai.dto.ImageTableDto" fetchSize="1000">
+		select * from data.imageevent 
+		where monitoring_tag = '' 
+		order by image_idx asc;
+	</select>
+	
+	<select id="selectDownloadImage" resultType="com.refa.ai.dto.ImageTableDto" parameterType="com.refa.ai.dto.ImageTableDto" fetchSize="1000">
+		select login_id, item_name, event_time, image_name, monitoring_tag, thumb_name, user_name
+		from data.imageevent
+		where login_id = #{login_id};
+	</select>
+	
+	<insert id="updateImageMonitoring" parameterType="com.refa.ai.dto.ImageTableDto">
+		update data.imageevent 
+		set monitoring_tag = #{monitoring_tag}
+		where image_idx = #{image_idx};
+	</insert>
+	
+	<select id="selectMonitoringCount" resultType="String" parameterType="com.refa.ai.dto.MonitoringDto" fetchSize="1000">
+		select monitoring_count 
+		from data.monitoring
+		where monitoring_tag = #{monitoring_tag};
+	</select>
+	
+	<insert id="insertMonitoring" parameterType="com.refa.ai.dto.MonitoringDto">
+		insert into data.monitoring 
+		(monitoring_src, monitoring_time, monitoring_item, monitoring_ch, monitoring_tag, monitoring_count, monitoring_info, login_id, monitoring_category_big, monitoring_size)
+		values
+		(#{monitoring_src}, #{monitoring_time}, #{monitoring_item}, #{monitoring_ch}, #{monitoring_tag}, #{monitoring_count}, #{monitoring_info}, #{login_id}, #{monitoring_category_big}, #{monitoring_size});
+	</insert>
+	
+	<insert id="updateMonitoring" parameterType="com.refa.ai.dto.MonitoringDto">
+		<!-- update data.monitoring 
+		set monitoring_count = monitoring_count + 1, monitoring_src = #{monitoring_src}, monitoring_time = #{monitoring_time}, monitoring_category_big = #{monitoring_category_big}, monitoring_size = #{monitoring_size}
+		where monitoring_tag = #{monitoring_tag}; -->
+		
+		insert into data.monitoring
+		(monitoring_src, monitoring_time, monitoring_item, monitoring_ch, monitoring_tag, monitoring_count, monitoring_info, login_id, monitoring_category_big, monitoring_size)
+		values
+		(#{monitoring_src}, #{monitoring_time}, #{monitoring_item}, #{monitoring_ch}, #{monitoring_tag}, 1, #{monitoring_info}, #{login_id}, #{monitoring_category_big}, #{monitoring_size})
+		on conflict (monitoring_tag) do update set monitoring_count = data.monitoring.monitoring_count + 1, monitoring_src = #{monitoring_src}, monitoring_time = #{monitoring_time}, monitoring_category_big = #{monitoring_category_big}, monitoring_size = #{monitoring_size};
+	</insert>
+	
+	<insert id="insertGallery" parameterType="java.util.Map">
+		with upsert as (
+			update data.gallery 
+			set gallery_count = gallery_count + 1, gallery_size = #{gallery_size}, thumb_name = #{thumb_name}, event_time = #{event_time}
+			where dev_ch = #{dev_ch} and event_name = #{event_name} and substring(event_time, 1, 10) = substring(#{event_time}, 1, 10)
+			returning *
+		)
+		insert into data.gallery (
+			gallery_count, gallery_size, dev_ch, thumb_name, event_name, event_time, dev_title
+		) select 
+			#{gallery_count}, #{gallery_size}, #{dev_ch}, #{thumb_name}, #{event_name}, #{event_time}, #{dev_title}
+		where not exists (
+			select * from upsert
+		)	
+	</insert>
+	
+	<select id="selectGalleryList" resultType="java.util.Map" parameterType="java.util.Map">
+		select *
+		from data.gallery 
+		<if test="event_name != null">
+			where event_name = #{event_name}
+		</if>
+		order by event_time desc, gallery_idx desc;
+	</select>
+	
+	<insert id="updateMonitor" parameterType="java.util.Map">
+		<!-- update data.monitoring 
+		set monitoring_count = monitoring_count + 1, monitoring_src = #{monitoring_src}, monitoring_time = #{monitoring_time}, monitoring_category_big = #{monitoring_category_big}, monitoring_size = #{monitoring_size}
+		where monitoring_tag = #{monitoring_tag}; -->
+		
+		insert into data.monitor
+		(monitor_src, monitor_size, dev_ch)
+		values
+		(#{monitor_src}, #{monitor_size}, #{dev_ch})
+		on conflict (dev_ch) do update set monitor_src = #{monitor_src}, monitor_size = #{monitor_size}, monitor_update_time = now(); 
+	</insert>
+	
+	<select id="selectImage" resultType="String" parameterType="com.refa.ai.dto.CategoryDto" fetchSize="1000">
+		select monitoring_src
+		from data.monitoring 
+		<!-- where jsonb_path_exists(image_json::jsonb, ('$.** ? (@ == "' || #{category_big} || '")')::jsonpath) -->
+		where login_id = #{login_id}
+		order by monitoring_idx desc
+		limit 4;
+		
+		<!-- select "image_json" ->> 'thumb_name'
+		from data.imageeventjson 
+		where jsonb_path_exists(image_json::jsonb, ('$.** ? (@ == "' || #{category_big} || '")')::jsonpath)
+		and "image_json" ->> 'login_id' = #{login_id}
+		order by image_idx desc -->
+		<!-- limit 4 -->;
+	</select>
+	
+	<select id="filterCount" resultType="com.refa.ai.dto.CountDto" parameterType="String" fetchSize="1000">
+		select * from data.eventcount
+		where event_name like '%' || #{event_name} || '%'
+		order by event_time desc;
+	</select>
+	
+	<select id="filterCount2" resultType="com.refa.ai.dto.CountDto" parameterType="String" fetchSize="1000">
+		select * from data.eventcount
+		where is_data like #{event_name} || '%'
+		order by event_time desc;
+	</select>
+	
+	<select id="insert" parameterType="com.refa.ai.dto.EventDto" resultType="com.refa.ai.dto.EventDto">
+		insert into data.itemEventJson(item_json) values (json_build_object(
+		'item_type',#{item_type},
+		'item_name',#{item_name},
+		'item_mac',#{item_mac},
+		'item_ip',#{item_ip},
+		'item_id',#{item_id},
+		'item_pwd',#{item_pwd},
+		'item_port',#{item_port},
+		'dev_ip',#{dev_ip},
+		'dev_mac',#{dev_mac},
+		'dev_id',#{dev_id},
+		'dev_pwd',#{dev_pwd},
+		'dev_port',#{dev_port},
+		'dev_web_port',#{dev_web_port},
+		'dev_channel',#{dev_channel},
+		'user_id',#{user_id},
+		'event_name',#{event_name},
+		'event_info',#{event_info},
+		'event_time',#{event_time},
+		'event_isCheck','Y',
+		'event_source',#{event_source} 
+		))
+		returning *;
+	</select>
+	
+	<select id="selectCount" parameterType="com.refa.ai.dto.EventDto" resultType="String" fetchSize="1000">
+		select count(*) 
+		from data.eventCount
+		where item_name = #{item_name}
+		and dev_ip = #{dev_ip}
+		and dev_channel = #{dev_channel}
+		and event_name = #{event_name}
+		and event_time = substring(#{event_time}, 1, 13);
+	</select>
+	
+	<insert id="insertCount" parameterType="com.refa.ai.dto.EventDto">
+		insert into data.eventCount 
+		(item_name, dev_ip, dev_channel, event_name, event_time, event_count)
+		values
+		(#{item_name}, #{dev_ip}, #{dev_channel}, #{event_name}, substring(#{event_time}, 1, 13), 1);
+	</insert>
+		
+	<insert id="updateCount" parameterType="com.refa.ai.dto.EventDto">
+		insert into data.eventcount (
+			item_name, dev_ip, dev_channel, event_name, event_time, event_count, is_data
+		) values (
+			#{item_name}, #{dev_ip}, #{dev_channel}, #{event_name}, substring(#{event_time}, 1, 13), 1,
+			#{item_name} || '_ch' || #{dev_channel} || '_' || replace(substring(#{event_time}, 1, 10), '-', '') || '_' || #{event_name}
+			|| '1_' || #{dev_ip} || '_' || substring(#{event_time}, 12, 2)
+		)
+		on conflict (is_data) do update set event_count = data.eventcount.event_count + 1;
+	</insert>
+	
+	<select id="itemEventDate" resultType="String" parameterType="java.util.Map">
+		select item_json
+		from data.itemEventJson
+		<choose>
+			<when test="search_date != null">
+				where substring(item_json ->> 'event_time', 0, 11)::date = #{search_date}::date
+			</when>
+			<otherwise>
+				where substring(item_json ->> 'event_time', 0, 11)::date = now()::date
+			</otherwise>
+		</choose>
+		order by data_idx desc
+		limit 1000;
+	</select>
+	
+	<select id="itemInfo" resultType="java.util.Map" fetchSize="1000">
+		select *
+		from data.devinfo
+		order by dev_ch asc;
+	</select>
+	
+	<select id="actionInfoIsuse" resultType="java.util.Map" fetchSize="1000">
+		<!-- select *
+		from data.actionInfo
+		order by dev_title asc; -->
+		select * from data.actioninfo
+		order by action_idx asc
+	</select>
+	
+	<select id="insertActionInfo" parameterType="java.util.Map" resultType="java.util.Map">
+		<!-- with selected as (
+			select * 
+			from data.actioninfo
+			where dev_title = #{dev_title} and action_event = #{action_event} and action_action = #{action_action} and action_source = #{action_source}
+		) -->
+		<!-- where action_key = (#{dev_title} || '_' || #{action_event} || '_' || #{action_action} || '_' || #{action_source})) -->
+			
+		insert into data.actionInfo (action_ip, action_event, action_action, dev_title, pre_title, action_source, action_key, scada_tag, network_title) 
+		select #{action_ip},  #{action_event}, #{action_action}, #{dev_title}, #{pre_title}, #{action_source}
+		, #{action_key}, #{scada_tag}, #{network_title}
+		on conflict (action_key) do nothing returning *;
+		
+		<!-- on conflict (action_key) do update set action_key = EXCLUDED.action_key returning *; -->
+		<!-- where not exists (select * from selected) returning * -->
+	</select>
+	
+	<select id="selectActionInfoByKey" resultType="java.util.Map" fetchSize="1000">
+		select *
+		from data.actionInfo
+		where action_key = #{action_key}
+	</select>
+	
+	<insert id="updateActionInfo" parameterType="java.util.Map">	
+		update data.actionInfo
+		set action_action = #{action_action}, pre_title = #{pre_title}, network_title = #{network_title}
+		where action_key = #{action_key};
+	</insert>
+	
+	<insert id="insertActionLogInfo" parameterType="com.refa.ai.dto.ActionLogDto">
+		INSERT INTO data.actionloginfo(
+		action_ip, action_channel, action_event, action_action, action_target, action_src)
+		VALUES (#{action_ip}, #{action_channel}, #{action_event}, #{action_action}, #{action_target}, #{action_src});
+	</insert>
+	
+	<insert id="updateActionIsuse" parameterType="java.util.Map">
+		update data.actionInfo
+		set action_isuse = #{action_isuse}
+		where action_key = #{action_key};
+	</insert>
+	
+	<insert id="updateActionIsuseAll" parameterType="java.util.Map">
+		update data.actionInfo
+		set action_isuse = #{action_isuse};
+	</insert>
+	
+	<delete id="deleteActionInfo" parameterType="java.util.Map">
+		delete from data.actionInfo
+		where action_key = #{action_key};
+	</delete>
+	
+	<delete id="deleteActionInfoByTitle" parameterType="java.util.Map">
+		delete from data.actionInfo
+		where dev_title = #{dev_title};
+	</delete>
+	
+	<select id="chkUserId" parameterType="com.refa.ai.dto.user.UserDto" resultType="com.refa.ai.dto.user.UserDto" fetchSize="1000">
+		select *
+		from data.userInfo
+		where user_id = #{user_id};
+	</select>
+		
+	<insert id="insertUserInfo" parameterType="String">
+		insert into data.userInfo (user_id, user_pw, user_name, user_phone, user_email, user_tokken, user_tokken_isuse, user_isAdmin, user_channel) 
+		values (#{user_id}, #{user_pw}, #{user_name}, #{user_phone}, #{user_email}, #{user_tokken}, #{user_tokken_isuse}, #{user_isAdmin}, #{user_channel});
+	</insert>
+	
+	<insert id="updateUserInfo" parameterType="com.refa.ai.entity.User">
+		update data.userInfo 
+		set user_name = #{user_name}, user_phone = #{user_phone}, user_email = #{user_email}, user_tokken = #{user_tokken}
+		<if test="user_isadmin != null">
+			, user_isadmin = #{user_isadmin}
+		</if>
+		<if test="user_channel != null">
+			, user_channel = #{user_channel}
+		</if>
+		where user_id = #{user_id};
+	</insert>
+	
+	<insert id="updatePwInfo" parameterType="com.refa.ai.entity.User">
+		update data.userInfo 
+		set user_pw = #{user_pw}, user_name = #{user_name}, user_phone = #{user_phone}, user_email = #{user_email}, user_tokken = #{user_tokken}
+		<if test="user_isadmin != null">
+			, user_isadmin = #{user_isadmin}
+		</if>
+		<if test="user_channel != null">
+			, user_channel = #{user_channel}
+		</if>
+		where user_id = #{user_id};
+	</insert>
+	
+	<insert id="updateIsUse" parameterType="com.refa.ai.dto.user.UserDto">
+		update data.userInfo 
+		set user_isuse = 'N'
+		where user_id = #{user_id};
+	</insert>
+	
+	<select id="deviceList" parameterType="java.util.Map" resultType="java.util.Map">
+		select *
+		from data.devinfo
+		<if test="dev_type != null">
+			where dev_type = #{dev_type}
+		</if>
+		order by dev_ch asc;
+	</select>
+	
+	<select id="deviceInfoOne2" resultType="java.util.Map" parameterType="java.util.Map" fetchSize="1000">
+		select *
+		from data.devinfo
+		where dev_ch = #{dev_ch}::integer
+	</select>
+	
+	<insert id="updateDevCon" parameterType="java.util.Map">
+		update data.devinfo 
+		set dev_isconnect = 'Y', dev_rtsp_url = #{rtsp_url}::text[]
+		where login_id = #{web_user} and dev_ch = #{dev_ch}::integer;
+	</insert>
+	
+	<insert id="updateDevInfo" parameterType="java.util.Map">
+		update data.devinfo
+		<set> 
+			dev_mac_address = #{dev_mac}, dev_title = #{dev_title}, dev_ip = #{dev_ip}, dev_web_port = #{dev_port}::integer, dev_id = #{dev_id}, dev_pwd = #{dev_pwd}, dev_rtsp = #{dev_rtsp}
+			<if test='rtsp_url != null'>
+				, dev_rtsp_url = #{rtsp_url}::text[]
+			</if>
+			<if test='status == "success"'>
+				, dev_isconnect = 'Y'
+			</if>
+			<if test='status == "failed"'>
+				, dev_isconnect = 'N'
+			</if>
+			<if test='command == "RF_REQ_IPCAMERA_UPDATE"'>
+				, dev_fire = #{dev_fire}, dev_falldown = #{dev_falldown}, dev_flood = #{dev_flood}, dev_glove = #{dev_glove}, dev_invasion = #{dev_invasion}, dev_leak = #{dev_leak}, dev_loitering = #{dev_loitering}
+				, dev_handaction = #{dev_handaction}, dev_spin = #{dev_spin}, dev_cmtank = #{dev_cmtank}, dev_outtank = #{dev_outtank}, dev_overflow = #{dev_overflow}
+			</if>
+		</set>
+		where dev_ch = #{dev_ch}::integer;
+	</insert>
+	
+	<delete id="deleteDeviceInfo" parameterType="com.refa.ai.dto.DeviceInfoDto">
+		delete from data.devinfo
+		where dev_ch = #{dev_ch}::integer
+	</delete>
+	
+	<select id="selectImage2" resultType="com.refa.ai.dto.ImageTableDto" fetchSize="1000">
+		select *
+		from (select * from data.imageevent a
+		where (select count(monitoring_tag) from data.monitoring where monitoring_tag = a.monitoring_tag) = 0) b
+	</select>
+	
+	<select id="searchDateImage" parameterType="String" resultType="com.refa.ai.dto.MonitoringDto" fetchSize="1000">
+		select * from data.monitoring
+		where #{monitoring_time} > substring(monitoring_time, 1, 13) or substring(monitoring_time, 1, 13) = #{monitoring_time}
+		order by monitoring_time desc
+		limit 100;
+		
+	</select>
+	<select id="searchFilterMonitoring" parameterType="com.refa.ai.dto.ImageTableDto" resultType="com.refa.ai.dto.ImageTableDto" fetchSize="1000">
+		select *
+		from (select (ROW_NUMBER() OVER()) AS row_num, a.*
+		from (select * from data.imageevent
+		where login_id = #{login_id} and monitoring_tag = #{monitoring_tag} 
+		order by event_time desc) a) b
+		where (#{event_time} >= substring(event_time, 1, 13))
+		limit 100;
+	</select>
+	
+	<select id="searchFilterMonitoring2" parameterType="com.refa.ai.dto.ImageTableDto" resultType="com.refa.ai.dto.ImageTableDto" fetchSize="1000">
+		select *
+		from (select (ROW_NUMBER() OVER()) AS row_num, a.*
+		from (select * from data.imageevent
+		where login_id = #{login_id} and monitoring_tag = #{monitoring_tag}
+		order by event_time desc) a) b
+		where b.row_num > #{row_num}
+		limit 100;
+	</select>
+	
+	<select id="searchFilterImage" parameterType="com.refa.ai.dto.ImageTableDto" resultType="com.refa.ai.dto.ImageTableDto" fetchSize="1000">
+		select *
+		from (select (ROW_NUMBER() OVER()) AS row_num, a.*
+		from (
+		select * from data.imageevent
+		where login_id = #{login_id} and tags LIKE '%' || #{tags}  || '%'
+		order by event_time desc) a) b
+		where (#{event_time} >= substring(event_time, 1, 13))
+		limit 100;
+	</select>
+	
+	<select id="searchFilterImage2" parameterType="com.refa.ai.dto.ImageTableDto" resultType="com.refa.ai.dto.ImageTableDto" fetchSize="1000">
+		select *
+		from (select (ROW_NUMBER() OVER()) AS row_num, a.*
+		from (
+		select * from data.imageevent
+		where login_id = #{login_id} and tags LIKE '%' || '"' || #{tags} || '"' || '%'
+		order by event_time desc) a) b
+		where b.row_num > #{row_num}
+		limit 100;
+	</select>
+	
+	<select id="searchUpMonitoring" parameterType="com.refa.ai.dto.ImageTableDto" resultType="com.refa.ai.dto.ImageTableDto" fetchSize="1000">
+		select *
+		from (select *
+		from (select (ROW_NUMBER() OVER()) AS row_num, a.*
+		from (
+		select * from data.imageevent
+		where login_id = #{login_id} and monitoring_tag = #{monitoring_tag}
+		order by event_time desc) a) b
+		where #{row_num} > b.row_num
+		order by b.row_num desc
+		limit 100) d
+		order by d.row_num asc;
+	</select>
+	
+	<select id="searchUpTag" parameterType="com.refa.ai.dto.ImageTableDto" resultType="com.refa.ai.dto.ImageTableDto" fetchSize="1000">
+		select *
+		from (select *
+		from (select (ROW_NUMBER() OVER()) AS row_num, a.*
+		from (
+		select * from data.imageevent
+		where login_id = #{login_id} and tags LIKE '%' || '"' || #{tags} || '"' || '%'
+		order by event_time desc) a) b
+		where #{row_num} > b.row_num
+		order by b.row_num desc
+		limit 100) d
+		order by d.row_num asc;
+	</select>
+	
+	<select id="selectModalImage" resultType="java.util.Map" parameterType="java.util.Map">
+		select i.*, d.dev_title 
+		from data.imageevent as i
+		join 
+			data.devinfo as d
+			on i.dev_ch::integer = d.dev_ch
+		where i.image_idx = #{image_idx}
+	</select>
+	
+	<select id="showRightInfoImage" resultType="com.refa.ai.dto.ImageTableDto" parameterType="com.refa.ai.dto.ImageTableDto" fetchSize="1000">
+		select * from data.imageevent
+		where image_idx = #{image_idx}
+	</select>
+	
+	<select id="selectRecentImageList" parameterType="com.refa.ai.dto.ImageTableDto" resultType="com.refa.ai.dto.ImageTableDto" fetchSize="1000">
+		select * from data.imageevent
+		<where>
+			<if test="login_id != null">
+				login_id = #{login_id}
+			</if>
+			<if test="event_time != null">
+				<!-- substring(event_time, 1, 13) = substring((select event_time from data.imageevent order by event_time asc limit 1), 1, 13) -->
+				and substring(event_time, 1, 13) = substring(#{event_time}, 1, 13)
+			</if>
+		</where>
+		order by event_time desc;
+	</select>
+	
+	<select id="selectRecentImage" parameterType="com.refa.ai.dto.ImageTableDto" resultType="com.refa.ai.dto.ImageTableDto" fetchSize="1000">
+		select * from data.imageevent
+		<where>
+			<if test="login_id != null">
+				login_id = #{login_id}
+			</if>
+		</where>
+		order by event_time desc limit 1;
+	</select>
+	
+	<delete id="deleteBackupImage" parameterType="String">
+		delete from data.imageevent
+		where thumb_name like #{image_name} || '%'
+	</delete>
+	
+	<delete id="deleteBackupMonitoring" parameterType="String">
+		delete from data.monitoring
+		where monitoring_src like #{image_name} || '%'
+	</delete>
+	
+	<insert id="updateBackupMonitoring" parameterType="String">
+		update data.monitoring
+		set monitoring_count = monitoring_count - 1
+		where monitoring_tag = #{monitoring_tag};
+	</insert>
+	
+	<insert id="insertBackupLog" parameterType="com.refa.ai.dto.BackupLogDto">
+		INSERT INTO data.backuplog(
+		log_time, log_content, log_count, log_taken, log_size)
+		VALUES (#{log_time}, #{log_content}, #{log_count}, #{log_taken}, #{log_size});
+	</insert>
+	
+	<select id="selectImageAll" resultType="com.refa.ai.dto.ImageTableDto" fetchSize="1000">
+		select * from data.imageevent
+		order by event_time desc;
+	</select>
+	
+	<insert id="updateImageAll" parameterType="com.refa.ai.dto.ImageTableDto">
+		update data.imageevent 
+		set image_name = #{image_name}, thumb_name = #{thumb_name}
+		where image_idx = #{image_idx};
+	</insert>
+	
+	<select id="selectMonitoringAll" resultType="com.refa.ai.dto.MonitoringDto" fetchSize="1000">
+		select * from data.monitoring
+		order by monitoring_time desc;
+	</select>
+	
+	<insert id="updateMonitoringAll" parameterType="com.refa.ai.dto.MonitoringDto">
+		update data.monitoring
+		set monitoring_src = #{monitoring_src}
+		where monitoring_idx = #{monitoring_idx};
+	</insert>
+	
+	<select id="selectDeleteC" parameterType="Integer" resultType="com.refa.ai.dto.ImageTableDto" fetchSize="1000">
+		select distinct substring(image_name, 0, position(split_part(image_name, '/', 6) in image_name)) image_name
+		from data.imageevent
+		where now()::date - event_time::date = #{dateCount}
+	</select>
+	
+	<select id="selectDeleteD" parameterType="Integer" resultType="com.refa.ai.dto.ImageTableDto" fetchSize="1000">
+		with deleted AS (
+		    DELETE FROM data.imageevent where now()::date - event_time::date = #{dateCount} RETURNING *
+		)
+		SELECT distinct substring(image_name, 0, position(split_part(image_name, '/', 6) in image_name)) image_name FROM deleted
+	</select>
+	
+	<select id="selectMoveCD" parameterType="com.refa.ai.dto.DBackupDto" resultType="com.refa.ai.dto.ImageTableDto" fetchSize="1000">
+		select distinct substring(image_name, 0, position(split_part(image_name, '/', 6) in image_name)) image_name
+		from data.imageevent
+		where #{untilTime}::timestamp(0) >= event_time::timestamp(0) and event_time::timestamp(0) >= #{imageTime}::timestamp(0); 
+	</select>
+	
+	<select id="deleteOverDate" parameterType="String" resultType="com.refa.ai.dto.ImageTableDto" fetchSize="1000">
+		with deleted AS (
+		    DELETE FROM data.imageevent where #{untilTime}::date - event_time::date > 179 RETURNING *
+		)
+		SELECT distinct substring(image_name, 0, position(split_part(image_name, '/', 6) in image_name)) image_name FROM deleted
+	</select>
+	
+	<delete id="deleteOverDateMonitoring" parameterType="String">
+		delete from data.gallery
+		where #{untilTime}::date - event_time::date > 179;
+	</delete>
+	
+	<delete id="deleteOverDateMonitoring2" parameterType="com.refa.ai.dto.ImageTableDto">
+		delete from data.gallery
+		where thumb_name like #{image_name} || '%';
+	</delete>
+	
+	<select id="selectTestImage" resultType="com.refa.ai.dto.MonitoringDto" parameterType="com.refa.ai.dto.MonitoringDto" fetchSize="1000">
+		select * from data.imageevent
+		where monitoring_tag = #{monitoring_tag};
+	</select>
+	
+	<insert id="updateTestMonitoring" parameterType="com.refa.ai.dto.MonitoringDto">
+		update data.monitoring 
+		set monitoring_count = #{monitoring_count}
+		where monitoring_tag = #{monitoring_tag};
+	</insert>
+	
+	<insert id="insertErrorLog" parameterType="com.refa.ai.dto.ErrorLogDto">
+		INSERT INTO data.errorlog(
+		log_time, log_place, log_content)
+		VALUES (#{log_time}, #{log_place}, #{log_content});
+	</insert>
+	
+	<select id="backupLogDate" parameterType="String" resultType="com.refa.ai.dto.BackupLogDto" fetchSize="1000">
+		select * from data.backuplog
+		where substring(log_time, 0, 11) = #{searchDate}
+		order by log_idx desc
+	</select>
+	
+	<select id="backupLogDate2" resultType="com.refa.ai.dto.BackupLogDto" fetchSize="1000">
+		select * from data.backuplog
+		order by log_idx desc
+		limit 1000;
+	</select>
+	
+	<select id="errorLogDate" parameterType="String" resultType="com.refa.ai.dto.ErrorLogDto" fetchSize="1000">
+		select * from data.errorlog
+		where substring(log_time, 0, 11) = #{searchDate}
+		order by log_idx desc
+	</select>
+	
+	<select id="errorLogDate2" resultType="com.refa.ai.dto.ErrorLogDto" fetchSize="1000">
+		select * from data.errorlog
+		order by log_idx desc
+		limit 1000;
+	</select>
+	
+	<select id="settingData" parameterType="String" resultType="com.refa.ai.dto.SettingDto">	
+		select * from data.setting
+		where setting_name = #{setting_name};
+	</select>
+	
+	<insert id="insertDevInfo" parameterType="java.util.Map">
+		INSERT INTO data.devinfo(
+		dev_type, dev_ch, dev_title, dev_ip, dev_web_port, dev_app_port, login_id, dev_id, dev_pwd, dev_mac_address, dev_model_name, dev_rtsp_url, dev_rtsp)
+		VALUES (#{dev_type}, #{dev_ch}::integer, #{dev_title}, #{ip}, #{port}::integer, #{port}::integer, #{web_user}, #{id}, #{pw}, #{dev_mac}, #{dev_manufacturer}, #{rtsp_url}::text[], #{dev_rtsp});
+	</insert>
+	
+	<select id="selectDevCh" parameterType="java.util.Map" resultType="Integer">
+		select count(*)
+		from data.devinfo
+		where login_id = #{web_user} and dev_type = #{dev_type} and dev_ch = #{dev_ch};
+	</select>
+	
+	<select id="deviceListByType" parameterType="java.util.Map" resultType="java.util.Map">
+		select *
+		from data.devinfo
+		<where>
+			dev_type = #{dev_type}
+		</where>
+		order by dev_ch asc;
+	</select>
+	
+	<insert id="updatePresetByCh" parameterType="java.util.Map">
+		<foreach collection="preset" item="item" index="index" separator=";">
+			<if test="index lte 300">
+				update data.presetinfo
+				set pre_title=#{item}, pre_isuse = 'Y'
+				where dev_ch = #{dev_ch}::integer and pre_number = #{index} + 1
+			</if>
+		</foreach>
+	</insert>
+	
+	<insert id="updatePresetByIsuse" parameterType="java.util.Map">
+		update data.presetinfo
+		set pre_isuse = 'N'
+		where dev_ch = #{dev_ch}::integer
+	</insert>
+	
+	<select id="selectDeviceInfoByTitle" parameterType="java.util.Map" resultType="java.util.Map">
+		select *
+		from data.devinfo
+		where dev_title = #{dev_title};
+	</select>
+	
+	<select id="selectEventActionByAction" parameterType="java.util.Map" resultType="java.util.Map">
+		select a.*, d.*
+		from 
+			data.devinfo as d
+			join
+				data.actioninfo as a
+				on a.dev_title = d.dev_title
+		<choose>
+			<when test="isEvent != null">
+				where lower(a.action_event) = lower(#{model_name}) and (POSITION(#{action_action} in a.action_action) > 0) and a.dev_title = #{dev_title} 
+				and a.action_source = #{action_source};
+			</when>
+			<otherwise>
+				where lower(a.action_event) = lower(#{model_name}) and a.action_action = #{action_action} and a.dev_title = #{dev_title} 
+				and a.action_source = #{action_source};
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="selectEventActionListByAction" parameterType="java.util.Map" resultType="java.util.Map">
+		select a.*, d.*
+		from 
+			data.devinfo as d
+			join
+				data.actioninfo as a
+				on a.dev_title = d.dev_title
+		where lower(a.action_event) = lower(#{model_name}) and a.dev_title = #{dev_title} 
+		and a.action_source = #{action_source};
+	</select>
+	
+	<select id="selectDeviceInfoByIP" parameterType="java.util.Map" resultType="java.util.Map">
+		select *
+		from data.devinfo
+		where dev_ip = #{ip}
+		<if test="port != 0">
+			and dev_web_port = #{port}
+		</if>
+		order by dev_idx desc
+		limit 1;
+	</select>
+	
+	<select id="selectMonitorAll" resultType="java.util.Map">
+		select m.*, d.dev_title
+		from 
+			data.monitor as m
+			join
+				data.devinfo as d
+				on m.dev_ch = d.dev_ch
+		order by m.dev_ch asc;
+	</select>
+	
+	<insert id="updateUrlSetup" parameterType="java.util.Map">
+		update data.versioninfo
+		set request_url = #{request_url}, analyze_url = #{analyze_url}
+		where client_code = 'kwater';
+	</insert>
+	
+	<insert id="updateDeviceUrlSetup" parameterType="java.util.Map">
+		update data.versioninfo
+		set request_url = #{socketUrl}, analyze_url = #{socketUrl}
+		where client_code = 'device_search';
+	</insert>
+	
+	<select id="selectmonitorByCh" resultType="java.util.Map" parameterType="Integer">
+		select m.*, i.*
+		from 
+			data.imageevent as i
+			join
+				data.monitor as m
+				on m.dev_ch = i.dev_ch::integer
+		where m.dev_ch = #{ch}
+		order by i.event_time desc
+		limit 1;
+	</select>
+	
+	<select id="selectmonitorByCh2" resultType="java.util.Map" parameterType="String">
+		select m.*, i.*
+		from 
+			data.imageevent as i
+			join
+				data.monitoring as m
+				on m.monitoring_src = i.thumb_name
+		where m.monitoring_tag = #{tag}
+		order by i.event_time desc
+		limit 1;
+	</select>
+	
+	<select id="selectActionSetup" resultType="java.util.Map">
+		select a.*, c.* 
+		from data.actionsetup a
+		left join data.confdur c
+		on a.dev_ch = c.dev_ch 
+		<where>
+			<if test="dev_ch != null">
+				a.dev_ch = #{dev_ch}::integer
+			</if>
+		</where>
+		order by a.dev_ch asc
+	</select>
+	
+	<insert id="updateActionInfoTitle" parameterType="java.util.Map">
+		update data.versioninfo
+		set request_url = #{socketUrl}, analyze_url = #{socketUrl}
+		where client_code = 'device_search';
+	</insert>
+	
+	<delete id="deleteActionSetup" parameterType="java.util.Map">
+		delete from data.actionsetup
+		where dev_ch = #{dev_ch}::integer;
+	</delete>
+	
+	<delete id="deleteConfdur" parameterType="java.util.Map">
+		delete from data.confdur
+		where dev_ch = #{dev_ch}::integer;
+	</delete>
+	
+	<insert id="insertActionSetup" parameterType="java.util.Map">
+		INSERT INTO data.actionsetup(
+			dev_ch, dev_title
+		)
+		VALUES (#{dev_ch}::integer, #{dev_title});
+	</insert>
+	
+	<insert id="updateActionSetup" parameterType="java.util.Map">
+		update data.actionsetup
+		set dev_title = #{dev_title}
+		where dev_ch = #{dev_ch}::integer
+	</insert>
+	
+	<insert id="updateActionSetupBySetup" parameterType="java.util.Map">
+		update data.actionsetup
+		<set>
+			<if test="action_fire != null">
+				action_fire = #{action_fire}
+			</if>
+			<if test="actopm_leak != null">
+				actopm_leak = #{actopm_leak}
+			</if>
+			<if test="action_spin != null">
+				action_spin = #{action_spin}
+			</if>
+			<if test="action_invasion != null">
+				action_invasion = #{action_invasion}
+			</if>
+			<if test="action_loitering != null">
+				action_loitering = #{action_loitering}
+			</if>
+			<if test="action_falldown != null">
+				action_falldown = #{action_falldown}
+			</if>
+			<if test="action_handaction != null">
+				action_handaction = #{action_handaction}
+			</if>
+			<if test="action_glove != null">
+				action_glove = #{action_glove}
+			</if>
+			<if test="actopm_flood != null">
+				actopm_flood = #{actopm_flood}
+			</if>
+		</set>
+		<where>
+			<choose>
+				<when test="dev_title != null">
+					dev_title = #{dev_title}
+				</when>
+				<otherwise>
+					dev_ch = #{dev_ch}
+				</otherwise>
+			</choose>
+		</where>
+	</insert>
+	<insert id="updateConfdur" parameterType="java.util.Map">
+		with upsert as (
+			update data.confdur 
+			set confidence = #{confidence}::integer, duration = #{duration}::integer
+			where dev_ch = #{dev_ch}::integer
+			returning *
+		)
+		insert into data.confdur (
+			dev_ch, confidence, duration
+		) select 
+			#{dev_ch}::integer, #{confidence}::integer, #{duration}::integer
+		where not exists (
+			select * from upsert
+		)	
+	</insert>
+	<select id="selectDevinfoAsSetting" resultType="java.util.Map">
+		select 
+			dev_ip as ip, 
+			dev_ch as ch,
+			dev_title as title,
+			dev_falldown as KWATER_Falldown_Detection,
+			dev_fire as KWATER_Fire_Detection,
+			dev_flood as KWATER_Flood_Detection,
+			dev_glove as KWATER_Glove_Detection,
+			dev_invasion as KWATER_Invasion_Detection,
+			dev_leak as KWATER_Leak_Detection,
+			dev_loitering as KWATER_Loitering_Detection,
+			dev_handaction as KWATER_HandAction_Detection,
+			dev_spin as KWATER_Spin_Detection,
+			dev_cmtank as KWATER_Cmtank_leak,
+			dev_outtank as KWATER_Outtank_leak,
+			dev_overflow as KWATER_Overflow
+		from data.devinfo;
+	</select>
+	
+	<select id="selectNetworkSpeaker" resultType="java.util.Map">
+		select *
+		from data.networkspeaker
+	</select>
+	<select id="selectNetworkSpeakerByIdx" parameterType="java.util.Map" resultType="java.util.Map">
+		select *
+		from data.networkspeaker
+		where network_idx = #{idx}::integer
+	</select>
+	<insert id="insertNetworkSpeaker" parameterType="java.util.Map">
+		INSERT INTO data.networkspeaker(
+		network_title, network_ip, network_port, network_id, network_pwd, network_falldown, network_fire, network_flood, network_glove, network_invasion, network_leak, network_loitering, network_handaction, network_spin, network_cmtank, network_outtank, network_overflow)
+		VALUES (#{title}, #{ip}, #{port}::integer, #{id}, #{pwd}, #{falldown}, #{fire}, #{flood}, #{glove}, #{invasion}, #{leak}, #{loitering}, #{handaction}, #{spin}, #{cmtank}, #{outtank}, #{overflow});
+	</insert>
+	<insert id="updateNetworkSpeaker" parameterType="java.util.Map">
+		UPDATE data.networkspeaker
+		SET 
+			network_title=#{title}, network_ip=#{ip}, network_port=#{port}::integer, network_id=#{id}, network_pwd=#{pwd}, network_falldown=#{falldown}, network_fire=#{fire}, network_flood=#{flood}, network_glove=#{glove}, 
+			network_invasion=#{invasion}, network_leak=#{leak}, network_loitering=#{loitering}, network_handaction=#{handaction}, network_spin=#{spin}, network_cmtank=#{cmtank}, network_outtank=#{outtank}, network_overflow=#{overflow}
+		where network_idx = #{idx}::integer 
+	</insert>
+	<delete id="deleteNetworkSpeakerByIdx" parameterType="java.util.Map">
+		delete from data.networkspeaker
+		where network_idx = #{idx}::integer;
+	</delete>
+	
+	<select id="selectAreaSet" resultType="java.util.Map" parameterType="java.util.Map">
+		select * 
+		from data.areaset
+		where 
+			dev_ch = #{dev_ch}::integer and 
+			area_event = #{area_event};
+	</select>
+	<insert id="setAreaSet" parameterType="java.util.Map">
+		with upsert as (
+			update data.areaset 
+			set area_total = #{area_total}::text, area_now = #{area_now}::text
+			where dev_ch = #{dev_ch}::integer and area_event = #{area_event}
+			returning *
+		)
+		insert into data.areaset (
+			area_total, area_now, dev_title, dev_ch, area_event
+		) select 
+			#{area_total}::text, #{area_now}::text, #{dev_title}, #{dev_ch}::integer, #{area_event}
+		where not exists (
+			select * from upsert
+		)
+	</insert>
+	<delete id="deleteAreaSet" parameterType="java.util.Map">
+		delete from data.areaset
+		where dev_ch = #{dev_ch}::integer;
+		<!-- and area_event = #{area_event} -->
+	</delete>
+	
+	<select id="selectScheduleAll" resultType="java.util.Map">
+		select * 
+		from data.scheduleinfo
+	</select>
+	<select id="selectSchedule" parameterType="java.util.Map" resultType="java.util.Map">
+		select * 
+		from data.scheduleinfo
+		where event_name = #{event_name} and dev_ch = #{dev_ch}::integer;
+	</select>
+	<insert id="saveSchedule" parameterType="java.util.Map">
+		with upsert as (
+			update data.scheduleinfo 
+			set schedule_content = #{id_list}
+			where dev_ch = #{dev_ch}::integer and event_name = #{event_name}
+			returning *
+		)
+		insert into data.scheduleinfo (
+			event_name, dev_ch, dev_title
+		) select 
+			#{event_name}, #{dev_ch}::integer, #{dev_title}
+		where not exists (
+			select * from upsert
+		)
+	</insert>
+	<delete id="deleteSchedule" parameterType="java.util.Map">
+		delete from data.scheduleinfo
+		<where>
+			dev_ch = #{dev_ch}::integer
+			<if test="event_name != null">
+				and event_name = #{event_name}
+			</if>
+		</where>
+	</delete>
+	
+	<select id="selectLogPopup" resultType="java.util.Map" parameterType="java.util.Map">
+		select * from data.imageevent
+		where dev_ch = #{dev_ch} and event_time = #{event_time}
+	</select>
+	
+</mapper>

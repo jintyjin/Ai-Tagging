@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="action">
+	
+	<select id="selectActionDeviceDto" resultType="com.refa.ai.dto.action.ActionDeviceDto">
+		select a.*, d.dev_rtsp_url, d.dev_id, d.dev_pwd
+		from data.actionsetup a
+			left join data.devinfo d
+			on a.dev_ch = d.dev_ch
+		order by a.dev_ch asc;
+	</select>
+</mapper>

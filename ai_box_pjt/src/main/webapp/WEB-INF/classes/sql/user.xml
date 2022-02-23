@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="user">
+	<insert id="save" parameterType="com.refa.ai.entity.User">
+		INSERT INTO data.userinfo(
+			 user_id, user_pw, user_name, user_phone, user_email, user_isadmin, user_tokken, user_tokken_isuse, user_channel
+		)
+		VALUES (
+			#{user_id}, #{user_pw}, #{user_name}, #{user_phone}, #{user_email}, #{user_isadmin}, #{user_tokken}, #{user_tokken_isuse}, #{user_channel}
+		);	
+	</insert>
+	
+	<select id="findById" parameterType="String" resultType="com.refa.ai.entity.User">
+		select *
+		from data.userinfo
+		where user_id = #{userId};
+	</select>
+	
+	<select id="findByIsUse" parameterType="String" resultType="com.refa.ai.entity.User">
+		select *
+		from data.userinfo
+		where user_isuse = #{isUse};
+	</select>
+	
+	<update id="updateLoginDate" parameterType="String">
+		update data.userinfo
+		set user_logindate = now()
+		where user_id = #{userId};
+	</update>
+</mapper>

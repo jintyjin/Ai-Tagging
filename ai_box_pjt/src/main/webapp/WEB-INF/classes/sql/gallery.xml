@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="gallery">
+
+	<select id="findAll" resultType="com.refa.ai.entity.Gallery">
+		select *
+		from data.gallery;
+	</select>
+
+	<select id="selectGalleryMonitoring" parameterType="String" resultType="com.refa.ai.dto.gallery.GalleryMonitoringDto" fetchSize="1000">
+		select a.*, i.thumb_name
+		from data.imageevent as i
+		right join (
+			select substring(event_time, 1, 10) as event_time, dev_ch::integer, count(*), max(image_idx) as image_idx
+			from data.imageevent
+			where lower(tags) like '%' || lower(#{keyword}) || '%'
+			group by substring(event_time, 1, 10), dev_ch::integer
+			order by event_time desc, dev_ch::integer asc
+		) as a
+		on i.image_idx = a.image_idx
+	</select>
+
+	<select id="selectGalleryDevice" resultType="com.refa.ai.dto.gallery.GalleryDeviceDto" parameterType="Integer">
+		select i.*, d.dev_title
+		from data.imageevent as i
+		left join
+			data.devinfo as d
+			on i.dev_ch::integer = d.dev_ch
+		where i.image_idx = #{imageIdx}
+	</select>
+	
+	<!-- 검색 로직  시작 -->
+	<select id="selectClickPlus" resultType="com.refa.ai.dto.gallery.SearchDto" parameterType="com.refa.ai.dto.gallery.SearchOptDto">
+		select i.image_idx, i.event_time, i.thumb_name
+		from data.imageevent as i
+		right join (
+			select substring(event_time, 1, 10) as event_time, dev_ch::integer
+			from data.imageevent
+			where image_idx = #{image_idx}
+			order by image_idx desc
+		) as a
+		on a.event_time = substring(i.event_time, 1, 10) and a.dev_ch = i.dev_ch::integer and lower(i.tags) like '%' || lower(#{keyword}) || '%'
+		order by image_idx desc
+		<if test="offset != null">
+			offset #{offset} 
+		</if>
+		limit 300;
+	</select>
+	
+	<select id="searchImage" resultType="com.refa.ai.dto.gallery.SearchDto" parameterType="com.refa.ai.dto.gallery.SearchOptDto" fetchSize="1000">
+		select i.image_idx, i.event_time, i.thumb_name
+		from 
+			data.imageevent as i
+		left join
+			data.categoryAll as c
+			on lower(i.tags) like '%' || lower(c.category_small) || '%'
+		where lower(c.category_small) like lower('%'|| #{keyword} || '%') or lower(c.category_korean) like lower('%' || #{keyword} || '%')
+		order by i.event_time desc
+		<if test="offset != null">
+			offset #{offset} 
+		</if>
+		limit 300;
+	</select>
+	<!-- 검색 로직  끝 -->
+	
+	<!-- 그룹 이미지 다운로드 로직 시작  -->
+	<select id="selectDownloadGroupImages" resultType="java.util.Map" parameterType="java.util.Map">
+		select i.*
+		from data.imageevent as i
+		right join (
+			select substring(event_time, 1, 10) as event_time, dev_ch::integer
+			from data.imageevent
+			where image_idx = #{idx}
+			order by image_idx desc
+		) as a
+		on a.event_time = substring(i.event_time, 1, 10) and a.dev_ch = i.dev_ch::integer and lower(i.tags) like '%' || lower(#{event_name}) || '%'
+		order by image_idx desc
+	</select>
+	<!-- 그룹 이미지 다운로드 로직 종료  -->
+	
+	<!-- 이미지 다운로드 로직 시작  -->
+	<select id="selectDownloadImages" resultType="java.util.Map" parameterType="java.util.List">
+		select *
+		from data.imageevent
+		where image_idx in
+		<foreach collection="list" index="index" open="(" close=")" separator="," item="item">
+			#{item}::integer
+		</foreach>
+	</select>
+	
+	<!-- 이미지 다운로드 로직 종료  -->
+	
+	<!-- 앨범 페이지 로직 시작  -->
+	<select id="selectAlbumData" resultType="com.refa.ai.dto.gallery.AlbumDto">
+		select b.event_name, array_to_string(array_agg(b.thumb_name), ',') as thumb_name from (
+			select *, row_number() over(partition by event_name order by image_idx) as row_num from (
+				select a.*, i.thumb_name
+				from data.imageevent as i
+				right join (
+					select substring(event_time, 1, 10) as event_time, dev_ch::integer, max(image_idx) as image_idx, regexp_split_to_table(substring(tags, 2, length(tags) - 2), ', ') as event_name
+					from data.imageevent
+					group by substring(event_time, 1, 10), dev_ch::integer, event_name
+					order by event_time desc, dev_ch::integer asc
+				) as a
+				on i.image_idx = a.image_idx
+			) c
+			order by event_name asc, event_time desc, dev_ch::integer asc
+		) b
+		<![CDATA[where row_num <= 4]]>
+		group by b.event_name
+	</select>
+	<!-- 앨범 페이지 로직 종료 -->
+</mapper>

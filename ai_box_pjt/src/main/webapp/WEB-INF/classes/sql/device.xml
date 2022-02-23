@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="device">
+	<insert id="save" parameterType="com.refa.ai.entity.Device">
+		INSERT INTO data.devinfo(
+		dev_type, dev_ch, dev_title, dev_ip, dev_web_port, dev_app_port, login_id, dev_id, dev_pwd, dev_mac_address, dev_model_name, dev_rtsp_url, dev_rtsp)
+		VALUES (
+			#{dev_type}, #{dev_ch}, #{dev_title}, #{ip}, #{port}::integer, 
+			#{port}::integer, #{web_user}, #{id}, #{pw}, #{dev_mac}, #{dev_manufacturer}, #{rtsp_url}::text[], #{dev_rtsp}
+		);
+	</insert>
+	
+	<select id="findByTitle" parameterType="String" resultType="com.refa.ai.entity.Device">
+		select *
+		from data.devinfo
+		where dev_title = #{devTitle};
+	</select>
+	
+	<select id="findByCh" parameterType="Integer" resultType="com.refa.ai.entity.Device">
+		select *
+		from data.devinfo
+		where dev_ch = #{devCh};
+	</select>
+	
+	<select id="findAll" resultType="com.refa.ai.entity.Device">
+		select *
+		from data.devinfo
+		order by dev_ch asc;
+	</select>
+	
+	<select id="selectDeviceCount" parameterType="java.util.Map" resultType="Integer">
+		select count(*)
+		from data.devinfo
+		where login_id = #{web_user} and dev_type = #{dev_type};
+	</select>
+	
+	<update id="updatePwdByIdx" parameterType="com.refa.ai.dto.device.DeviceIdxPwdDto">
+		update data.devinfo
+		set dev_pwd = #{dev_pwd}
+		where dev_idx = #{dev_idx};
+	</update>
+	
+</mapper>
