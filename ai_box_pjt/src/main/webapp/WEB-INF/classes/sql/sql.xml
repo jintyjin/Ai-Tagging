@@ -1058,5 +1058,14 @@
 		select * from data.imageevent
 		where dev_ch = #{dev_ch} and event_time = #{event_time}
 	</select>
-	
+	<select id="selectByChAndTime" resultType="com.refa.ai.dto.ImageTableDto" parameterType="com.refa.ai.dto.RequestScadaDto">
+		select * 
+		from data.imageevent
+		where dev_ch = #{ch}::text and event_time = #{event_time};
+	</select>
+	<update id="updateScadaWidthAndHeight" parameterType="com.refa.ai.dto.ImageTableDto">
+		update data.imageevent
+		set width = #{width}, height = #{height}
+		where dev_ch = #{dev_ch} and event_time = #{event_time};
+	</update>
 </mapper>

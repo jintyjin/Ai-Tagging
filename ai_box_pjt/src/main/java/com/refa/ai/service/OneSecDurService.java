@@ -36,14 +36,6 @@ public class OneSecDurService {
 		Date past = dateFormat.parse(event_time2);
 		Date now = dateFormat.parse(event_time);
 		
-		System.out.println("===== duration check 시작 ======");
-		
-		System.out.println("현재 = " + now.getTime());
-		System.out.println("과거 = " + past.getTime());
-		System.out.println("시작차이 = " + ((now.getTime() - past.getTime()) / 1000) + "초");
-		
-		System.out.println("===== duration check 종료 ======");
-		
 		if ((now.getTime() - past.getTime()) / 1000 >= 1) {
 			oneSecDurRepository.save(oneSecDurDto);
 			return true;

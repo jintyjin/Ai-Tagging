@@ -5,6 +5,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.refa.ai.dto.ImageTableDto;
+import com.refa.ai.dto.RequestScadaDto;
 
 import lombok.RequiredArgsConstructor;
 
@@ -17,5 +18,13 @@ public class ImageDataRepository {
 	
 	public void save(ImageTableDto imageTableDto) {
 		sqlSession.insert("sql.insertImageEvent", imageTableDto);
+	}
+	
+	public ImageTableDto findByChAndTime(RequestScadaDto requestScadaDto) {
+		return sqlSession.selectOne("sql.selectByChAndTime", requestScadaDto);
+	}
+	
+	public void updateScadaWidthAndHeight(ImageTableDto imageTableDto) {
+		sqlSession.update("updateScadaWidthAndHeight", imageTableDto);
 	}
 }

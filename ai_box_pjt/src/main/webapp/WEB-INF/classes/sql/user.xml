@@ -28,4 +28,12 @@
 		set user_logindate = now()
 		where user_id = #{userId};
 	</update>
+	
+	<select id="findRecentOne" resultType="com.refa.ai.entity.User">
+		select *
+		from data.userinfo
+		where user_isadmin != 'A'
+		order by user_idx desc
+		limit 1;
+	</select>
 </mapper>

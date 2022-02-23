@@ -32,4 +32,8 @@ public class UserRepository {
 		sqlSessionTemplate.update("user.updateLoginDate", userId);
 	}
 	
+	public User findRecentOne() {
+		return sqlSessionTemplate.selectOne("user.findRecentOne");
+	}
+	
 }

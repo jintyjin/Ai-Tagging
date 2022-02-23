@@ -156,6 +156,7 @@ import com.refa.ai.dto.MetadataDto;
 import com.refa.ai.dto.MlResultDto;
 import com.refa.ai.dto.MonitoringDto;
 import com.refa.ai.dto.OneSecDurDto;
+import com.refa.ai.dto.RequestScadaDto;
 import com.refa.ai.dto.ResponseEventDto;
 import com.refa.ai.dto.ResponseLogDto;
 import com.refa.ai.dto.SettingDto;
@@ -169,6 +170,7 @@ import com.refa.ai.repository.ActionEventRepository;
 import com.refa.ai.repository.ActionSetupRepository;
 import com.refa.ai.repository.Base64Repository;
 import com.refa.ai.repository.GalleryRepository;
+import com.refa.ai.repository.ImageDataRepository;
 import com.refa.ai.repository.InsertImagesTimeRepository;
 import com.refa.ai.repository.RejectEventRepository;
 import com.refa.ai.repository.ScheduleRepository;
@@ -203,6 +205,7 @@ public class EventController {
 	private final OneSecDurService oneSecDurService;
 	private final VersionRepository versionRepository;
 	private final GalleryRepository galleryRepository;
+	private final ImageDataRepository imageDataRepository;
 
 	RestTemplate rest;
 	private List<Map> actionListTotal;
@@ -239,6 +242,7 @@ public class EventController {
 	private BlockingQueue<Map> responseQ;
 	private BlockingQueue<Map> postQ;
 	private BlockingQueue<Map> eventActionQ;
+	private BlockingQueue<RequestScadaDto> requestScadaQ;
 
 	private Map resultMap;
 	private Map durationMap;
@@ -291,6 +295,7 @@ public class EventController {
 		responseQ = new LinkedBlockingQueue<Map>();
 		postQ = new LinkedBlockingQueue<Map>();
 		eventActionQ = new LinkedBlockingQueue<Map>();
+		requestScadaQ = new LinkedBlockingQueue<RequestScadaDto>();
 
 		resultMap = new HashMap();
 		resultMap.put("KWATER_Falldown_Detection", "boxes");
@@ -308,6 +313,7 @@ public class EventController {
 		startInsertQ();
 		startResponseQ();
 		startPostQ();
+		startRequestScadaQ();
 		// startEventActionQ();
 
 		scheduleList = scheduleRepository.findAll();
@@ -2762,6 +2768,82 @@ public class EventController {
 		executorService.submit(runnable);
 	}
 
+	@PostMapping("/requestScada")
+	@ResponseBody
+	public Map requestScada(@RequestBody RequestScadaDto requestScadaDto) throws java.text.ParseException {
+		
+		if (requestScadaDto.getCh() == null ||  requestScadaDto.getEvent_time() == null || requestScadaDto.getBase64() == null) {
+			Map map = new HashMap();
+			map.put("status", "failed");
+			map.put("detail", "value is null");
+			return map;
+		}
+
+		OneSecDurDto oneSecDurDto = new OneSecDurDto();
+		oneSecDurDto.setDev_ch(requestScadaDto.getCh());
+		oneSecDurDto.setEvent_time(requestScadaDto.getEvent_time());
+		
+		if (oneSecDurService.join(oneSecDurDto)) {
+			try {
+				requestScadaQ.put(requestScadaDto);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			Map map = new HashMap();
+			map.put("queue", requestScadaQ.size());
+			map.put("status", "ok");
+			
+			return map;
+		} 
+
+		Map map = new HashMap();
+		map.put("status", "failed");
+		map.put("detail", "please one second over");
+	
+		return map;
+		
+	}
+
+	@Transactional
+	public void startRequestScadaQ() {
+		Runnable runnable = new Runnable() {
+			@Override
+			public void run() {
+				while (true) {
+					RequestScadaDto requestScadaDto;
+					try {
+						requestScadaDto = requestScadaQ.take();
+						
+						String base64 = requestScadaDto.getBase64();
+						Integer ch = requestScadaDto.getCh();
+						String event_time = requestScadaDto.getEvent_time();
+						
+						ImageTableDto imageTableDto = imageDataRepository.findByChAndTime(requestScadaDto);
+						
+						String img_size = saveImage(":/web_server/", imageTableDto.getUser_name(), imageTableDto.getItem_name(), imageTableDto.getEvent_time(), base64, imageTableDto.getImage_name().substring(imageTableDto.getImage_name().lastIndexOf("/") + 1));
+
+						int width = Integer.parseInt(img_size.split("-")[0]);
+												
+						int height = Integer.parseInt(img_size.split("-")[1]);
+						
+						imageTableDto.setWidth(width);
+						imageTableDto.setHeight(height);
+						
+						imageDataRepository.updateScadaWidthAndHeight(imageTableDto);
+					
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+		};
+		// 스레드풀에게 작업 처리 요청
+		executorService.submit(runnable);
+	}
+	
 	@RequestMapping(value = "/responseEvent", method = RequestMethod.POST)
 	@ResponseBody
 	public void responseEvent(@RequestBody String tmpResponse)
@@ -3057,9 +3139,8 @@ public class EventController {
 				}
 			}
 
-			System.out.println("isDuration = " + isDuration);
-			
 			if (isDuration) {
+				String firstPath = ":/web_server/";
 				String img_name = metadata.get("img_name").toString(); // 원본 이미지 파일명으로 받음
 				String login_id = metadata.get("user_name").toString(); // 사용자 ID
 				String item_name = metadata.get("item_name").toString();
@@ -3067,113 +3148,14 @@ public class EventController {
 				String monitoring_tag = item_name + "_ch" + dev_ch + "_" + event_time.split(" ")[0].replaceAll("-", "")
 						+ "_" + class_name;
 
-				String img_size = "";
-
-				// 폴더 경로 잡아줌 - 장비 및 채널 정보 가져와서 추가로 만들어줌
-				String uploadPath = master_drive_name + ":/web_server/";
-				File folder = new File(uploadPath);
-
-				if (!folder.exists()) {
-					try {
-						folder.mkdir();
-					} catch (Exception e) {
-						e.getStackTrace();
-					}
-				}
-
-				uploadPath += login_id + "/";
-				folder = new File(uploadPath);
-
-				if (!folder.exists()) {
-					try {
-						folder.mkdir();
-					} catch (Exception e) {
-						e.getStackTrace();
-					}
-				}
-
-				uploadPath += item_name + "/";
-				folder = new File(uploadPath);
-
-				if (!folder.exists()) {
-					try {
-						folder.mkdir();
-					} catch (Exception e) {
-						e.getStackTrace();
-					}
-				}
-
-				uploadPath += event_time.split(" ")[0].split("-")[0] + event_time.split(" ")[0].split("-")[1]
-						+ event_time.split(" ")[0].split("-")[2] + "/";
-				folder = new File(uploadPath);
-
-				if (!folder.exists()) {
-					try {
-						folder.mkdir();
-					} catch (Exception e) {
-						e.getStackTrace();
-					}
-				}
-
-				String data = img_data;
-
-				byte[] imageBytes = DatatypeConverter.parseBase64Binary(data);
-
-				try {
-					File lOutFile = new File(uploadPath + img_name);
-
-					FileOutputStream lFileOutputStream = new FileOutputStream(lOutFile);
-
-					lFileOutputStream.write(imageBytes);
-
-					lFileOutputStream.close();
-
-				} catch (Exception e) {
-					e.printStackTrace();
-					System.out.println("원본 이미지 저장 안됨");
-				}
-
-				File f = new File(uploadPath + img_name);
+				String img_size = saveImage(firstPath, login_id, item_name, event_time, img_data, img_name);
+				
+				String uploadPath = master_drive_name + firstPath + login_id + "/" + item_name + "/" + event_time.split(" ")[0].split("-")[0] + event_time.split(" ")[0].split("-")[1]
+						+ event_time.split(" ")[0].split("-")[2] + "/" + img_name;
+				
 				String thumb_name = (uploadPath + img_name).substring(0, (uploadPath + img_name).lastIndexOf("."))
 						+ "_thumb.jpg";
-				try {
-					EasyImage easyImage = new EasyImage(f);
-					BufferedImage bi = ImageIO.read(f);
-
-					if (!easyImage.isSupportedImageFormat()) {
-						System.out.println("not supported image type");
-					}
-
-					int hWidth = bi.getWidth();
-					int hHeight = bi.getHeight();
-
-					img_size = hWidth + "-" + hHeight;
-
-					if (hWidth < 640 || hHeight < 480) {
-						File lOutFile = new File(thumb_name);
-
-						FileOutputStream lFileOutputStream = new FileOutputStream(lOutFile);
-
-						lFileOutputStream.write(imageBytes);
-
-						lFileOutputStream.close();
-
-					} else {
-						// resize
-						EasyImage resizedImage = easyImage.resize(640, 480);
-
-						FileOutputStream out = new FileOutputStream(thumb_name);
-
-						resizedImage.writeTo(out, "jpg");
-
-						out.close();
-					}
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					System.out.println("썸네일 이미지 저장 안됨");
-				}
-
+ 				
 				MonitoringDto monitoringDto = new MonitoringDto();
 				monitoringDto.setMonitoring_src(thumb_name.substring(thumb_name.indexOf("/")));
 				monitoringDto.setMonitoring_time(event_time);
@@ -3188,6 +3170,118 @@ public class EventController {
 			}
 		}
 		return isDuration;
+	}
+
+	private String saveImage(String firstPath, String login_id, String item_name, String event_time, String img_data, String img_name) {
+		// 폴더 경로 잡아줌 - 장비 및 채널 정보 가져와서 추가로 만들어줌
+		String uploadPath = master_drive_name + firstPath;
+		File folder = new File(uploadPath);
+
+		if (!folder.exists()) {
+			try {
+				folder.mkdir();
+			} catch (Exception e) {
+				e.getStackTrace();
+			}
+		}
+
+		uploadPath += login_id + "/";
+		folder = new File(uploadPath);
+
+		if (!folder.exists()) {
+			try {
+				folder.mkdir();
+			} catch (Exception e) {
+				e.getStackTrace();
+			}
+		}
+
+		uploadPath += item_name + "/";
+		folder = new File(uploadPath);
+
+		if (!folder.exists()) {
+			try {
+				folder.mkdir();
+			} catch (Exception e) {
+				e.getStackTrace();
+			}
+		}
+
+		uploadPath += event_time.split(" ")[0].split("-")[0] + event_time.split(" ")[0].split("-")[1]
+				+ event_time.split(" ")[0].split("-")[2] + "/";
+		folder = new File(uploadPath);
+
+		if (!folder.exists()) {
+			try {
+				folder.mkdir();
+			} catch (Exception e) {
+				e.getStackTrace();
+			}
+		}
+
+		String data = img_data;
+
+		byte[] imageBytes = DatatypeConverter.parseBase64Binary(data);
+
+		try {
+			File lOutFile = new File(uploadPath + img_name);
+
+			FileOutputStream lFileOutputStream = new FileOutputStream(lOutFile);
+
+			lFileOutputStream.write(imageBytes);
+
+			lFileOutputStream.close();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("원본 이미지 저장 안됨");
+		}
+
+		File f = new File(uploadPath + img_name);
+		String thumb_name = (uploadPath + img_name).substring(0, (uploadPath + img_name).lastIndexOf("."))
+				+ "_thumb.jpg";
+		
+		String img_size = "";
+		
+		try {
+			EasyImage easyImage = new EasyImage(f);
+			BufferedImage bi = ImageIO.read(f);
+
+			if (!easyImage.isSupportedImageFormat()) {
+				System.out.println("not supported image type");
+			}
+
+			int hWidth = bi.getWidth();
+			int hHeight = bi.getHeight();
+
+			img_size = hWidth + "-" + hHeight;
+
+			if (hWidth < 640 || hHeight < 480) {
+				File lOutFile = new File(thumb_name);
+
+				FileOutputStream lFileOutputStream = new FileOutputStream(lOutFile);
+
+				lFileOutputStream.write(imageBytes);
+
+				lFileOutputStream.close();
+
+			} else {
+				// resize
+				EasyImage resizedImage = easyImage.resize(640, 480);
+
+				FileOutputStream out = new FileOutputStream(thumb_name);
+
+				resizedImage.writeTo(out, "jpg");
+
+				out.close();
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.out.println("썸네일 이미지 저장 안됨");
+		}
+
+		return img_size;
 	}
 
 	public void saveImageData(Map metadata, ArrayList ml_result) throws ParseException, IOException {

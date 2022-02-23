@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
@@ -39,12 +40,17 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.refa.ai.dao.EventDao;
 import com.refa.ai.dto.EventDto;
+import com.refa.ai.dto.ImageTableDto;
+import com.refa.ai.entity.Device;
+import com.refa.ai.entity.User;
 import com.refa.ai.infra.AES256Util;
 import com.refa.ai.infra.WebSession;
 import com.refa.ai.repository.ActionEventRepository;
+import com.refa.ai.repository.DeviceRepository;
 import com.refa.ai.repository.PresetRepository;
 import com.refa.ai.repository.RejectEventRepository;
 import com.refa.ai.repository.ScheduleRepository;
+import com.refa.ai.repository.UserRepository;
 import com.refa.ai.service.ActionSetupService;
 import com.refa.ai.service.AreaSetService;
 import com.refa.ai.service.EventStatusService;
@@ -69,6 +75,8 @@ public class MyHandler extends AbstractWebSocketHandler {
 	private final RejectEventService rejectEventService;
 	private final PresetRepository presetRepository;
 	private final AES256Util aes256Util;
+	private final UserRepository userRepository;
+	private final DeviceRepository deviceRepository;
 
 	// 접속 된 클라이언트 WebSocket session 관리 리스트
 	private static List<WebSocketSession> sessionUsers = Collections.synchronizedList(new ArrayList<>());
@@ -389,47 +397,69 @@ public class MyHandler extends AbstractWebSocketHandler {
 				devMap.put("ip", ip);
 				devMap.put("port", port);
 				
-				Map devInfo = eventDao.selectDeviceInfoByIP(devMap);
+//				Map devInfo = eventDao.selectDeviceInfoByIP(devMap);
+				Optional<Device> device = deviceRepository.findByCh(ch);
 				
 				boolean isAction = false;
 				String pre_title = "";
 				
 //				System.out.println("웹소켓 핸들려 = " + devInfo);
 				
-				if (devInfo != null) {
+				if (device.isPresent()) {
 					sendScada(map);
 					
-					map.put("dev_ch", devInfo.get("dev_ch").toString());
+					Device devInfo = device.get();
+					
+					map.put("dev_ch", devInfo.getDev_ch() + "");
 
 					// 이벤트 로그
 					EventDto eventDto = new EventDto();
 
-					eventDto.setItem_name(devInfo.get("dev_title").toString());
-					eventDto.setDev_ip(devInfo.get("dev_ip").toString());
-					eventDto.setDev_channel(devInfo.get("dev_ch").toString());
+					eventDto.setItem_name(devInfo.getDev_title());
+					eventDto.setDev_ip(devInfo.getDev_ip());
+					eventDto.setDev_channel(devInfo.getDev_ch() + "");
 					eventDto.setEvent_time(event_time);
-					eventDto.setUser_id(devInfo.get("login_id").toString());
+					eventDto.setUser_id(devInfo.getLogin_id());
 
 					eventDto.setItem_type("1");
-					eventDto.setItem_ip(devInfo.get("dev_ip").toString());
-					eventDto.setItem_id(devInfo.get("login_id").toString());
-					eventDto.setItem_pwd(devInfo.get("dev_pwd").toString());
-					eventDto.setItem_port(devInfo.get("dev_web_port").toString());
+					eventDto.setItem_ip(devInfo.getDev_ip());
+					eventDto.setItem_id(devInfo.getLogin_id());
+					eventDto.setItem_pwd(devInfo.getDev_pwd());
+					eventDto.setItem_port(devInfo.getDev_web_port());
 					
 					String dev_mac_address = "00000";
-					if (devInfo.get("dev_mac_address") != null) {
-						dev_mac_address = devInfo.get("dev_mac_address").toString();
+					if (devInfo.getDev_mac_address() != null) {
+						dev_mac_address = devInfo.getDev_mac_address();
 					}
 					eventDto.setItem_mac(dev_mac_address);
 					eventDto.setDev_mac(dev_mac_address);
-					eventDto.setDev_id(devInfo.get("dev_id").toString());
-					eventDto.setDev_pwd(devInfo.get("dev_pwd").toString());
+					eventDto.setDev_id(devInfo.getDev_id());
+					eventDto.setDev_pwd(devInfo.getDev_pwd());
 					eventDto.setDev_port(port + "");
 					eventDto.setDev_web_port(port + "");
 					eventDto.setEvent_source("SCADA");
 					eventDto.setEvent_info(event_info);
 					
+					boolean isResult = false;
+					String class_name = "";
+					List originalTags = new ArrayList();
+					List colorTags = new ArrayList();
+					
 					for (String model_name : list) {
+						isResult = true;
+
+						if (model_name.split("_").length > 2) {
+							model_name = model_name.split("_")[0].toUpperCase() + 
+									"_" + model_name.split("_")[1].split("")[0].toUpperCase() + model_name.split("_")[1].substring(1) + 
+									"_" + model_name.split("_")[2].split("")[0].toUpperCase() + model_name.split("_")[2].substring(1);
+						} else {
+							model_name = model_name.split("_")[0].toUpperCase() + 
+									"_" + model_name.split("_")[1].split("")[0].toUpperCase() + model_name.split("_")[1].substring(1);
+						}
+						
+						class_name += model_name + 1;
+						originalTags.add(model_name);
+						
 						eventDto.setEvent_name(model_name);
 						eventDao.insertJson(eventDto);
 						
@@ -446,17 +476,17 @@ public class MyHandler extends AbstractWebSocketHandler {
 						this.template.setMessageConverter((MessageConverter) new StringMessageConverter());
 						this.template.convertAndSend("/receiveMessage", jsonStr);
 
-						map.put("dev_title", devInfo.get("dev_title"));
+						map.put("dev_title", devInfo.getDev_title());
 						
 						Map selectMap = new HashMap();
 						selectMap.put("model_name", model_name);
 						//selectMap.put("action_action", "프리셋");
-						selectMap.put("dev_title", devInfo.get("dev_title").toString());
+						selectMap.put("dev_title", devInfo.getDev_title());
 						selectMap.put("action_source", "SCADA");
 						
 						List<Map> return_maps = eventDao.selectEventActionListByAction(selectMap);
 
-						if (rejectEventService.chkTime(Integer.parseInt(devInfo.get("dev_ch").toString()), model_name, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(event_time))) {
+						if (rejectEventService.chkTime(Integer.parseInt(devInfo.getDev_ch() + ""), model_name, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(event_time))) {
 							eventReject(map, model_name);
 							if (return_maps != null) {
 								for (int i = 0; i < return_maps.size(); i++) {
@@ -508,20 +538,61 @@ public class MyHandler extends AbstractWebSocketHandler {
 										Map returnMap = new LinkedHashMap();
 										returnMap.put("command", "RF_REQ_GOTOPRESET");
 										returnMap.put("sender", "web");
-										returnMap.put("web_user", devInfo.get("login_id").toString());
-										returnMap.put("ip", devInfo.get("dev_ip").toString());
+										returnMap.put("web_user", devInfo.getLogin_id());
+										returnMap.put("ip", devInfo.getDev_ip());
 										
-										returnMap.put("id", devInfo.get("dev_id"));
-										returnMap.put("pw", devInfo.get("dev_pwd"));
-										returnMap.put("mac", devInfo.get("dev_mac_address"));
+										returnMap.put("id", devInfo.getDev_id());
+										returnMap.put("pw", devInfo.getDev_pwd());
+										returnMap.put("mac", devInfo.getDev_mac_address());
 										returnMap.put("preset_name", return_map.get("pre_title"));
-										returnMap.put("port", devInfo.get("dev_web_port"));
+										returnMap.put("port", devInfo.getDev_web_port());
 
 										TextMessage return_message = new TextMessage(new ObjectMapper().writeValueAsString(returnMap));
 										webSession.sendDifferentMessage(return_message, webSocketService, userSession);
 									}
 								}
 							}
+						}
+						
+						if (isResult) {
+							ImageTableDto imageTableDto = new ImageTableDto();
+							
+							User user = userRepository.findRecentOne();
+
+							imageTableDto.setLogin_id(user.getUser_id());
+							imageTableDto.setDev_ch(devInfo.getDev_ch() + "");
+							imageTableDto.setDev_pwd(devInfo.getDev_pwd());
+							imageTableDto.setStart_time(System.currentTimeMillis());
+							imageTableDto.setItem_name("AIBOX1");
+							imageTableDto.setDev_ip(devInfo.getDev_ip());
+							imageTableDto.setDev_port(devInfo.getDev_web_port());
+							imageTableDto.setEvent_time(event_time);
+							imageTableDto.setDev_id(devInfo.getDev_id());
+							imageTableDto.setDev_web_port(devInfo.getDev_web_port());
+							
+							String uploadPath = "/web_server/" + user.getUser_id() + "/" + "AIBOX1" + "/"
+									+ event_time.split(" ")[0].split("-")[0] + event_time.split(" ")[0].split("-")[1]
+									+ event_time.split(" ")[0].split("-")[2] + "/" + "ch" + devInfo.getDev_ch() + "_" + event_time.split(" ")[1].replaceAll(":", "")
+									+ ".jpg";
+							imageTableDto.setImage_name(uploadPath);
+							imageTableDto.setThumb_name(uploadPath.substring(0, uploadPath.lastIndexOf(".")) + "_thumb.jpg");
+							String monitoring_tag = "AIBOX1" + "_ch" + devInfo.getDev_ch() + "_" + event_time.split(" ")[0].replaceAll("-", "")
+									+ "_" + class_name;
+							imageTableDto.setMonitoring_tag(monitoring_tag);
+							
+							imageTableDto.setUser_name(user.getUser_id());
+							imageTableDto.setUser_passwd(user.getUser_pw());
+
+							imageTableDto.setImage_queue(0);
+
+							imageTableDto.setWidth(0);
+							imageTableDto.setHeight(0);
+
+							imageTableDto.setColor_tags(colorTags.toString());
+							imageTableDto.setTags(originalTags.toString().replaceAll("\\\\", ""));
+
+							eventDao.insertImageEvent(imageTableDto);
+							
 						}
 					}
 				}

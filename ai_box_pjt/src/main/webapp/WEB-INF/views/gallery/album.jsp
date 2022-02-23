@@ -291,6 +291,15 @@ $(document).ready(function () {
 		    		if (category.toLowerCase() == 'KWATER_Spin_Detection'.toLowerCase()) {
 		    			category = '약품미투입';
 		    		}
+					if (category.toLowerCase() == 'KWATER_Cmtank_Leak'.toLowerCase()) {
+						category = '약품탱크누액';
+					}
+					if (category.toLowerCase() == 'KWATER_Outtank_Leak'.toLowerCase()) {
+						category = '옥외탱크누액';
+					}
+					if (category.toLowerCase() == 'KWATER_Overflow'.toLowerCase()) {
+						category = '배출수월류';
+					}
 
 		    		appendStr += '</div></div><div style="height:44px;"><h2 class="h2">' + category + '</h2></div></div></a>';
 		    	}
