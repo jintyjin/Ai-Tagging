@@ -37,18 +37,18 @@
 		from data.imageevent
 		where 
 			to_timestamp(event_time, 'YYYY-MM-DD')::timestamp between #{startDate}::timestamp and #{endDate}::timestamp
-		group by regexp_split_to_table(substring(tags, 2, length(tags) - 2), ', ')
+		group by lower(split_part(regexp_split_to_table(substring(tags, 2, length(tags) - 2), ', '),'_',2))
 	</select>
 	
 	<select id="selectBetweenDateEventCount" parameterType="com.refa.ai.dto.dashboard.StartEndDate" resultType="com.refa.ai.dto.dashboard.EventCountTimeDto" fetchSize="1000">
 		SELECT time, ARRAY_TO_STRING(ARRAY_AGG(event),',') as event
 		FROM (
-			select substring(event_time, 1, 10) as time, lower(split_part(regexp_split_to_table(substring(tags, 2, length(tags) - 2), ', '),'_',2)) || '_' || count(*) || '_' || max(image_idx) as event
+			select substring(event_time, 1, 10) as time, lower(split_part(regexp_split_to_table(substring(tags, 2, length(tags) - 2), ', '),'_',2)) || '_' || count(*) as event
 			from data.imageevent
 			where 
 				to_timestamp(event_time, 'YYYY-MM-DD')::timestamp between #{startDate}::timestamp and #{endDate}::timestamp
-			group by substring(event_time, 1, 10), regexp_split_to_table(substring(tags, 2, length(tags) - 2), ', ')
-			order by time asc
+			group by substring(event_time, 1, 10), lower(split_part(regexp_split_to_table(substring(tags, 2, length(tags) - 2), ', '),'_',2))
+			order by time asc, event asc
 		) a
 		GROUP BY time;
 		
