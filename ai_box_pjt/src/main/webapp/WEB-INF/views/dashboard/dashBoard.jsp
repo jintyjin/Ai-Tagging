@@ -733,7 +733,8 @@ function clearRightData() {
 			</div>
 			<div id="cmtank" class="event">
 				<div id="cmtankTitle" class="title">
-					<span><img src="/resources/image/event/cmtank.png" width="70px" style="margin-top:-20px; margin-left:-40px;"/></span>
+					<!-- <span><img src="/resources/image/event/cmtank.png" width="70px" style="margin-top:-20px; margin-left:-40px;"/></span> -->
+					<span class="glyphicon glyphicon-filter" style="margin-top:-10px; margin-left:-40px; font-size:50px;"></span>
 				</div>
 				<div id="cmtankCount" class="count 8" style="margin-left:-40px;"></div>
 			</div>
@@ -745,7 +746,7 @@ function clearRightData() {
 			</div>
 			<div id="overflow" class="event">
 				<div id="overflowTitle" class="title">
-					<span><img src="/resources/image/event/overflow.png" width="70px" style="margin-top:-20px; margin-left:-40px;"/></span>
+					<span><img src="/resources/image/event/overflow.png" width="70px" style="margin-top:-20px; margin-left:-45px;"/></span>
 				</div>
 				<div id="overflowCount" class="count 8" style="margin-left:-40px;"></div>
 			</div>
