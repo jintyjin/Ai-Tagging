@@ -50,7 +50,7 @@ html, body {
 	margin:auto;
 }
 #top {
-	width:1800px;
+	width:1440px;
 }
 #startDate, #top span, #endDate {
 	float:right;
@@ -62,13 +62,13 @@ html, body {
 	line-height:28px;
 }
 #middle {
-	width:1800px;
+	width:1440px;
 	height:80px;
 	margin-top:90px;
 	margin-bottom:60px;
 }
 .event {
-	width:200px;
+	width:120px;
 	float:left;
 }
 .title {
@@ -81,39 +81,39 @@ html, body {
 	text-align:center;
 }
 #bottom {
-	width:1800px;
+	width:1440px;
 	height:65%;
 }
 #left, #center, #right {
-	height:770px;
+	height:840px;
 	float:left;
 }
 #left {
-	width:8%;
+	width:10%;
 }
 .leftEvent {
-	height:70px;
+	height:60px;
 	text-align:center;
-	line-height:70px;
+	line-height:60px;
 	font-size:16px;
 	border:1px solid white;
 	background-color:#3E3E42;
 }
 #center {
 	/* width:72%; */
-	width:92%;
+	width:90%;
 	
 }
 #centerLeft, #centerRight {
-	height:770px;
+	height:840px;
 	float:left;
 }
 #centerLeft {
-	/* width:1152px; */
-	width:1512px;
+	width:1152px;
+	/* width:1512px; */
 }
 #centerLeftContent {
-	height:770px;
+	height:840px;
 	/* border:1px solid white; */
 }
 #centerTable {
@@ -139,14 +139,14 @@ html, body {
 	display:block;
 	border:1px solid white;
 	width:144px;
-	height:70px;
-	line-height:70px;
+	height:60px;
+	line-height:60px;
 }
 .dateTd {
 	background-color:#3E3E42;
 }
 .centerCount {
-	height:70px;
+	height:60px;
 	text-align:center;
 	line-height:90px;
 	font-size:16px;
@@ -156,9 +156,9 @@ html, body {
 	width:144px;
 }
 .rightEvent {
-	height:70px;
+	height:60px;
 	text-align:center;
-	line-height:70px;
+	line-height:60px;
 	font-size:16px;
 	border:1px solid white;
 	background-color:#3E3E42;
@@ -323,7 +323,7 @@ html, body {
 }
 </style>
 <script type="text/javascript">
-var eventArr = ['falldown', 'fire', 'flood', 'glove', 'handaction', 'invasion', 'leak', 'loitering', 'spin']
+var eventArr = ['falldown', 'fire', 'flood', 'glove', 'invasion', 'leak', 'loitering', 'handaction', 'spin', 'cmtank', 'outtank', 'overflow']
 var week = new Array('일', '월', '화', '수', '목', '금', '토');
 var day2 = new Date();
 var year2 = day2.getFullYear();
@@ -392,6 +392,15 @@ $(document).ready(function () {
 		if (tag == 'spin') {
 			tag = '약품미투입';
 		}
+		if (tag == 'cmtank') {
+			tag = '약품탱크누액';
+		}
+		if (tag == 'outtank') {
+			tag = '옥외탱크누액';
+		}
+		if (tag == 'overflow') {
+			tag = '배출수월류';
+		}
 		
 		$(this).append('<div id="tooltip"><div class="tipBody">' + tag + '</div></div>');
 	}).mousemove(function(e) {
@@ -435,10 +444,8 @@ function getStatisticsData(startDate, endDate) {
 }
 
 function changeMiddleCount(countArr) {
-	for (var i = 0; i < 9; i++) {
-		if (countArr[i] != null) {
-			$('#' + countArr[i].event + 'Count').text(countArr[i].count);
-		}
+	for (var i = 0; i < countArr.length; i++) {
+		$('#' + countArr[i].event + 'Count').text(countArr[i].count);
 	}
 }
 function changeBottomCount(countArr) {
@@ -449,6 +456,7 @@ function changeBottomCount(countArr) {
 	var totalCount = 0;
 	
 	if (countArr.length > 0) {
+		console.log(countArr);
 		for (var i = 0; i < countArr.length; i++) {
 			str += '<tr>';
 			str += '<td class="centerTd dateTd">' + countArr[i].time + '</td>';
@@ -457,6 +465,7 @@ function changeBottomCount(countArr) {
 			var count = 0;
 			for (var k = 0; k < countArr[i].event.split(',').length; k++) {
 				for (var j = idx; j < eventArr.length; j++) {
+					console.log(eventArr[j], countArr[i].event.split(',')[k].split('_')[0]);
 					if (eventArr[j] == countArr[i].event.split(',')[k].split('_')[0]) {
 						str += '<td class="centerTd ' + countArr[i].event.split(',')[k].split('_')[0] + ' changeColor" ondblclick="showPopup(' + "'" + countArr[i].event.split(',')[k].split('_')[0] + "', '" + countArr[i].time + "일'" + ');">' + countArr[i].event.split(',')[k].split('_')[1] + '</td>';
 						idx = j + 1;
@@ -486,7 +495,7 @@ function changeBottomCount(countArr) {
 	$('#centerTable').append(str);
 	
 	$('#dateTotal').text(countArr.length + '일');
-	$('#total9').text(totalCount);
+	$('#total12').text(totalCount);
 }
 function showInfo(idx) {
 	var jsonUrl = "/showRightInfo";
@@ -622,6 +631,14 @@ var popup_height = 720;
 function showPopup(tag, time) {
 	var event_name = 'KWATER_' + tag + '_Detection';
 	
+	if (tag == 'cmtank' || tag == 'outtank') {
+		event_name = 'KWATER_' + tag + '_Leak';
+	}
+	
+	if (tag == 'overflow') {
+		event_name = 'KWATER_' + tag;
+	}
+	
 	var url = '/tagImage.htm?event_name=' + event_name + '&scroll=Y&event_time=' + time;
 		
 	if(popup_window[POPUP_MORE] && !popup_window[POPUP_MORE].closed) {
@@ -684,12 +701,6 @@ function clearRightData() {
 				</div>
 				<div id="gloveCount" class="count 3"></div>
 			</div>
-			<div id="handaction" class="event">
-				<div id="handactionTitle" class="title">
-					<span><img src="/resources/image/event/handaction.png" width="100px" style="margin-top:-40px;"/></span>
-				</div>
-				<div id="handactionCount" class="count 7"></div>
-			</div>
 			<div id="invasion" class="event">
 				<div id="invasionTitle" class="title">
 					<span><img src="/resources/image/event/invasion.png" width="70px" style="margin-top:-20px;"/></span>
@@ -708,11 +719,35 @@ function clearRightData() {
 				</div>
 				<div id="loiteringCount" class="count 6"></div>
 			</div>
+			<div id="handaction" class="event">
+				<div id="handactionTitle" class="title">
+					<span><img src="/resources/image/event/handaction.png" width="100px" style="margin-top:-40px;"/></span>
+				</div>
+				<div id="handactionCount" class="count 7"></div>
+			</div>
 			<div id="spin" class="event">
 				<div id="spinTitle" class="title">
 					<span><img src="/resources/image/event/spin.png" width="70px" style="margin-top:-20px; margin-left:-40px;"/></span>
 				</div>
 				<div id="spinCount" class="count 8" style="margin-left:-40px;"></div>
+			</div>
+			<div id="cmtank" class="event">
+				<div id="cmtankTitle" class="title">
+					<span><img src="/resources/image/event/cmtank.png" width="70px" style="margin-top:-20px; margin-left:-40px;"/></span>
+				</div>
+				<div id="cmtankCount" class="count 8" style="margin-left:-40px;"></div>
+			</div>
+			<div id="outtank" class="event">
+				<div id="outtankTitle" class="title">
+					<span><img src="/resources/image/event/outtank.png" width="70px" style="margin-top:-20px; margin-left:-40px;"/></span>
+				</div>
+				<div id="outtankCount" class="count 8" style="margin-left:-40px;"></div>
+			</div>
+			<div id="overflow" class="event">
+				<div id="overflowTitle" class="title">
+					<span><img src="/resources/image/event/overflow.png" width="70px" style="margin-top:-20px; margin-left:-40px;"/></span>
+				</div>
+				<div id="overflowCount" class="count 8" style="margin-left:-40px;"></div>
 			</div>
 		</div>
 		<div id="bottom">
@@ -722,11 +757,14 @@ function clearRightData() {
 				<div class="leftEvent">화재</div>
 				<div class="leftEvent">침수</div>
 				<div class="leftEvent">장갑미착용</div>
-				<div class="leftEvent">수신호</div>
 				<div class="leftEvent">침입</div>
 				<div class="leftEvent">누수</div>
 				<div class="leftEvent">배회</div>
+				<div class="leftEvent">수신호</div>
 				<div class="leftEvent">약품미투입</div>
+				<div class="leftEvent">약품탱크누액</div>
+				<div class="leftEvent">옥외탱크누액</div>
+				<div class="leftEvent">배출수월류</div>
 				<div class="leftEvent">총합</div>
 			</div>
 			<div id="center">
@@ -748,6 +786,9 @@ function clearRightData() {
 					<div id="total7" class="rightEvent"></div>
 					<div id="total8" class="rightEvent"></div>
 					<div id="total9" class="rightEvent"></div>
+					<div id="total10" class="rightEvent"></div>
+					<div id="total11" class="rightEvent"></div>
+					<div id="total12" class="rightEvent"></div>
 				</div>
 			</div>
 			<!-- <div id="right">
