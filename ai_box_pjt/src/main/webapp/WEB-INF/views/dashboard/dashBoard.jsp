@@ -456,7 +456,6 @@ function changeBottomCount(countArr) {
 	var totalCount = 0;
 	
 	if (countArr.length > 0) {
-		console.log(countArr);
 		for (var i = 0; i < countArr.length; i++) {
 			str += '<tr>';
 			str += '<td class="centerTd dateTd">' + countArr[i].time + '</td>';
@@ -465,7 +464,6 @@ function changeBottomCount(countArr) {
 			var count = 0;
 			for (var k = 0; k < countArr[i].event.split(',').length; k++) {
 				for (var j = idx; j < eventArr.length; j++) {
-					console.log(eventArr[j], countArr[i].event.split(',')[k].split('_')[0]);
 					if (eventArr[j] == countArr[i].event.split(',')[k].split('_')[0]) {
 						str += '<td class="centerTd ' + countArr[i].event.split(',')[k].split('_')[0] + ' changeColor" ondblclick="showPopup(' + "'" + countArr[i].event.split(',')[k].split('_')[0] + "', '" + countArr[i].time + "일'" + ');">' + countArr[i].event.split(',')[k].split('_')[1] + '</td>';
 						idx = j + 1;

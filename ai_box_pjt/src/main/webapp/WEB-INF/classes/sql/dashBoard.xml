@@ -61,6 +61,7 @@
 				order by time asc, event asc
 			) as i
 			on lower(split_part(c.category_small, '_', 2)) = split_part(i.event, '_', 1)
+			where i.time is not null
 			order by i.time asc, c.category_idx asc
 		) a
 		GROUP BY time;
