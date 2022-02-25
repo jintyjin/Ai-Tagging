@@ -659,7 +659,7 @@ $(document).ready(function () {
 		}
 	}
 	
-	$('.topInfo').after('<div class="bottomInfo"><div class="bottomDiv" style="top:' + marginTop + 'px; left:' + marginLeft + 'px; width:' + imgWidth + 'px; height:' + imgHeight + 'px;"><div class="bottomImageDiv" style="width:' + imgWidth + 'px; height:' + imgHeight + 'px;"><div class="imagediv2" style="width:' + imgWidth + 'px; height:' + imgHeight + 'px;"><img class="image" id="img" width="' + imgWidth + '" height="' + imgHeight + '" src="' + imgSrc.replace('_thumb', '') + '" style="transform: translate3d(0px, 0px, 0px) rotate(0deg); background-image:url(' + imgSrc + ');" onError="this.src=' + "'" + imgSrc.replace('web_server', 'webserver').replace('_thumb', '') + "'" + '" /></div></div></div></div>');
+	$('.topInfo').after('<div class="bottomInfo"><div class="bottomDiv" style="top:' + marginTop + 'px; left:' + marginLeft + 'px; width:' + imgWidth + 'px; height:' + imgHeight + 'px;"><div class="bottomImageDiv" style="width:' + imgWidth + 'px; height:' + imgHeight + 'px;"><div class="imagediv2" style="width:' + imgWidth + 'px; height:' + imgHeight + 'px;"><img class="image" id="img" width="' + imgWidth + '" height="' + imgHeight + '" src="' + imgSrc.replace('_thumb', '') + '" style="transform: translate3d(0px, 0px, 0px) rotate(0deg); background-image:url(' + imgSrc + ');" onError="this.src=' + "'" + imgSrc.replace('webserver', 'web_server').replace('_thumb', '') + "'" + '" /></div></div></div></div>');
 	//$('.IPDiv').text(IPinfo + ' ch' + chInfo);
 	$('.IPDiv').text(chInfo);
 	//$('.chSpan').text('ch' + chInfo);

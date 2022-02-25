@@ -570,7 +570,7 @@ public class MyHandler extends AbstractWebSocketHandler {
 							imageTableDto.setDev_id(devInfo.getDev_id());
 							imageTableDto.setDev_web_port(devInfo.getDev_web_port());
 							
-							String uploadPath = "/web_server/" + user.getUser_id() + "/" + "AIBOX1" + "/"
+							String uploadPath = "/webserver/" + user.getUser_id() + "/" + "AIBOX1" + "/"
 									+ event_time.split(" ")[0].split("-")[0] + event_time.split(" ")[0].split("-")[1]
 									+ event_time.split(" ")[0].split("-")[2] + "/" + "ch" + devInfo.getDev_ch() + "_" + event_time.split(" ")[1].replaceAll(":", "")
 									+ ".jpg";
