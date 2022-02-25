@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,7 +30,13 @@ public class DeviceApiController {
 	
 	// 모든 장비 리스트를 가져옴
 	@PostMapping("/deviceList")
-	public List<Device> deviceList() {
+	public List<Device> deviceList(Locale locale) {
+		System.out.println("===== locale start =====");
+
+		System.out.println(locale.getLanguage() + " : " + locale.getDisplayLanguage());
+		System.out.println("locale = " + locale);
+		
+		System.out.println("===== locale end =====");
 		return deviceService.findAll();
 	}
 

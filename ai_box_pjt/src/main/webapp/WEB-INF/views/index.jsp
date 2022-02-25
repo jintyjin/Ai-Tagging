@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -641,39 +642,39 @@ function networkTest() {
 <div style="padding-top:12px; height:100%; min-width:245px;">
 	<div id="logo">
 		<img src="/resources/image/Police/logo_RECON.ico" alt="logo" />
-		<span style="position:absolute; top:18px;">&nbsp;&nbsp;지능형 영상<br />&nbsp;&nbsp;안전 관리 시스템</span>
+		<span style="position:absolute; top:18px;">&nbsp;&nbsp;<spring:message code="tab.titleFirstName" /><br />&nbsp;&nbsp;<spring:message code="tab.titleSecondName" /></span>
 	</div>
 	<div id="menu">
 		<ul>
-			<li id="tab1" style="display:none;"><span onclick="menuClick('./dashBoard.htm');" class="tabMenu active" style="padding-left:1px;"><span class="glyphicon glyphicon-cloud" style="margin-right:0.7em;"></span>대시보드</span></li>
-			<li id="tab14" style="display:none;"><span onclick="connectMonitoring('kmonitoring://');" class="tabMenu"><span class="glyphicon glyphicon-bell" style="margin-right:0.7em;"></span>실시간 모니터링</span></li>
-			<li id="tab5" style="display:none;"><span onclick="menuClick('./album.htm');" class="tabMenu"><span class="glyphicon glyphicon-book" style="margin-right:0.7em;"></span>갤러리</span></li>
-			<li id="tab6" style="display:none;"><span onclick="menuClick('./log.htm');" class="tabMenu"><span class="glyphicon glyphicon-bell" style="margin-right:0.7em;"></span>로그</span>
-			<li id="tab7" style="display:none;"><span onclick="menuClick('./eventStatusSetup.htm');" class="tabMenu"><span class="glyphicon glyphicon-list-alt" style="margin-right:0.7em;"></span>이벤트 현황</span></li>
-			<li id="tab2" style="display:none;"><span onclick="menuClick('./userList.htm');" class="tabMenu" style="padding-left:1px;"><span class="glyphicon glyphicon-user" style="margin-right:0.7em;"></span>사용자</span></li>
-			<li id="tab3" style="display:none;"><span onclick="menuClick('./device.htm');" class="tabMenu" style="padding-left:1px;"><span class="glyphicon glyphicon-blackboard" style="margin-right:0.7em;"></span>장치관리</span>
+			<li id="tab1" style="display:none;"><span onclick="menuClick('./dashBoard.htm');" class="tabMenu active" style="padding-left:1px;"><span class="glyphicon glyphicon-cloud" style="margin-right:0.7em;"></span><spring:message code="tab.dashboard"/></span></li>
+			<li id="tab14" style="display:none;"><span onclick="connectMonitoring('kmonitoring://');" class="tabMenu"><span class="glyphicon glyphicon-bell" style="margin-right:0.7em;"></span><spring:message code="tab.liveMonitoring"/></span></li>
+			<li id="tab5" style="display:none;"><span onclick="menuClick('./album.htm');" class="tabMenu"><span class="glyphicon glyphicon-book" style="margin-right:0.7em;"></span><spring:message code="tab.gallery"/></span></li>
+			<li id="tab6" style="display:none;"><span onclick="menuClick('./log.htm');" class="tabMenu"><span class="glyphicon glyphicon-bell" style="margin-right:0.7em;"></span><spring:message code="tab.log"/></span>
+			<li id="tab7" style="display:none;"><span onclick="menuClick('./eventStatusSetup.htm');" class="tabMenu"><span class="glyphicon glyphicon-list-alt" style="margin-right:0.7em;"></span><spring:message code="tab.eventStatus"/></span></li>
+			<li id="tab2" style="display:none;"><span onclick="menuClick('./userList.htm');" class="tabMenu" style="padding-left:1px;"><span class="glyphicon glyphicon-user" style="margin-right:0.7em;"></span><spring:message code="tab.user"/></span></li>
+			<li id="tab3" style="display:none;"><span onclick="menuClick('./device.htm');" class="tabMenu" style="padding-left:1px;"><span class="glyphicon glyphicon-blackboard" style="margin-right:0.7em;"></span><spring:message code="tab.device"/></span>
 				<ul id="device_ul">
-					<li><a href="#" class="tabMenu" onclick="menuClick('./deviceSearch.htm');">검색</a></li>
+					<li><a href="#" class="tabMenu" onclick="menuClick('./deviceSearch.htm');"><spring:message code="tab.device.search"/></a></li>
 					<!-- <li><a href="#" class="tabMenu" onclick="menuClick('./deviceJoin.htm');">등록</a></li> -->
-					<li><a href="#" class="tabMenu" onclick="menuClick('./eventSetup.htm');">이벤트 설정</a></li>
+					<li><a href="#" class="tabMenu" onclick="menuClick('./eventSetup.htm');"><spring:message code="tab.device.setup"/></a></li>
 					<!-- <li><a href="#" class="tabMenu" onclick="menuClick('./eventActionSetup.htm');">이벤트 액션 설정</a></li> -->
-					<li><a href="#" class="tabMenu" onclick="menuClick('./eventActionList.htm');">이벤트 액션 설정</a></li>
+					<li><a href="#" class="tabMenu" onclick="menuClick('./eventActionList.htm');"><spring:message code="tab.device.actionSetup"/></a></li>
 					<!-- <li><a href="#" class="tabMenu" onclick="menuClick('./rejectSetup.htm');">이벤트 무시 설정</a></li> -->
-					<li><a href="#" class="tabMenu" onclick="menuClick('./networkSpeakerList.htm');">네트워크 스피커</a></li>
+					<li><a href="#" class="tabMenu" onclick="menuClick('./networkSpeakerList.htm');"><spring:message code="tab.device.networkSpeaker"/></a></li>
 				</ul>
 			</li>
-			<li id="tab13" style="display:none;"><span onclick="location.href='http://10.15.32.150:18080';" class="tabMenu"><span class="glyphicon glyphicon-tint" style="margin-right:0.7em;"></span>AI 스마트 정수장<br />&nbsp;&nbsp; 운영 시스템</span></li>
+			<li id="tab13" style="display:none;"><span onclick="location.href='http://10.15.32.150:18080';" class="tabMenu"><span class="glyphicon glyphicon-tint" style="margin-right:0.7em;"></span><spring:message code="tab.AISystemFirstName"/><br />&nbsp;&nbsp; <spring:message code="tab.AISystemSecondName"/></span></li>
 			<!-- <li id="tab4" style="display:none;"><span onclick="menuClick('./image.htm');" class="tabMenu" style="padding-left:1px;"><span class="glyphicon glyphicon-facetime-video" style="margin-right:0.7em;"></span>모니터링</span></li> -->
 			<!-- <li id="tab4" style="display:none;"><span onclick="menuClick('./monitor.htm');" class="tabMenu" style="padding-left:1px;"><span class="glyphicon glyphicon-facetime-video" style="margin-right:0.7em;"></span>모니터링</span></li> -->
 				<!-- <ul id="log_ul">
 					<li><a href="#" class="tabMenu" onclick="menuClick('./eventStatusSetup.htm');">이벤트 현황</a></li>
 				</ul> -->
-			<li id="tab9" style="display:none;"><span onclick="openUl();" class="tabMenu"><span class="glyphicon glyphicon-cog" style="margin-right:0.7em;"></span>Setup</span>
+			<li id="tab9" style="display:none;"><span onclick="openUl();" class="tabMenu"><span class="glyphicon glyphicon-cog" style="margin-right:0.7em;"></span><spring:message code="tab.setup"/></span>
 				<ul id="setup_ul">
-					<li><a href="#" onclick="menuClick('./license.htm');">라이센스</a></li>
-					<li><a href="#" onclick="menuClick('./driveSize.htm');">저장공간</a></li>
-					<li><a href="#" onclick="menuClick('./oem.htm');">About</a></li>
-					<li><a href="#" onclick="menuClick('./urlSetup.htm');">url 설정</a></li>
+					<li><a href="#" onclick="menuClick('./license.htm');"><spring:message code="tab.setup.license"/></a></li>
+					<li><a href="#" onclick="menuClick('./driveSize.htm');"><spring:message code="tab.setup.storageSpace"/></a></li>
+					<li><a href="#" onclick="menuClick('./oem.htm');"><spring:message code="tab.setup.about"/></a></li>
+					<li><a href="#" onclick="menuClick('./urlSetup.htm');"><spring:message code="tab.setup.url"/></a></li>
 					<!-- <li><a href="#">History</a></li> -->
 					<!-- <li><a href="#">About</a></li> -->
 					<!-- <li><a href="#">Contact</a></li> -->
@@ -689,13 +690,13 @@ function networkTest() {
 				+
 				</a>
 				<ul class="dropdown-menu" role="menu">
-	                <li role="presentation"><a role="menuitem" tabindex="-1" href="#" onclick="popupMenu('./dashBoard.htm');">대시보드</a></li>
-	                <li role="presentation"><a role="menuitem" tabindex="-1" href="#" onclick="popupMenu('./userList.htm');">사용자 관리</a></li>
-	                <li role="presentation"><a role="menuitem" tabindex="-1" href="#" onclick="popupMenu('./device.htm');">장치관리</a></li>
+	                <li role="presentation"><a role="menuitem" tabindex="-1" href="#" onclick="popupMenu('./dashBoard.htm');"><spring:message code="tab.dashboard"/></a></li>
+	                <li role="presentation"><a role="menuitem" tabindex="-1" href="#" onclick="popupMenu('./userList.htm');"><spring:message code="tab.user"/></a></li>
+	                <li role="presentation"><a role="menuitem" tabindex="-1" href="#" onclick="popupMenu('./device.htm');"><spring:message code="tab.device"/></a></li>
 	                <!-- <li role="presentation"><a role="menuitem" tabindex="-1" href="#" onclick="popupMenu('./image.htm');">모니터링</a></li> -->
-	                <li role="presentation"><a role="menuitem" tabindex="-1" href="#" onclick="popupMenu('./album.htm');">갤러리</a></li>
-	                <li role="presentation"><a role="menuitem" tabindex="-1" href="#" onclick="popupMenu('./log.htm');">로그</a></li>
-	                <li role="presentation"><a role="menuitem" tabindex="-1" href="#" onclick="popupMenu('./eventActionList.htm');">이벤트 액션 설정</a></li>
+	                <li role="presentation"><a role="menuitem" tabindex="-1" href="#" onclick="popupMenu('./album.htm');"><spring:message code="tab.gallery"/></a></li>
+	                <li role="presentation"><a role="menuitem" tabindex="-1" href="#" onclick="popupMenu('./log.htm');"><spring:message code="tab.log" /></a></li>
+	                <li role="presentation"><a role="menuitem" tabindex="-1" href="#" onclick="popupMenu('./eventActionList.htm');"><spring:message code="tab.device.actionSetup" /></a></li>
 				</ul>
 			</li>
 			<!-- <li id="tab9" style="display:none;"><span onclick="updateData();" class="tabMenu"><span class="glyphicon glyphicon-list-alt" style="margin-right:0.7em;"></span>업데이트 데이터</span></li> -->
