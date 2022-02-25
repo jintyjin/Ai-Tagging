@@ -250,14 +250,14 @@ $(document).ready(function () {
 		    			if (parseInt(j % 2) == 0) {
 			    			if (data[i].thumb_name.split(',')[j] != null && data[i].thumb_name.split(',')[j] != '') {
 	    	    				var thumb_name = data[i].thumb_name.split(',')[j];
-			    				appendStr += '<img loading="lazy" onError="this.src=' + "'" + thumb_name.replace('web_server', 'webserver') + "'" + '" src="' + thumb_name + '" width="133px" height="133px" alt="" style="margin-right:4px;">';
+			    				appendStr += '<img loading="lazy" onError="this.src=' + "'" + thumb_name.replace('webserver', 'web_server') + "'" + '" src="' + thumb_name + '" width="133px" height="133px" alt="" style="margin-right:4px;">';
 			    			} else {
 			    				appendStr += '<svg xmlns="http://www.w3.org/2000/svg" width="133px" height="133px" viewBox="0 0 160 160" style="margin-right:4px;"><rect width="160" height="160" fill="#EFF0F2" rx="2"/></g></svg>';
 			    			}
 		    			} else {
 			    			if (data[i].thumb_name.split(',')[j] != null && data[i].thumb_name.split(',')[j] != '') {
 	    	    				var thumb_name = data[i].thumb_name.split(',')[j];
-			    				appendStr += '<img loading="lazy" onError="this.src=' + "'" + thumb_name.replace('web_server', 'webserver') + "'" + '" src="' + thumb_name + '" width="133px" height="133px" alt="">';
+			    				appendStr += '<img loading="lazy" onError="this.src=' + "'" + thumb_name.replace('webserver', 'web_server') + "'" + '" src="' + thumb_name + '" width="133px" height="133px" alt="">';
 	    					} else {
 								appendStr += '<svg xmlns="http://www.w3.org/2000/svg" width="133px" height="133px" viewBox="0 0 160 160" style="float:right;"><rect width="160" height="160" fill="#EFF0F2" rx="2"/></g></svg>';
 	    					}
