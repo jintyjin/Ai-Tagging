@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -327,6 +328,38 @@ var eventArr = ['falldown', 'fire', 'flood', 'glove', 'invasion', 'leak', 'loite
 var week = new Array('일', '월', '화', '수', '목', '금', '토');
 var day2 = new Date();
 var year2 = day2.getFullYear();
+var lang = {
+	"ko" : {
+		fire : "화재",
+		falldown : "쓰러짐",
+		flood : "침수",
+		glove : "장갑미착용",
+		invasion : "침입",
+		leak : "누수",
+		loitering : "배회",
+		handaction : "수신호",
+		spin : "약품미투입",
+		cmtank : "약품탱크누액",
+		outtank : "옥외탱크누액",
+		overflow : "배출수월류"
+	},
+	
+	"en" : {
+		fire : "Fire",
+		falldown : "Falldown",
+		flood : "Flood",
+		glove : "Glove",
+		invasion : "Invasion",
+		leak : "Leak",
+		loitering : "Loitering",
+		handaction : "Handaction",
+		spin : "Spin",
+		cmtank : "Cmtank",
+		outtank : "Outtank",
+		overflow : "Overflow"
+	}
+}
+
 $(document).ready(function () {
 	function getStartFormatDate(date){
 		date.setDate(date.getDate() - 7);
@@ -365,44 +398,7 @@ $(document).ready(function () {
 	$('.event').mouseover(function(e) {
 		var tag = $(this).attr('id');
 
-		if (tag == 'fire') {
-			tag = '화재';
-		}
-		if (tag == 'falldown') {
-			tag = '쓰러짐';
-		}
-		if (tag == 'flood') {
-			tag = '침수';
-		}
-		if (tag == 'glove') {
-			tag = '장갑미착용';
-		}
-		if (tag == 'invasion') {
-			tag = '침입';
-		}
-		if (tag == 'leak') {
-			tag = '누수';
-		}
-		if (tag == 'loitering') {
-			tag = '배회';
-		}
-		if (tag == 'handaction') {
-			tag = '수신호';
-		}
-		if (tag == 'spin') {
-			tag = '약품미투입';
-		}
-		if (tag == 'cmtank') {
-			tag = '약품탱크누액';
-		}
-		if (tag == 'outtank') {
-			tag = '옥외탱크누액';
-		}
-		if (tag == 'overflow') {
-			tag = '배출수월류';
-		}
-		
-		$(this).append('<div id="tooltip"><div class="tipBody">' + tag + '</div></div>');
+		$(this).append('<div id="tooltip"><div class="tipBody">' + getTranslate(tag) + '</div></div>');
 	}).mousemove(function(e) {
 		$("#tooltip").css('top', e.pageY + 10);
 		$("#tooltip").css('left', e.pageX + 10);
@@ -492,135 +488,14 @@ function changeBottomCount(countArr) {
 	
 	$('#centerTable').append(str);
 	
-	$('#dateTotal').text(countArr.length + '일');
+	$('#dateTotal').text(countArr.length + ' <spring:message code="dashboard.day" />');
 	$('#total12').text(totalCount);
 }
-function showInfo(idx) {
-	var jsonUrl = "/showRightInfo";
-	
-	var jsonData = idx;
-
-	$('#imageDiv img').remove();
-	
-	$.ajax({
-		type : "POST",                        	 	     
-		url : jsonUrl,                      		
-		dataType : "json",                        	  
-		contentType : "application/json; charset=UTF-8",   
-		async:false,
-		data : jsonData,             		   
-	    success: function(data) {
-			var tags = data.tags.substring(1, data.tags.length - 1);
-
-			var tagInfo = '';
-
-			for (var i = 0; i < tags.split(', ').length; i++) {
-				var spTag = tags.split(', ')[i];
-				
-				if (spTag.toLowerCase() == 'KWATER_Fire_Detection'.toLowerCase()) {
-					tagInfo += '화재';
-				}
-				if (spTag.toLowerCase() == 'KWATER_Falldown_Detection'.toLowerCase()) {
-					tagInfo += '쓰러짐';
-				}
-				if (spTag.toLowerCase() == 'KWATER_Flood_Detection'.toLowerCase()) {
-					tagInfo += '침수';
-				}
-				if (spTag.toLowerCase() == 'KWATER_Glove_Detection'.toLowerCase()) {
-					tagInfo += '장갑미착용';
-				}
-				if (spTag.toLowerCase() == 'KWATER_Invasion_Detection'.toLowerCase()) {
-					tagInfo += '침입';
-				}
-				if (spTag.toLowerCase() == 'KWATER_Leak_Detection'.toLowerCase()) {
-					tagInfo += '누수';
-				}
-				if (spTag.toLowerCase() == 'KWATER_Loitering_Detection'.toLowerCase()) {
-					tagInfo += '배회';
-				}
-				if (spTag.toLowerCase() == 'KWATER_HandAction_Detection'.toLowerCase()) {
-					tagInfo += '수신호';
-				}
-				if (spTag.toLowerCase() == 'KWATER_Spin_Detection'.toLowerCase()) {
-					tagInfo += '약품미투입';
-				}
-				
-				if (i < tags.split(', ').length - 1) {
-					tagInfo += ', ';
-				}
-			}
-	    	$('.IPDiv2').text(data.dev_title);
-	    	var day2 = new Date(data.event_time);
-	    	var year2 = day2.getFullYear();
-	    	var month2 = day2.getMonth() + 1;
-	    	var date2 = day2.getDate();
-	    	var hour2 = day2.getHours();
-	    	var min2 = day2.getMinutes();
-	    	var second2 = day2.getSeconds();
-	    	
-	    	if (month2 < 10) {
-	    		month2 = '0' + month2;
-	    	} 
-	    	if (date2 < 10) {
-	    		date2 = '0' + date2;
-	    	}
-    	
-	    	if (hour2 < 10) {
-	    		hour2 = '0' + hour2;
-	    	} 
-	    	
-	    	if (min2 < 10) {
-	    		min2 = '0' + min2;
-	    	} 
-	    	
-	    	if (second2 < 10) {
-	    		second2 = '0' + second2;
-	    	} 
-	    	
-	    	var dateInfo2 = year2 + "년 " + month2 + '월 ' + date2 + "일 " + week[day2.getDay()] + "요일";
-			var timeInfo2= hour2 + "시 " + min2 + "분 " + second2 + "초";
-			$('.dateDiv2').text(dateInfo2);
-			$('.timeSpan2').text(timeInfo2);
-			
-			var tag = data.event_name;
-
-    		if (tag == 'KWATER_Falldown_Detection') {
-    			tag = '화재';
-    		}
-    		if (tag == 'KWATER_Falldown_Detection') {
-    			tag = '쓰러짐';
-    		}
-    		if (tag == 'KWATER_Flood_Detection') {
-    			tag = '침수';
-    		}
-    		if (tag == 'KWATER_Glove_Detection') {
-    			tag = '장갑미착용';
-    		}
-    		if (tag == 'KWATER_Invasion_Detection') {
-    			tag = '침입';
-    		}
-    		if (tag == 'KWATER_Leak_Detection') {
-    			tag = '누수';
-    		}
-    		if (tag == 'KWATER_Loitering_Detection') {
-    			tag = '배회';
-    		}
-    		if (tag == 'KWATER_HandAction_Detection') {
-    			tag = '수신호';
-    		}
-    		if (tag == 'KWATER_Spin_Detection') {
-    			tag = '약품미투입';
-    		}
-				
-	    	$('.tagDiv2').text(tagInfo);
-	    	var imgStr = '<img src="' + data.thumb_name + '" style="width:100%; height:100%;" />';
-	    	$('#imageDiv').append(imgStr);
-		},
-		error: function(errorThrown) {
-			alert(errorThrown.statusText);
-			alert(JSON.stringify(data));
-		}
-	});
+function getLanguage() {
+    return navigator.language || navigator.userLanguage;
+}
+function getTranslate(tag) {
+	return eval('lang.' + getLanguage().substring(0, 2) + '.' + tag);
 }
 var POPUP_MORE = 0;
 var popup_window = new Array();
@@ -751,20 +626,20 @@ function clearRightData() {
 		</div>
 		<div id="bottom">
 			<div id="left">
-				<div class="leftEvent">날짜</div>
-				<div class="leftEvent">쓰러짐</div>
-				<div class="leftEvent">화재</div>
-				<div class="leftEvent">침수</div>
-				<div class="leftEvent">장갑미착용</div>
-				<div class="leftEvent">침입</div>
-				<div class="leftEvent">누수</div>
-				<div class="leftEvent">배회</div>
-				<div class="leftEvent">수신호</div>
-				<div class="leftEvent">약품미투입</div>
-				<div class="leftEvent">약품탱크누액</div>
-				<div class="leftEvent">옥외탱크누액</div>
-				<div class="leftEvent">배출수월류</div>
-				<div class="leftEvent">총합</div>
+				<div class="leftEvent"><spring:message code="dashboard.date" /></div>
+				<div class="leftEvent"><spring:message code="event.kwater_falldown_detection" /></div>
+				<div class="leftEvent"><spring:message code="event.kwater_fire_detection" /></div>
+				<div class="leftEvent"><spring:message code="event.kwater_flood_detection" /></div>
+				<div class="leftEvent"><spring:message code="event.kwater_glove_detection" /></div>
+				<div class="leftEvent"><spring:message code="event.kwater_invasion_detection" /></div>
+				<div class="leftEvent"><spring:message code="event.kwater_leak_detection" /></div>
+				<div class="leftEvent"><spring:message code="event.kwater_loitering_detection" /></div>
+				<div class="leftEvent"><spring:message code="event.kwater_handaction_detection" /></div>
+				<div class="leftEvent"><spring:message code="event.kwater_spin_detection" /></div>
+				<div class="leftEvent"><spring:message code="event.kwater_cmtank_detection" /></div>
+				<div class="leftEvent"><spring:message code="event.kwater_outtank_detection" /></div>
+				<div class="leftEvent"><spring:message code="event.kwater_overflow_detection" /></div>
+				<div class="leftEvent"><spring:message code="dashboard.total" /></div>
 			</div>
 			<div id="center">
 				<div id="centerLeft">
