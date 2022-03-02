@@ -11,6 +11,7 @@
 <script src="./resources/js/bootstrap.min.js"></script>
 <script src="./resources/js/sockjs.min.js"></script> 
 <script src="./resources/js/stomp.min.js"></script>
+<script type="text/javascript" src="/resources/js/translate.js"></script>
 <style>
 .loading {
 	display:none;
@@ -263,45 +264,8 @@ $(document).ready(function () {
 	    					}
 		    			}
 		    		}
-		    		
-		    		if (category.toLowerCase() == 'KWATER_Fire_Detection'.toLowerCase()) {
-		    			category = '화재';
-		    		}
-		    		if (category.toLowerCase() == 'KWATER_Falldown_Detection'.toLowerCase()) {
-		    			category = '쓰러짐';
-		    		}
-		    		if (category.toLowerCase() == 'KWATER_Flood_Detection'.toLowerCase()) {
-		    			category = '침수';
-		    		}
-		    		if (category.toLowerCase() == 'KWATER_Glove_Detection'.toLowerCase()) {
-		    			category = '장갑미착용';
-		    		}
-		    		if (category.toLowerCase() == 'KWATER_Invasion_Detection'.toLowerCase()) {
-		    			category = '침입';
-		    		}
-		    		if (category.toLowerCase() == 'KWATER_Leak_Detection'.toLowerCase()) {
-		    			category = '누수';
-		    		}
-		    		if (category.toLowerCase() == 'KWATER_Loitering_Detection'.toLowerCase()) {
-		    			category = '배회';
-		    		}
-		    		if (category.toLowerCase() == 'KWATER_HandAction_Detection'.toLowerCase()) {
-		    			category = '수신호';
-		    		}
-		    		if (category.toLowerCase() == 'KWATER_Spin_Detection'.toLowerCase()) {
-		    			category = '약품미투입';
-		    		}
-					if (category.toLowerCase() == 'KWATER_Cmtank_Leak'.toLowerCase()) {
-						category = '약품탱크누액';
-					}
-					if (category.toLowerCase() == 'KWATER_Outtank_Leak'.toLowerCase()) {
-						category = '옥외탱크누액';
-					}
-					if (category.toLowerCase() == 'KWATER_Overflow'.toLowerCase()) {
-						category = '배출수월류';
-					}
 
-		    		appendStr += '</div></div><div style="height:44px;"><h2 class="h2">' + category + '</h2></div></div></a>';
+		    		appendStr += '</div></div><div style="height:44px;"><h2 class="h2">' + getTranslate(category.toLowerCase().split('_')[1]) + '</h2></div></div></a>';
 		    	}
 	    	}
     		$(appendStr).appendTo('.allImage');

@@ -31,6 +31,7 @@
 <script type="text/javascript" src="/resources/js/jqwidgets/jqxgrid.filter.js"></script>
 <script type="text/javascript" src="/resources/js/jqwidgets/jqxgrid.edit.js"></script>
 <script type="text/javascript" src="/resources/js/jqwidgets/jqxwindow.js"></script>
+<script type="text/javascript" src="/resources/js/translate.js"></script>
 <style>
 html, body {
 	background-color: #252525;
@@ -328,38 +329,6 @@ var eventArr = ['falldown', 'fire', 'flood', 'glove', 'invasion', 'leak', 'loite
 var week = new Array('일', '월', '화', '수', '목', '금', '토');
 var day2 = new Date();
 var year2 = day2.getFullYear();
-var lang = {
-	"ko" : {
-		fire : "화재",
-		falldown : "쓰러짐",
-		flood : "침수",
-		glove : "장갑미착용",
-		invasion : "침입",
-		leak : "누수",
-		loitering : "배회",
-		handaction : "수신호",
-		spin : "약품미투입",
-		cmtank : "약품탱크누액",
-		outtank : "옥외탱크누액",
-		overflow : "배출수월류"
-	},
-	
-	"en" : {
-		fire : "Fire",
-		falldown : "Falldown",
-		flood : "Flood",
-		glove : "Glove",
-		invasion : "Invasion",
-		leak : "Leak",
-		loitering : "Loitering",
-		handaction : "Handaction",
-		spin : "Spin",
-		cmtank : "Cmtank",
-		outtank : "Outtank",
-		overflow : "Overflow"
-	}
-}
-
 $(document).ready(function () {
 	function getStartFormatDate(date){
 		date.setDate(date.getDate() - 7);
@@ -490,12 +459,6 @@ function changeBottomCount(countArr) {
 	
 	$('#dateTotal').text(countArr.length + ' <spring:message code="dashboard.day" />');
 	$('#total12').text(totalCount);
-}
-function getLanguage() {
-    return navigator.language || navigator.userLanguage;
-}
-function getTranslate(tag) {
-	return eval('lang.' + getLanguage().substring(0, 2) + '.' + tag);
 }
 var POPUP_MORE = 0;
 var popup_window = new Array();
