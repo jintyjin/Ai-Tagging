@@ -55,7 +55,7 @@ var lang = {
 		// Date
 		year : "-",
 		month : "-",
-		day : "",
+		day : " ",
 		hour : ":",
 		minute : ":",
 		second : "",

@@ -1245,7 +1245,6 @@ $(document).ready(function () {
     });
     var isDownload = true;
 	$('.downloadButton').click(function() {
-		alert(isPopUp);
 		if (isPopUp) {
 			if (isDownload) {
 				isDownload = false;

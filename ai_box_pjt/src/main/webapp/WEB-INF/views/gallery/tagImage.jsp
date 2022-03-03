@@ -11,6 +11,7 @@
 <script src="./resources/js/bootstrap.min.js"></script>
 <script src="./resources/js/imagesloaded.pkgd.min.js"></script>
 <script src="./resources/js/imagesloaded.pkgd.js"></script>
+<script type="text/javascript" src="/resources/js/translate.js"></script>
 <style>
 * {
 	-webkit-tap-highlight-color:transparent;
@@ -851,7 +852,7 @@ var ModalInfoVal;
 var dataArr = [];
 var length;
 var dataLength;
-var week = new Array('일', '월', '화', '수', '목', '금', '토');
+var week = new Array(getTranslate('sunday'), getTranslate('monday'), getTranslate('tuesday'), getTranslate('wednesday'), getTranslate('thursday'), getTranslate('friday'), getTranslate('saturday'));
 var day2 = new Date();
 var year2 = day2.getFullYear();
 var isDateStr = "";
@@ -904,19 +905,19 @@ $(document).ready(function () {
 			    		date = '0' + date;
 			    	}
 
-					var dateStr = "'" + year + '-' + month + '-' + date + "일'";
+					var dateStr = "'" + year + '-' + month + '-' + date + getTranslate('day') + "'";
 					
 					if (dateStr != isDateStr) {
 	 		    		var yearStr = "";
 	 		    		if (year < year2) {
-	 		    			yearStr = year;
+	 		    			yearStr = year + getTranslate('year');
 	 		    		}
 	 		    		if (dateStr != "") {
 	 		    			appendStr +='</div></div>';
 	 		    		}
 	 		    		
-	 		    		appendStr += '<div class="images loading ' + year + '-' + month + '-' + date + '일' + '" onmouseover="showTitleV(' + dateStr + ')" onmouseout="hideTitleV(' + dateStr + ')"><div class="imagesTitle"><svg class="hideTitleChk" width="24px" height="24px" onclick="clickTitleV(' + dateStr + ');"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"></path></svg><div style="height:44px;"><h2 class="titleH2">' + yearStr + month + '월 ' + date + '일 ' + '(' + week[day.getDay()] + ')' + '</h2></div></div><div class="imageInA" id="'+ year + '-' + month + '-' + date + '일' + '">';
-			    		isDateStr = "'" + year + '-' + month + '-' + date + "일'";
+	 		    		appendStr += '<div class="images loading ' + year + '-' + month + '-' + date + getTranslate('day') + '" onmouseover="showTitleV(' + dateStr + ')" onmouseout="hideTitleV(' + dateStr + ')"><div class="imagesTitle"><svg class="hideTitleChk" width="24px" height="24px" onclick="clickTitleV(' + dateStr + ');"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"></path></svg><div style="height:44px;"><h2 class="titleH2">' + yearStr + month + getTranslate('month') + date + getTranslate('day') + ' ' + '(' + week[day.getDay()].substring(0, 3) + ')' + '</h2></div></div><div class="imageInA" id="'+ year + '-' + month + '-' + date + getTranslate('day') + '">';
+			    		isDateStr = dateStr;
 			    	}
 
 					var count = json.count;
@@ -928,7 +929,7 @@ $(document).ready(function () {
 					
 					var idx2 = "'" + idx + "'";
 					
-			    	appendStr += '<div class="monitoring_tag ' + idx + '" id="' + count + '" onmouseover="showV(' + idx2 + ')" onmouseout="hideV(' + idx2 + ');"><div class="monitoring_tag_div"><div class="bgDivBefore" ><div class="icon"><svg class="hideChkV" width="24px" height="24px" id="' + idx + 'V" onclick="clickV(' + idx2 + ', ' + "'" + year + '-' + month + '-' + date + '일' + "'" + ');"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"></path></svg><svg width="24px" height="24px" class="hideChk" id="' + idx + 'Circle"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"></path></svg><div style="float:right;"><a style="color:white; text-shadow:1px -1px 2px black; cursor:pointer;" onclick="popupMenu(' + idx2 + ', ' + "'" + "${event_name}" + "'" + ');">' + countstr + '</a></div></div><a class="imageA" id="' + count + '" onclick="clickModal(' + idx2 + ')"><img loading="lazy" class="beforeChkImage" src="' + json.thumb_name + '" alt="" onError="this.src=' + "'" + json.thumb_name.replace('webserver', 'web_server') + "'" + '"/></a></div></div></div>';
+			    	appendStr += '<div class="monitoring_tag ' + idx + '" id="' + count + '" onmouseover="showV(' + idx2 + ')" onmouseout="hideV(' + idx2 + ');"><div class="monitoring_tag_div"><div class="bgDivBefore" ><div class="icon"><svg class="hideChkV" width="24px" height="24px" id="' + idx + 'V" onclick="clickV(' + idx2 + ', ' + "'" + year + '-' + month + '-' + date + getTranslate('day') + "'" + ');"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"></path></svg><svg width="24px" height="24px" class="hideChk" id="' + idx + 'Circle"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"></path></svg><div style="float:right;"><a style="color:white; text-shadow:1px -1px 2px black; cursor:pointer;" onclick="popupMenu(' + idx2 + ', ' + "'" + "${event_name}" + "'" + ');">' + countstr + '</a></div></div><a class="imageA" id="' + count + '" onclick="clickModal(' + idx2 + ')"><img loading="lazy" class="beforeChkImage" src="' + json.thumb_name + '" alt="" onError="this.src=' + "'" + json.thumb_name.replace('webserver', 'web_server') + "'" + '"/></a></div></div></div>';
 	  	    	}
 
 	  	    	$("#allImage").append(appendStr + '</div></div>');
@@ -1078,42 +1079,7 @@ function showV(idx) {
 			for (var i = 0; i < tags.split(', ').length; i++) {
 				var spTag = tags.split(', ')[i];
 				
-				if (spTag.toLowerCase() == 'KWATER_Fire_Detection'.toLowerCase()) {
-					tagInfo += '화재';
-				}
-				if (spTag.toLowerCase() == 'KWATER_Falldown_Detection'.toLowerCase()) {
-					tagInfo += '쓰러짐';
-				}
-				if (spTag.toLowerCase() == 'KWATER_Flood_Detection'.toLowerCase()) {
-					tagInfo += '침수';
-				}
-				if (spTag.toLowerCase() == 'KWATER_Glove_Detection'.toLowerCase()) {
-					tagInfo += '장갑미착용';
-				}
-				if (spTag.toLowerCase() == 'KWATER_Invasion_Detection'.toLowerCase()) {
-					tagInfo += '침입';
-				}
-				if (spTag.toLowerCase() == 'KWATER_Leak_Detection'.toLowerCase()) {
-					tagInfo += '누수';
-				}
-				if (spTag.toLowerCase() == 'KWATER_Loitering_Detection'.toLowerCase()) {
-					tagInfo += '배회';
-				}
-				if (spTag.toLowerCase() == 'KWATER_HandAction_Detection'.toLowerCase()) {
-					tagInfo += '수신호';
-				}
-				if (spTag.toLowerCase() == 'KWATER_Spin_Detection'.toLowerCase()) {
-					tagInfo += '약품미투입';
-				}
-				if (spTag.toLowerCase() == 'KWATER_Cmtank_Leak'.toLowerCase()) {
-					tagInfo = '약품탱크누액';
-				}
-				if (spTag.toLowerCase() == 'KWATER_Outtank_Leak'.toLowerCase()) {
-					tagInfo = '옥외탱크누액';
-				}
-				if (spTag.toLowerCase() == 'KWATER_Overflow'.toLowerCase()) {
-					tagInfo = '배출수월류';
-				}
+				tagInfo += getTranslate(spTag.toLowerCase().split('_')[1]);
 				
 				if (i < tags.split(', ').length - 1) {
 					tagInfo += ', ';
@@ -1147,41 +1113,11 @@ function showV(idx) {
 	    		second2 = '0' + second2;
 	    	} 
 	    	
-	    	var dateInfo2 = year2 + "년 " + month2 + '월 ' + date2 + "일 " + week[day2.getDay()] + "요일";
-			var timeInfo2= hour2 + "시 " + min2 + "분 " + second2 + "초";
+	    	var dateInfo2 = year2 + getTranslate('year') + month2 + getTranslate('month') + date2 + getTranslate('day') + week[day2.getDay()];
+			var timeInfo2= hour2 + getTranslate('hour') + min2 + getTranslate('minute') + second2 + getTranslate('second');
 			$('.dateDiv2').text(dateInfo2);
 			$('.timeSpan2').text(timeInfo2);
 			
-			var tag = data.event_name;
-
-    		if (tag == 'KWATER_Falldown_Detection') {
-    			tag = '화재';
-    		}
-    		if (tag == 'KWATER_Falldown_Detection') {
-    			tag = '쓰러짐';
-    		}
-    		if (tag == 'KWATER_Flood_Detection') {
-    			tag = '침수';
-    		}
-    		if (tag == 'KWATER_Glove_Detection') {
-    			tag = '장갑미착용';
-    		}
-    		if (tag == 'KWATER_Invasion_Detection') {
-    			tag = '침입';
-    		}
-    		if (tag == 'KWATER_Leak_Detection') {
-    			tag = '누수';
-    		}
-    		if (tag == 'KWATER_Loitering_Detection') {
-    			tag = '배회';
-    		}
-    		if (tag == 'KWATER_HandAction_Detection') {
-    			tag = '수신호';
-    		}
-    		if (tag == 'KWATER_Spin_Detection') {
-    			tag = '약품미투입';
-    		}
-				
 	    	$('.tagDiv2').text(tagInfo);
 	        $('#right_info').css({"transform": "translate3d(0, 0, 0)"});
 		},
@@ -1314,8 +1250,8 @@ function showDashInfo(i, event_time, option) {
 	
 	if (option == 'first') {
 		if (i == 0) {
-			appendStr = "<ul id='allUl'><li class='date_menu'><a>" + yearStr + "</a><ul class='hide' id='" + yearStr + "'><li class='month_menu' value='" + yMonthStr + "'><a>" + monthStr + "월" + "</a><ul class='hide' id='"
-			+ yMonthStr + "'><li id='" + dateStr + "' class='day_menu minus' value='" + dateStr + "'><a onclick='showDateImage(" + '"' + dateStr + '일' + '"' + ");'>" + dayStr + "일" + "</a></li></ul></li></ul></li></ul>";
+			appendStr = "<ul id='allUl'><li class='date_menu'><a>" + yearStr + "</a><ul class='hide' id='" + yearStr + "'><li class='month_menu' value='" + yMonthStr + "'><a>" + monthStr + getTranslate('month') + "</a><ul class='hide' id='"
+			+ yMonthStr + "'><li id='" + dateStr + "' class='day_menu minus' value='" + dateStr + "'><a onclick='showDateImage(" + '"' + dateStr + getTranslate('day') + '"' + ");'>" + dayStr + getTranslate('day') + "</a></li></ul></li></ul></li></ul>";
 			// <ul class='hide' id='"	+ dateStr + "' ><li class='time_menu' id='" + allDateStr + "' value='" + allDateStr + "'><a onclick='showDateImage(" + '"' + allDateStr + '"' + ");'>" + allDateStr.substring(allDateStr.lastIndexOf(' ') + 1) + "시" + "</a></li></ul>
 			
 			$("#search_date").append(appendStr);
@@ -1331,13 +1267,13 @@ function showDashInfo(i, event_time, option) {
 				var tmpDate = event_time.substring(0, event_time.lastIndexOf(' '));
 				yMonthStr = event_time.substring(0, event_time.lastIndexOf(' ')).substring(0, tmpDate.lastIndexOf('-'));
 				monthStr = yMonthStr.substring(yMonthStr.indexOf('-') + 1);
-				appendStr = "<li class='month_menu' value='" + yMonthStr + "'><a>" + monthStr + "월" + "</a><ul class='hide' id='" + yMonthStr + "'></ul></li>";
+				appendStr = "<li class='month_menu' value='" + yMonthStr + "'><a>" + monthStr + getTranslate('month') + "</a><ul class='hide' id='" + yMonthStr + "'></ul></li>";
 				$("#" + yearStr).append(appendStr);
 			} 
 			if (document.getElementById(dateStr) == null) {
 				dateStr = event_time.substring(0, event_time.lastIndexOf(' '));
 				dayStr = dateStr.substring(dateStr.lastIndexOf('-') + 1);
-				appendStr = "<li id='" + dateStr + "' class='day_menu minus' value='" + dateStr + "'><a onclick='showDateImage(" + '"' + dateStr + '일' + '"' + ");'>" + dayStr + "일" + "</a></li>";
+				appendStr = "<li id='" + dateStr + "' class='day_menu minus' value='" + dateStr + "'><a onclick='showDateImage(" + '"' + dateStr + getTranslate('day') + '"' + ");'>" + dayStr + getTranslate('day') + "</a></li>";
 				// <ul class='hide' id='" + dateStr + "'></ul>
 				$("#" + yMonthStr).append(appendStr);
 			}
@@ -1354,13 +1290,13 @@ function showDashInfo(i, event_time, option) {
 			var tmpDate = event_time.substring(0, event_time.lastIndexOf(' '));
 			yMonthStr = event_time.substring(0, event_time.lastIndexOf(' ')).substring(0, tmpDate.lastIndexOf('-'));
 			monthStr = yMonthStr.substring(yMonthStr.indexOf('-') + 1);
-			appendStr = "<li class='month_menu' value='" + yMonthStr + "'><a>" + monthStr + "월" + "</a><ul class='hide' id='" + yMonthStr + "'></ul></li>";
+			appendStr = "<li class='month_menu' value='" + yMonthStr + "'><a>" + monthStr + getTranslate('month') + "</a><ul class='hide' id='" + yMonthStr + "'></ul></li>";
 			$("#" + yearStr).append(appendStr);
 		} 
 		if (dateStr != event_time.substring(0, event_time.lastIndexOf(' '))) {
 			dateStr = event_time.substring(0, event_time.lastIndexOf(' '));
 			dayStr = dateStr.substring(dateStr.lastIndexOf('-') + 1);
-			appendStr = "<li class='day_menu' value='" + dateStr + "'><a onclick='showDateImage(" + '"' + dateStr + '일' + '"' + ");'>" + dayStr + "일" + "</a></li>";
+			appendStr = "<li class='day_menu' value='" + dateStr + "'><a onclick='showDateImage(" + '"' + dateStr + getTranslate('day') + '"' + ");'>" + dayStr + getTranslate('day') + "</a></li>";
 			// <ul class='hide' id='" + dateStr + "'></ul>
 			$("#" + yMonthStr).append(appendStr);
 		}

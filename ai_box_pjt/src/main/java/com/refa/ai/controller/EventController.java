@@ -4305,16 +4305,15 @@ public class EventController {
 		int count = 0;
 		
 		for (Map i : imageList) {
-			if (i.get("image_name").toString().indexOf("web_server") > 0) {
-				files.add(part_drive_name + ":" + i.get("image_name").toString());
-//				i.put("image_name", part_drive_name + ":" + i.get("image_name").toString());
-			} else {
+			if (new File(master_drive_name + ":" + i.get("image_name").toString().replace("webserver", "web_server")).exists()) {
 				files.add(master_drive_name + ":" + i.get("image_name").toString().replace("webserver", "web_server"));
-//				i.put("image_name", master_drive_name + ":" + i.get("image_name").toString());
+				file_size += FileUtils.sizeOf(new File(master_drive_name + ":" + i.get("image_name").toString().replace("webserver", "web_server")));
+				count++;
+				continue;
 			}
-			
-			if (new File(i.get("image_name").toString()).exists()) {
-				file_size += FileUtils.sizeOf(new File(i.get("image_name").toString()));
+			if (new File(part_drive_name + ":" + i.get("image_name").toString().replace("webserver", "web_server")).exists()) {
+				files.add(part_drive_name + ":" + i.get("image_name").toString().replace("webserver", "web_server"));
+				file_size += FileUtils.sizeOf(new File(part_drive_name + ":" + i.get("image_name").toString().replace("webserver", "web_server")));
 				count++;
 			}
 		}
