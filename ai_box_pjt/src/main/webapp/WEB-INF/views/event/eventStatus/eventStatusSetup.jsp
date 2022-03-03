@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -35,6 +36,7 @@
 <script type="text/javascript" src="/resources/js/jqwidgets/jqxexport.js"></script> 
 <script src="./resources/js/sockjs.min.js"></script> 
 <script src="./resources/js/stomp.min.js"></script>
+<script type="text/javascript" src="/resources/js/translate.js"></script>
 <style>
 body {
 	background-color: #252525;
@@ -104,48 +106,8 @@ $(document).ready(function () {
 		contentType : "application/json; charset=UTF-8",         
 	    success: function(data) {
 	    	for (var i = 0; i < data.length; i++) {
-	    		var event_name = data[i].model_name;
-	    		console.log(event_name);
-	    		var action = '';
-
-				if (event_name.toLowerCase() == 'KWATER_Fire_Detection'.toLowerCase()) {
-					action = '화재';
-				}
-				if (event_name.toLowerCase() == 'KWATER_Falldown_Detection'.toLowerCase()) {
-					action = '쓰러짐';
-				}
-				if (event_name.toLowerCase() == 'KWATER_Flood_Detection'.toLowerCase()) {
-					action = '침수';
-				}
-				if (event_name.toLowerCase() == 'KWATER_Glove_Detection'.toLowerCase()) {
-					action = '장갑미착용';
-				}
-				if (event_name.toLowerCase() == 'KWATER_Invasion_Detection'.toLowerCase()) {
-					action = '침입';
-				}
-				if (event_name.toLowerCase() == 'KWATER_Leak_Detection'.toLowerCase()) {
-					action = '누수';
-				}
-				if (event_name.toLowerCase() == 'KWATER_Loitering_Detection'.toLowerCase()) {
-					action = '배회';
-				}
-				if (event_name.toLowerCase() == 'KWATER_HandAction_Detection'.toLowerCase()) {
-					action = '수신호';
-				}
-				if (event_name.toLowerCase() == 'KWATER_Spin_Detection'.toLowerCase()) {
-					action = '약품미투입';
-				}
-				if (event_name.toLowerCase() == 'kwater_cmtank_leak'.toLowerCase()) {
-					action = '약품탱크누액';
-				}
-				if (event_name.toLowerCase() == 'kwater_outtank_leak'.toLowerCase()) {
-					action = '옥외탱크누액';
-				}
-				if (event_name.toLowerCase() == 'kwater_overflow'.toLowerCase()) {
-					action = '배출수월류';
-				}
-				
-				data[i].action = action;
+				data[i].action_source = getTranslate(data[i].action_source);
+				data[i].action = getTranslate(data[i].model_name.toLowerCase().split('_')[1]);
 	    	}
 	    	
 			var source = {
@@ -185,13 +147,13 @@ $(document).ready(function () {
                 autoshowfiltericon: true,
 				editable: true,
 				columns: [
-					{ text: '이벤트 소스', datafield: 'action_source', width: '15%', editable: false },
-					{ text: '장치 이름', datafield: 'dev_title', width: '15%', editable: false },
-					{ text: 'IP/DDNS', datafield: 'dev_ip', width: '8%', editable: false, hidden:true },
-					{ text: '이벤트', datafield: 'model_name', width: '18%', editable: false, hidden:true },
-					{ text: '이벤트', datafield: 'action', width: '16%', editable: false },
-					{ text: '동작', datafield: 'event_action', width: '10%', editable: false },
-					{ text: '발생 시간', datafield: 'event_time', width: '28%', editable: false },
+					{ text: getTranslate('event_source'), datafield: 'action_source', width: '15%', editable: false },
+					{ text: getTranslate('device_title'), datafield: 'dev_title', width: '15%', editable: false },
+					{ text: getTranslate('device_ip'), datafield: 'dev_ip', width: '8%', editable: false, hidden:true },
+					{ text: getTranslate('event_name'), datafield: 'model_name', width: '18%', editable: false, hidden:true },
+					{ text: getTranslate('event_name'), datafield: 'action', width: '16%', editable: false },
+					{ text: getTranslate('action'), datafield: 'event_action', width: '10%', editable: false },
+					{ text: getTranslate('event_time'), datafield: 'event_time', width: '28%', editable: false },
 					{ datafield: 'dev_ch', editable: false, hidden:true },
 					{ datafield: 'dev_id', editable: false, hidden:true },
 					{ datafield: 'dev_pwd', editable: false, hidden:true },
@@ -202,13 +164,13 @@ $(document).ready(function () {
 					{ datafield: 'dev_pwd', editable: false, hidden:true },
 					{ datafield: 'dev_port', editable: false, hidden:true },
 					{ datafield: 'dev_web_port', editable: false, hidden:true }, */
-					{ text: '실행', columntype: 'button', align: 'center', width: '8%', editable: false, sortable: false, filterable: false, cellsrenderer: function (row) {
+					{ text: getTranslate('run'), columntype: 'button', align: 'center', width: '8%', editable: false, sortable: false, filterable: false, cellsrenderer: function (row) {
 						var rowData = $('#grid').jqxGrid('getrowdata', row);
 						
-						var word = "무시";
+						var word = getTranslate('reject');
 						
 						if (rowData.event_action == '프리셋') {
-							word = "이동";
+							word = getTranslate('move');
 						}
 						
 						return word;
@@ -249,8 +211,8 @@ $(document).ready(function () {
 							}
 						}
 					}},
-					{ text: '취소', columntype: 'button', align: 'center', width: '8%', editable: false, sortable: false, filterable: false, cellsrenderer: function () {
-						return '삭제';
+					{ text: getTranslate('cancel'), columntype: 'button', align: 'center', width: '8%', editable: false, sortable: false, filterable: false, cellsrenderer: function () {
+						return getTranslate('delete_data');
 					},
 					buttonclick: function (row) {
 						var rowData = $('#grid').jqxGrid('getrowdata', row);
@@ -288,6 +250,7 @@ $(document).ready(function () {
 	stompClient.connect({}, function (frame) {
 		stompClient.subscribe('/receiveEventStatus', function (message) {
 			var obj = JSON.parse(message.body);
+			obj.action_source = getTranslate(obj.action_source);
 			var action_source = obj.action_source;
 			var dev_ch = obj.dev_ch;
 			var model_name = obj.model_name;
@@ -303,45 +266,7 @@ $(document).ready(function () {
 					}
 				}
 			} else {
-	    		var action = '';
-	    		var event_name = obj.model_name;
-
-				if (event_name.toLowerCase() == 'KWATER_Fire_Detection'.toLowerCase()) {
-					action = '화재';
-				}
-				if (event_name.toLowerCase() == 'KWATER_Falldown_Detection'.toLowerCase()) {
-					action = '쓰러짐';
-				}
-				if (event_name.toLowerCase() == 'KWATER_Flood_Detection'.toLowerCase()) {
-					action = '침수';
-				}
-				if (event_name.toLowerCase() == 'KWATER_Glove_Detection'.toLowerCase()) {
-					action = '장갑미착용';
-				}
-				if (event_name.toLowerCase() == 'KWATER_Invasion_Detection'.toLowerCase()) {
-					action = '침입';
-				}
-				if (event_name.toLowerCase() == 'KWATER_Leak_Detection'.toLowerCase()) {
-					action = '누수';
-				}
-				if (event_name.toLowerCase() == 'KWATER_Loitering_Detection'.toLowerCase()) {
-					action = '배회';
-				}
-				if (event_name.toLowerCase() == 'KWATER_HandAction_Detection'.toLowerCase()) {
-					action = '수신호';
-				}
-				if (event_name.toLowerCase() == 'KWATER_Spin_Detection'.toLowerCase()) {
-					action = '약품미투입';
-				}
-				if (event_name.toLowerCase() == 'kwater_cmtank_leak'.toLowerCase()) {
-					action = '약품탱크누액';
-				}
-				if (event_name.toLowerCase() == 'kwater_outtank_leak'.toLowerCase()) {
-					action = '옥외탱크누액';
-				}
-				if (event_name.toLowerCase() == 'kwater_overflow'.toLowerCase()) {
-					action = '배출수월류';
-				}
+	    		var action = getTranslate(obj.model_name.toLowerCase().split('_')[1]);
 				
 				var row = { 
 							action_source: obj.action_source, 

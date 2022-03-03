@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -11,6 +12,7 @@
 <script src="./resources/js/bootstrap.min.js"></script>
 <script src="./resources/js/sockjs.min.js"></script> 
 <script src="./resources/js/stomp.min.js"></script>
+<script type="text/javascript" src="/resources/js/translate.js"></script>
 <style>
 button:focus {outline:0;}
 html {
@@ -488,20 +490,12 @@ $(document).ready(function () {
 
 	var tags = tags.substring(1, tags.length - 1);
 	
-	console.log(width);
-	console.log(height);
-	console.log(monitor_src);
-	console.log(event_time);
-	console.log(dev_title);
-	console.log(tags);
-	console.log(tags.split(', '));
-
 	realWidth = parseInt(width);
 	realHeight = parseInt(height);
 	imgSrc = monitor_src;
    	var day = new Date(event_time);
-	
-	var week = new Array('일', '월', '화', '수', '목', '금', '토');
+
+   	var week = new Array(getTranslate('sunday'), getTranslate('monday'), getTranslate('tuesday'), getTranslate('wednesday'), getTranslate('thursday'), getTranslate('friday'), getTranslate('saturday'));
    	var year = day.getFullYear();
    	var month = day.getMonth() + 1;
    	var date = day.getDate();
@@ -528,49 +522,13 @@ $(document).ready(function () {
    		second = '0' + second;
    	} 
    	
-   	dateInfo = year + "년 " + month + '월 ' + date + "일 " + week[day.getDay()] + "요일";
-	timeInfo = hour + "시 " + min + "분 " + second + "초";
-
+   	dateInfo = year + '-' + month + '-' + date + getTranslate('day') + week[day.getDay()];
+	timeInfo = hour + getTranslate('hour') + min + getTranslate('minute') + second + getTranslate('second');
 	for (var i = 0; i < tags.split(', ').length; i++) {
 		var spTag = tags.split(', ')[i];
 		
-		if (spTag.toLowerCase() == 'KWATER_Fire_Detection'.toLowerCase()) {
-			tagInfo += '화재';
-		}
-		if (spTag.toLowerCase() == 'KWATER_Falldown_Detection'.toLowerCase()) {
-			tagInfo += '쓰러짐';
-		}
-		if (spTag.toLowerCase() == 'KWATER_Flood_Detection'.toLowerCase()) {
-			tagInfo += '침수';
-		}
-		if (spTag.toLowerCase() == 'KWATER_Glove_Detection'.toLowerCase()) {
-			tagInfo += '장갑미착용';
-		}
-		if (spTag.toLowerCase() == 'KWATER_Invasion_Detection'.toLowerCase()) {
-			tagInfo += '침입';
-		}
-		if (spTag.toLowerCase() == 'KWATER_Leak_Detection'.toLowerCase()) {
-			tagInfo += '누수';
-		}
-		if (spTag.toLowerCase() == 'KWATER_Loitering_Detection'.toLowerCase()) {
-			tagInfo += '배회';
-		}
-		if (spTag.toLowerCase() == 'KWATER_HandAction_Detection'.toLowerCase()) {
-			tagInfo += '수신호';
-		}
-		if (spTag.toLowerCase() == 'KWATER_Spin_Detection'.toLowerCase()) {
-			tagInfo += '약품미투입';
-		}
-		if (spTag.toLowerCase() == 'KWATER_Cmtank_Leak'.toLowerCase()) {
-			tagInfo = '약품탱크누액';
-		}
-		if (spTag.toLowerCase() == 'KWATER_Outtank_Leak'.toLowerCase()) {
-			tagInfo = '옥외탱크누액';
-		}
-		if (spTag.toLowerCase() == 'KWATER_Overflow'.toLowerCase()) {
-			tagInfo = '배출수월류';
-		}
-
+		tagInfo += getTranslate(spTag.toLowerCase().split('_')[1]);
+		
 		if (i < tags.split(', ').length - 1) {
 			tagInfo += ', ';
 		}
@@ -1194,7 +1152,7 @@ $(document).ready(function () {
 </div>
 <div class="showInfo">
 	<div>
-		<div class="infoTitle">정보
+		<div class="infoTitle"><spring:message code="gallery.info" />
 			<button class="closeTitle">
 				<span>
 					<svg width="24px" height="24px" class="infoSvg" viewBox="0 0 24 24">
@@ -1205,7 +1163,7 @@ $(document).ready(function () {
 		</div>
 		<div>
 			<div>
-				<div class="detail">태그정보</div>
+				<div class="detail"><spring:message code="gallery.tagInfo" /></div>
 				<dl class="detailInfo">
 					<div class="IP">
 						<dt class="IPDt">

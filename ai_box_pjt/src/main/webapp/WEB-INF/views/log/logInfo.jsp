@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%-- <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %> --%>
@@ -35,6 +36,7 @@
 <script type="text/javascript" src="/resources/js/jqwidgets/jqxwindow.js"></script>
 <script type="text/javascript" src="/resources/js/jqwidgets/jqxdata.export.js"></script> 
 <script type="text/javascript" src="/resources/js/jqwidgets/jqxgrid.export.js"></script>
+<script type="text/javascript" src="/resources/js/translate.js"></script>
 <style>
 body {
 	background-color: #252525;
@@ -640,45 +642,8 @@ $(document).ready(function () {
 	    	ascount = data.length;
 
 	    	for (var i = 0; i < data.length; i++) {
-	    		var action = '';
-	    		var event_name = data[i].event_name;
-				if (event_name.toLowerCase() == 'KWATER_Fire_Detection'.toLowerCase()) {
-					action = '화재';
-				}
-				if (event_name.toLowerCase() == 'KWATER_Falldown_Detection'.toLowerCase()) {
-					action = '쓰러짐';
-				}
-				if (event_name.toLowerCase() == 'KWATER_Flood_Detection'.toLowerCase()) {
-					action = '침수';
-				}
-				if (event_name.toLowerCase() == 'KWATER_Glove_Detection'.toLowerCase()) {
-					action = '장갑미착용';
-				}
-				if (event_name.toLowerCase() == 'KWATER_Invasion_Detection'.toLowerCase()) {
-					action = '침입';
-				}
-				if (event_name.toLowerCase() == 'KWATER_Leak_Detection'.toLowerCase()) {
-					action = '누수';
-				}
-				if (event_name.toLowerCase() == 'KWATER_Loitering_Detection'.toLowerCase()) {
-					action = '배회';
-				}
-				if (event_name.toLowerCase() == 'KWATER_HandAction_Detection'.toLowerCase()) {
-					action = '수신호';
-				}
-				if (event_name.toLowerCase() == 'KWATER_Spin_Detection'.toLowerCase()) {
-					action = '약품미투입';
-				}
-				if (event_name.toLowerCase() == 'kwater_cmtank_leak'.toLowerCase()) {
-					action = '약품탱크누액';
-				}
-				if (event_name.toLowerCase() == 'kwater_outtank_leak'.toLowerCase()) {
-					action = '옥외탱크누액';
-				}
-				if (event_name.toLowerCase() == 'kwater_overflow'.toLowerCase()) {
-					action = '배출수월류';
-				}
-				data[i].event_name2 = action;
+				data[i].event_source = getTranslate(data[i].event_source);
+				data[i].event_name2 = getTranslate(data[i].event_name.toLowerCase().split('_')[1]);
 	    	}
 	    	
 	    	var SKEY_REQUEST = 'REQUEST';
@@ -719,24 +684,24 @@ $(document).ready(function () {
                 autoshowfiltericon: true,
 				editable: true,
 				columns: [
-					{ text: 'Event Source', datafield: 'event_source', width: '19%', editable: false },
-					{ text: 'Device IP', datafield: 'dev_ip', width: '17%', editable: false },
-					{ text: 'Channel', datafield: 'dev_channel', width: '8%', editable: false },
-					{ text: 'Event Name', datafield: 'event_name', width: '13%', editable: false, hidden:true},
-					{ text: 'Event Name', datafield: 'event_name2', width: '13%', editable: false },
-					{ text: 'Event Time', datafield: 'event_time', width: '20%', editable: false },
-					{ text: 'Event Info', datafield: 'event_info', width: '15%', editable: false },
+					{ text: getTranslate('event_source'), datafield: 'event_source', width: '19%', editable: false },
+					{ text: getTranslate('device_ip'), datafield: 'dev_ip', width: '17%', editable: false },
+					{ text: getTranslate('channel'), datafield: 'dev_channel', width: '8%', editable: false },
+					{ text: getTranslate('event_name'), datafield: 'event_name', width: '13%', editable: false, hidden:true},
+					{ text: getTranslate('event_name'), datafield: 'event_name2', width: '13%', editable: false },
+					{ text: getTranslate('event_time'), datafield: 'event_time', width: '20%', editable: false },
+					{ text: getTranslate('event_info'), datafield: 'event_info', width: '15%', editable: false },
 					{ datafield: 'dev_id', editable: false, hidden:true },
 					{ datafield: 'dev_pwd', editable: false, hidden:true },
 					{ datafield: 'dev_port', editable: false, hidden:true },
 					{ datafield: 'dev_web_port', editable: false, hidden:true },
-					{ text: 'Popup', columntype: 'button', align: 'center', width: '8%', editable: false, sortable: false, filterable: false, cellsrenderer: function () {
-						return '보기';
+					{ text: getTranslate('popup'), columntype: 'button', align: 'center', width: '8%', editable: false, sortable: false, filterable: false, cellsrenderer: function () {
+						return getTranslate('display');
 					},
 					buttonclick: function (row) {
 						var rowData = $('#grid').jqxGrid('getrowdata', row);
 						if (rowData.event_source == 'SCADA') {
-							alert('이미지가 없습니다.');
+							alert(getTranslate('noImage'));
 						} else {
 							if (get('userdata') != null) {
 								if(popup_window[POPUP_SEARCH] && !popup_window[POPUP_SEARCH].closed)

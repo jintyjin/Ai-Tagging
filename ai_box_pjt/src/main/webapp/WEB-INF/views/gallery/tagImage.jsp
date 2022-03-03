@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -916,7 +917,7 @@ $(document).ready(function () {
 	 		    			appendStr +='</div></div>';
 	 		    		}
 	 		    		
-	 		    		appendStr += '<div class="images loading ' + year + '-' + month + '-' + date + getTranslate('day') + '" onmouseover="showTitleV(' + dateStr + ')" onmouseout="hideTitleV(' + dateStr + ')"><div class="imagesTitle"><svg class="hideTitleChk" width="24px" height="24px" onclick="clickTitleV(' + dateStr + ');"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"></path></svg><div style="height:44px;"><h2 class="titleH2">' + yearStr + month + getTranslate('month') + date + getTranslate('day') + ' ' + '(' + week[day.getDay()].substring(0, 3) + ')' + '</h2></div></div><div class="imageInA" id="'+ year + '-' + month + '-' + date + getTranslate('day') + '">';
+	 		    		appendStr += '<div class="images loading ' + year + '-' + month + '-' + date + getTranslate('day') + '" onmouseover="showTitleV(' + dateStr + ')" onmouseout="hideTitleV(' + dateStr + ')"><div class="imagesTitle"><svg class="hideTitleChk" width="24px" height="24px" onclick="clickTitleV(' + dateStr + ');"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"></path></svg><div style="height:44px;"><h2 class="titleH2">' + yearStr + month + getTranslate('month') + date + getTranslate('day') + ' ' + '(' + week[day.getDay()].substring(0, 3) + ')' + '</h2></div></div><div class="imageInA" id="' + year + '-' + month + '-' + date + getTranslate('day') + '">';
 			    		isDateStr = dateStr;
 			    	}
 
@@ -1358,7 +1359,7 @@ function showDateImage(dateTime) {
 							</svg>
 						</div>
 						<div class="searchTextDiv">
-							<input class="searchText" type="text" placeholder="내 사진 검색">
+							<input class="searchText" type="text" placeholder='<spring:message code="holder.searchBar" />' />
 						</div>
 					</div>
 				</div>
@@ -1396,7 +1397,7 @@ function showDateImage(dateTime) {
 	</div>
 	<div id="right_info">
 		<div>
-			<div class="detail2">태그정보</div>
+			<div class="detail2"><spring:message code="gallery.tagInfo" /></div>
 			<dl class="detailInfo2">
 				<div class="IP2">
 					<dt class="IPDt2">

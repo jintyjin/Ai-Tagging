@@ -1,6 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
-<%-- <%@ include file="../include/searchBar.jsp" %> --%>
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -14,6 +14,7 @@
 <script src="./resources/js/stomp.min.js"></script>
 <script src="./resources/js/imagesloaded.pkgd.min.js"></script>
 <script src="./resources/js/imagesloaded.pkgd.js"></script>
+<script type="text/javascript" src="/resources/js/translate.js"></script>
 <style>
 * {
 	-webkit-tap-highlight-color:transparent;
@@ -884,7 +885,7 @@ var ModalImageArr = [];
 var ModalImageVal;
 var length;
 var dataLength;
-var week = new Array('일', '월', '화', '수', '목', '금', '토');
+var week = new Array(getTranslate('sunday'), getTranslate('monday'), getTranslate('tuesday'), getTranslate('wednesday'), getTranslate('thursday'), getTranslate('friday'), getTranslate('saturday'));
 var scrollDateArr = [];
 var scrollTopArr = [];
 var scrollDate = "";
@@ -969,6 +970,9 @@ $(document).ready(function () {
 		    	if (noData != null) {
 		    		$('#noData').remove();
 		    	}
+
+		    	var allImage = document.getElementById('allImage');
+		    	var appendStr = "";
 		    	
 		    	if (data.length > 0) {
 			    	if (get('keywordOption') != null) {
@@ -977,6 +981,7 @@ $(document).ready(function () {
 			    	
 			    	var length = data.length;
 
+			    	var isDateStr = "";
 		  	    	for (var i = 0; i < length; i++) {
 		 				var json = data[i];
 		 				ModalImageArr.push(json);
@@ -995,24 +1000,29 @@ $(document).ready(function () {
 		 		    	if (date < 10) {
 		 		    		date = '0' + date;
 		 		    	}
-		 		    	
-		 		    	var dateStr = "'" + year + '-' + month + '-' + date + "'"; 
-		 		    	
-		 		    	if (document.getElementById(year + '-' + month + '-' + date + '일') == null) {
+
+						var dateStr = "'" + year + '-' + month + '-' + date + getTranslate('day') + "'";
+						
+						if (dateStr != isDateStr) {
 		 		    		var yearStr = "";
 		 		    		if (year < year2) {
-		 		    			yearStr = year + "년 ";
+		 		    			yearStr = year + getTranslate('year');
 		 		    		}
-		 		    		$('<div class="images loading ' + year + '-' + month + '-' + date + '" onmouseover="showTitleV(' + dateStr + ')" onmouseout="hideTitleV(' + dateStr + ')"><div class="imagesTitle"><svg class="hideTitleChk" width="24px" height="24px" onclick="clickTitleV(' + dateStr + ');"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"></path></svg><div style="height:44px;"><h2 class="titleH2">' + yearStr + month + '월 ' + date + '일 ' + '(' + week[day.getDay()] + ')' + '</h2></div></div><div class="imageInA" id="' + year + '-' + month + '-' + date + '일' +'"></div></div>').appendTo('.allImage');
-	 		    			scrollDateArr.push(year + '-' + month + '-' + date);
-		 		    	}
+		 		    		if (dateStr != "") {
+		 		    			appendStr +='</div></div>';
+		 		    		}
+		 		    		
+		 		    		appendStr += '<div class="images loading ' + year + '-' + month + '-' + date + getTranslate('day') + '" onmouseover="showTitleV(' + dateStr + ')" onmouseout="hideTitleV(' + dateStr + ')"><div class="imagesTitle"><svg class="hideTitleChk" width="24px" height="24px" onclick="clickTitleV(' + dateStr + ');"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"></path></svg><div style="height:44px;"><h2 class="titleH2">' + yearStr + month + getTranslate('month') + date + getTranslate('day') + ' ' + '(' + week[day.getDay()].substring(0, 3) + ')' + '</h2></div></div><div class="imageInA" id="' + year + '-' + month + '-' + date + getTranslate('day') + '">';
+				    		isDateStr = dateStr;
+				    	}
 						
 		 		    	var idx2 = "'" + idx + "'";
 		 		    	
-		 		    	$('<div class="thumb_name ' + idx + '" id="' + idx + '" onmouseover="showV(' + idx2 + ')" onmouseout="hideV(' + idx2 + ');"><div class="thumb_name_div"><div class="bgDivBefore" ><div class="icon"><svg class="hideChkV" width="24px" height="24px" id="' + idx + 'V" onclick="clickV(' + idx2 + ', ' + dateStr + ');"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"></path></svg><svg width="24px" height="24px" class="hideChk" id="' + idx + 'Circle"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"></path></svg></div><a class="imageA" id="' + i + '" onclick="clickModal(' + idx + ')"><img loading="lazy" onError="this.src=' + "'" + image.replace('webserver', 'web_server') + "'" + '" class="beforeChkImage" src="' + image + '" alt=""/></a></div></div>').appendTo('#' + year + '-' + month + '-' + date + '일');
+		 		    	appendStr += '<div class="thumb_name ' + idx + '" id="' + idx + '" onmouseover="showV(' + idx2 + ')" onmouseout="hideV(' + idx2 + ');"><div class="thumb_name_div"><div class="bgDivBefore" ><div class="icon"><svg class="hideChkV" width="24px" height="24px" id="' + idx + 'V" onclick="clickV(' + idx2 + ', ' + dateStr + ');"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"></path></svg><svg width="24px" height="24px" class="hideChk" id="' + idx + 'Circle"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"></path></svg></div><a class="imageA" id="' + i + '" onclick="clickModal(' + idx + ')"><img loading="lazy" onError="this.src=' + "'" + image.replace('webserver', 'web_server') + "'" + '" class="beforeChkImage" src="' + image + '" alt=""/></a></div></div></div>';
 		  	    	}
+		  	    	$("#allImage").append(appendStr + '</div></div>');
 		    	} else {
-		    		$('<div id="noData"><h2>데이터가 없습니다.</h2></div>').appendTo('.allImage');
+		    		$('<div id="noData"><h2><spring:message code="gallery.noData" /></h2></div>').appendTo('.allImage');
 		    	}
 		    	if (status != 'plus') {
 					$('.searchText').val(keyword);
@@ -1177,6 +1187,7 @@ $(document).ready(function () {
     		    		
     			    	var length = data.length;
 
+    			    	var isDateStr = "";
     		  	    	for (var i = 0; i < length; i++) {
     		 				var json = data[i];
     		 				ModalImageArr.push(json);
@@ -1195,22 +1206,26 @@ $(document).ready(function () {
     		 		    	if (date < 10) {
     		 		    		date = '0' + date;
     		 		    	}
-    		 		    	
-    		 		    	var dateStr = "'" + year + '-' + month + '-' + date + "'"; 
-    		 		    	
-    		 		    	if (document.getElementById(year + '-' + month + '-' + date + '일') == null) {
+    						var dateStr = "'" + year + '-' + month + '-' + date + getTranslate('day') + "'";
+    						
+    						if (dateStr != isDateStr) {
     		 		    		var yearStr = "";
     		 		    		if (year < year2) {
-    		 		    			yearStr = year + "년 ";
+    		 		    			yearStr = year + getTranslate('year');
     		 		    		}
-    		 		    		$('<div class="images loading ' + year + '-' + month + '-' + date + '" onmouseover="showTitleV(' + dateStr + ')" onmouseout="hideTitleV(' + dateStr + ')"><div class="imagesTitle"><svg class="hideTitleChk" width="24px" height="24px" onclick="clickTitleV(' + dateStr + ');"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"></path></svg><div style="height:44px;"><h2 class="titleH2">' + yearStr + month + '월 ' + date + '일 ' + '(' + week[day.getDay()] + ')' + '</h2></div></div><div class="imageInA" id="' + year + '-' + month + '-' + date + '일' +'"></div></div>').appendTo('.allImage');
-    	 		    			scrollDateArr.push(year + '-' + month + '-' + date);
-    		 		    	}
+    		 		    		if (dateStr != "") {
+    		 		    			appendStr +='</div></div>';
+    		 		    		}
+    		 		    		
+    		 		    		appendStr += '<div class="images loading ' + year + '-' + month + '-' + date + getTranslate('day') + '" onmouseover="showTitleV(' + dateStr + ')" onmouseout="hideTitleV(' + dateStr + ')"><div class="imagesTitle"><svg class="hideTitleChk" width="24px" height="24px" onclick="clickTitleV(' + dateStr + ');"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"></path></svg><div style="height:44px;"><h2 class="titleH2">' + yearStr + month + getTranslate('month') + date + getTranslate('day') + ' ' + '(' + week[day.getDay()].substring(0, 3) + ')' + '</h2></div></div><div class="imageInA" id="' + year + '-' + month + '-' + date + getTranslate('day') + '">';
+    				    		isDateStr = dateStr;
+    				    	}
     						
     		 		    	var idx2 = "'" + idx + "'";
     		 		    	
-    		 		    	$('<div class="thumb_name ' + idx + '" id="' + idx + '" onmouseover="showV(' + idx2 + ')" onmouseout="hideV(' + idx2 + ');"><div class="thumb_name_div"><div class="bgDivBefore" ><div class="icon"><svg class="hideChkV" width="24px" height="24px" id="' + idx + 'V" onclick="clickV(' + idx2 + ', ' + dateStr + ');"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"></path></svg><svg width="24px" height="24px" class="hideChk" id="' + idx + 'Circle"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"></path></svg></div><a class="imageA" id="' + i + '" onclick="clickModal(' + idx + ')"><img loading="lazy" onError="this.src=' + "'" + image.replace('web_server', 'webserver') + "'" + '" class="beforeChkImage" src="' + image + '" alt=""/></a></div></div>').appendTo('#' + year + '-' + month + '-' + date + '일');
+    		 		    	appendStr += '<div class="thumb_name ' + idx + '" id="' + idx + '" onmouseover="showV(' + idx2 + ')" onmouseout="hideV(' + idx2 + ');"><div class="thumb_name_div"><div class="bgDivBefore" ><div class="icon"><svg class="hideChkV" width="24px" height="24px" id="' + idx + 'V" onclick="clickV(' + idx2 + ', ' + dateStr + ');"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"></path></svg><svg width="24px" height="24px" class="hideChk" id="' + idx + 'Circle"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"></path></svg></div><a class="imageA" id="' + i + '" onclick="clickModal(' + idx + ')"><img loading="lazy" onError="this.src=' + "'" + image.replace('webserver', 'web_server') + "'" + '" class="beforeChkImage" src="' + image + '" alt=""/></a></div></div></div>';
     		  	    	}
+    		  	    	$("#allImage").append(appendStr + '</div></div>');
     		    	}
     				$('div').removeClass('loading');
     				$('#Progress_Loading').hide();
@@ -1377,42 +1392,7 @@ function showV(tag) {
 			for (var i = 0; i < tags.split(', ').length; i++) {
 				var spTag = tags.split(', ')[i];
 				
-				if (spTag.toLowerCase() == 'KWATER_Fire_Detection'.toLowerCase()) {
-					tagInfo += '화재';
-				}
-				if (spTag.toLowerCase() == 'KWATER_Falldown_Detection'.toLowerCase()) {
-					tagInfo += '쓰러짐';
-				}
-				if (spTag.toLowerCase() == 'KWATER_Flood_Detection'.toLowerCase()) {
-					tagInfo += '침수';
-				}
-				if (spTag.toLowerCase() == 'KWATER_Glove_Detection'.toLowerCase()) {
-					tagInfo += '장갑미착용';
-				}
-				if (spTag.toLowerCase() == 'KWATER_Invasion_Detection'.toLowerCase()) {
-					tagInfo += '침입';
-				}
-				if (spTag.toLowerCase() == 'KWATER_Leak_Detection'.toLowerCase()) {
-					tagInfo += '누수';
-				}
-				if (spTag.toLowerCase() == 'KWATER_Loitering_Detection'.toLowerCase()) {
-					tagInfo += '배회';
-				}
-				if (spTag.toLowerCase() == 'KWATER_HandAction_Detection'.toLowerCase()) {
-					tagInfo += '수신호';
-				}
-				if (spTag.toLowerCase() == 'KWATER_Spin_Detection'.toLowerCase()) {
-					tagInfo += '약품미투입';
-				}
-				if (spTag.toLowerCase() == 'KWATER_Cmtank_Leak'.toLowerCase()) {
-					tagInfo = '약품탱크누액';
-				}
-				if (spTag.toLowerCase() == 'KWATER_Outtank_Leak'.toLowerCase()) {
-					tagInfo = '옥외탱크누액';
-				}
-				if (spTag.toLowerCase() == 'KWATER_Overflow'.toLowerCase()) {
-					tagInfo = '배출수월류';
-				}
+				tagInfo += getTranslate(spTag.toLowerCase().split('_')[1]);
 				
 				if (i < tags.split(', ').length - 1) {
 					tagInfo += ', ';
@@ -1446,11 +1426,12 @@ function showV(tag) {
 	    	if (second2 < 10) {
 	    		second2 = '0' + second2;
 	    	} 
-	    	
-	    	var dateInfo2 = year2 + "년 " + month2 + '월 ' + date2 + "일 " + week[day2.getDay()] + "요일";
-			var timeInfo2= hour2 + "시 " + min2 + "분 " + second2 + "초";
+
+	    	var dateInfo2 = year2 + getTranslate('year') + month2 + getTranslate('month') + date2 + getTranslate('day') + week[day2.getDay()];
+			var timeInfo2= hour2 + getTranslate('hour') + min2 + getTranslate('minute') + second2 + getTranslate('second');
 			$('.dateDiv2').text(dateInfo2);
 			$('.timeSpan2').text(timeInfo2);
+			
 	    	var tagInfo2 = "";
 	    	var tagInfoArray2 = data.tags;
 	    	
@@ -1599,7 +1580,7 @@ function isErrorImg(img) {
 							</button>
 						</div>
 						<div class="searchTextDiv">
-							<input class="searchText" type="text" placeholder="내 사진 검색" />
+							<input class="searchText" type="text" placeholder='<spring:message code="holder.searchBar" />' />
 						</div>
 					</div>
 				</div>
@@ -1665,7 +1646,7 @@ function isErrorImg(img) {
 	</div>
 	<div id="right_info">
 		<div>
-			<div class="detail2">태그정보</div>
+			<div class="detail2"><spring:message code="gallery.tagInfo" /></div>
 			<dl class="detailInfo2">
 				<div class="IP2">
 					<dt class="IPDt2">

@@ -14,6 +14,10 @@ var lang = {
 		outtank : "옥외탱크누액",
 		overflow : "배출수월류",
 		
+		// 이벤트 소스
+		지능형안전관리시스템 : "지능형안전관리시스템",
+		SCADA : "스카다", 
+		
 		// 날짜
 		year : "년 ",
 		month : "월 ",
@@ -35,7 +39,25 @@ var lang = {
 		saturday : "토요일",
 		sat : "토",
 		sunday : "일요일",
-		sun : "일"
+		sun : "일",
+		
+		// 고정값
+		event_source : "이벤트 소스",
+		device_title : "장치 이름",
+		device_ip : "장비 아이피",
+		channel : "채널",
+		event_info : "이벤트 정보",
+		popup : "팝업",
+		event_name : "이벤트",
+		action : "동작",
+		event_time : "발생 시간",
+		run : "실행",
+		cancel : "취소",
+		delete_data : "삭제",
+		display : "보기",
+		reject : "무시",
+		move : "이동",
+		noImage : "이미지가 없습니다."
 	},
 	"en" : {
 		// Event
@@ -51,6 +73,10 @@ var lang = {
 		cmtank : "Cmtank",
 		outtank : "Outtank",
 		overflow : "Overflow",
+
+		// Event Source
+		지능형안전관리시스템 : "KWATER",
+		SCADA : "SCADA", 
 		
 		// Date
 		year : "-",
@@ -73,7 +99,25 @@ var lang = {
 		saturday : "Saturday",
 		sat : "Sat",
 		sunday : "Sunday",
-		sun : "Sun"
+		sun : "Sun",
+
+		// 고정값
+		event_source : "Event Source",
+		device_title : "Device Title",
+		device_ip : "Device IP",
+		channel : "Channel",
+		event_info : "Event Info",
+		popup : "Popup",
+		event_name : "Event Name",
+		action : "Action",
+		event_time : "Event Time",
+		run : "Run",
+		cancel : "Cancel",
+		delete_data : "Delete",
+		display : "display",
+		reject : "reject",
+		move : "move",
+		noImage : "No image to display"
 	}
 }
 function getLanguage() {

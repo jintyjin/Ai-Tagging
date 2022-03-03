@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%-- <%@ include file="../include/searchBar.jsp" %> --%>
 <!DOCTYPE html>
 <html lang="ko">
@@ -325,7 +326,7 @@ function search() {
 							</svg>
 						</div>
 						<div class="searchTextDiv">
-							<input class="searchText" type="text" placeholder="내 사진 검색" />
+							<input class="searchText" type="text" placeholder='<spring:message code="holder.searchBar" />' />
 						</div>
 					</div>
 				</div>
