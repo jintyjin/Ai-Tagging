@@ -1484,7 +1484,7 @@ public class EventController {
 //			System.out.println("model_name = " + model_name);
 //			System.out.println("resultMap.get(model_name) = " + resultMap.get(model_name));
 //			System.out.println("===== responseEvents 검사 종료 =====");
-			if (responseEventsRepository.isBox(model_name)) {
+			if (!responseEventsRepository.isBox(model_name)) {
 				returnMap.put("status", "failed");
 				returnMap.put("detail", "not support");
 				returnMap.put("model_name", model_name);

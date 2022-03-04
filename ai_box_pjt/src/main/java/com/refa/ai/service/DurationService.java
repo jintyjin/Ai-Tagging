@@ -34,13 +34,12 @@ public class DurationService {
 		String key = dev_ip + "_" + dev_ch + "_" + model_name;
 		if (isDurationNull(key)) {
 			return true;
-			
 		}
 		return chkTime(event_time, key, Integer.parseInt(dev_ch), model_name);
 	}
 	
 	private boolean isDurationNull(String key) {
-		return durationRepository.findByKey(key) == null;
+		return !durationRepository.findByKey(key).isPresent();
 	}
 	
 	private boolean chkTime(String eventTime, String key, int ch, String model_name) throws ParseException {
