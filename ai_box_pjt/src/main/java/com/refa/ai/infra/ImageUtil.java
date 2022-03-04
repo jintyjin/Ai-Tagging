@@ -26,7 +26,7 @@ public class ImageUtil {
 			 f1.createNewFile();
 		 } catch (IOException e) {
 			 // TODO Auto-generated catch block
-			 e.printStackTrace();
+			 System.out.println("파일 생성 불가");
 		 }
 	 }
 	 
@@ -51,7 +51,7 @@ public class ImageUtil {
 	   
 		 } catch (IOException e) {
 			 // TODO Auto-generated catch block
-			 e.printStackTrace();
+			 System.out.println("파일 복사 불가");
 		 }
 	 }
 	 
@@ -73,7 +73,7 @@ public class ImageUtil {
 	   
 		 } catch (IOException e) {
 			 // TODO Auto-generated catch block
-			 e.printStackTrace();
+			 System.out.println("파일 이동 불가");
 		 }
 	 }
 	 
@@ -96,7 +96,7 @@ public class ImageUtil {
 					 dirFileList = Arrays.asList(files);
 				 }
 			 } catch(Exception e) {
-				 e.printStackTrace();
+				 System.out.println("파일 리스트 읽기 불가");
 			 }
 		 }
 	  

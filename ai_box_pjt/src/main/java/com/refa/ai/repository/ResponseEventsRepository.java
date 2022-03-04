@@ -3,8 +3,13 @@ package com.refa.ai.repository;
 import com.refa.ai.dto.ResponseEventDto;
 
 public interface ResponseEventsRepository {
-	int selectQueueSize();
-	int insertQueue(ResponseEventDto responseEventDto);
+	void startResponseQ();
+	
+	int size();
+	
+	<E> void save(E data) throws InterruptedException;
+	
 	void clear();
-	ResponseEventDto takeOne();
+	
+	boolean isBox(String eventName);
 }

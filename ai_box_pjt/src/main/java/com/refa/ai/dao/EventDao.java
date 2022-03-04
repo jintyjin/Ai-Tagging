@@ -174,10 +174,6 @@ public class EventDao {
 		return sqlSession.selectList("sql.itemInfo");
 	}
 
-	public List<Map> actionInfoIsuse() {
-		return sqlSession.selectList("sql.actionInfoIsuse");
-	}
-	
 	public Map insertActionInfo(Map map) {
 		return sqlSession.selectOne("sql.insertActionInfo", map);
 	}

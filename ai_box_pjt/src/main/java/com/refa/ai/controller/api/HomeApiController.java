@@ -20,7 +20,6 @@ import lombok.RequiredArgsConstructor;
 public class HomeApiController {
 	
 	private final ActionService actionService;
-	private final ResponseEventsService responseEventsService;
 	
 	@PostMapping("/cmdDeviceInfo")
 	public DeviceCmdDto jsonCmdDeviceInfo(@RequestBody CmdDto cmdDto) {
@@ -29,10 +28,5 @@ public class HomeApiController {
 		}
 		
 		return null;
-	}
-	
-	@PostMapping("/responseEvents2")	// °¥¾Æ ³¢¿ö¾ß µÊ
-	public Map responseEvents(@RequestBody ResponseEventDto responseEventDto) throws ParseException {
-		return responseEventsService.addQueue(responseEventDto);
 	}
 }

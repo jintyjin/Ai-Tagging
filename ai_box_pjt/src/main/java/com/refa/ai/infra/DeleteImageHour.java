@@ -72,7 +72,7 @@ public class DeleteImageHour extends TimerTask {
 						FileUtils.deleteDirectory(path);
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
-						e.printStackTrace();
+			        	System.out.println("폴더 삭제 오류");
 					}
 		        	
 		            // imageTable 데이터 삭제, 모니터 테이블 데이터 삭제
@@ -84,7 +84,7 @@ public class DeleteImageHour extends TimerTask {
 		            System.out.println("모든 이미지 시간 = " + (now1 - end1)/1000.0 + "초");
 		        }
 	        } catch(Exception e) {
-	        	e.printStackTrace();
+	        	System.out.println("이미지 삭제 오류");
 	        }
 	        
 		}

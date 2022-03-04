@@ -318,14 +318,6 @@
 		order by dev_ch asc;
 	</select>
 	
-	<select id="actionInfoIsuse" resultType="java.util.Map" fetchSize="1000">
-		<!-- select *
-		from data.actionInfo
-		order by dev_title asc; -->
-		select * from data.actioninfo
-		order by action_idx asc
-	</select>
-	
 	<select id="insertActionInfo" parameterType="java.util.Map" resultType="java.util.Map">
 		<!-- with selected as (
 			select * 

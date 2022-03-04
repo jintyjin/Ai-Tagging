@@ -20,19 +20,39 @@ public class DurationService {
 	private final DurationRepository durationRepository;
 	
 	public boolean chkDuration(MetadataDto metadata, MlResultDto m) throws ParseException {
-		if (durationRepository.findByKey(metadata.getDev_ch() + "_" + m.getModel_name()) == null) {
+		String key = metadata.getDev_ip() + "_" + metadata.getDev_ch() + "_" + m.getModel_name();
+		if (isDurationNull(key)) {
 			return true;
 		}
-
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		Date now = dateFormat.parse(metadata.getEvent_time());
-		Date past = dateFormat.parse(durationRepository.findByKey(metadata.getDev_ch() + "_" + m.getModel_name()));
 		
-		int duration = actionSetupService.selectOne(Integer.parseInt(metadata.getDev_ch())).get("duration") != null ? Integer
-				.parseInt(actionSetupService.selectOne(Integer.parseInt(metadata.getDev_ch())).get("duration").toString()) : 10;
+		return chkTime(metadata.getEvent_time(), key, Integer.parseInt(metadata.getDev_ch()), m.getModel_name());
+		
+	}
+
+	public boolean chkDuration(String dev_ip, String dev_ch, String model_name, String event_time) throws NumberFormatException, ParseException {
+		// TODO Auto-generated method stub
+		String key = dev_ip + "_" + dev_ch + "_" + model_name;
+		if (isDurationNull(key)) {
+			return true;
+			
+		}
+		return chkTime(event_time, key, Integer.parseInt(dev_ch), model_name);
+	}
+	
+	private boolean isDurationNull(String key) {
+		return durationRepository.findByKey(key) == null;
+	}
+	
+	private boolean chkTime(String eventTime, String key, int ch, String model_name) throws ParseException {
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		Date now = dateFormat.parse(eventTime);
+		Date past = dateFormat.parse(durationRepository.findByKey(key).get());
+		
+		int duration = actionSetupService.selectOne(ch).get("duration") != null ? Integer
+				.parseInt(actionSetupService.selectOne(ch).get("duration").toString()) : 10;
 		
 		if (now.getTime() - past.getTime() >= duration * 1000) {
-			durationRepository.save(metadata.getDev_ch() + "_" + m.getModel_name(), metadata.getEvent_time());
+			durationRepository.save(key, eventTime);
 			return true;
 		}
 		

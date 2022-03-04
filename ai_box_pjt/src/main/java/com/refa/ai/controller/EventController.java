@@ -166,20 +166,30 @@ import com.refa.ai.entity.User;
 import com.refa.ai.infra.DeleteImageDay;
 import com.refa.ai.infra.EasyImage;
 import com.refa.ai.infra.WebSession;
+import com.refa.ai.repository.ActionEventMemoryRepository;
 import com.refa.ai.repository.ActionEventRepository;
 import com.refa.ai.repository.ActionSetupRepository;
 import com.refa.ai.repository.Base64Repository;
 import com.refa.ai.repository.GalleryRepository;
 import com.refa.ai.repository.ImageDataRepository;
+import com.refa.ai.repository.InsertImagesRepository;
 import com.refa.ai.repository.InsertImagesTimeRepository;
+import com.refa.ai.repository.PostRepository;
 import com.refa.ai.repository.RejectEventRepository;
+import com.refa.ai.repository.ResponseEventsRepository;
 import com.refa.ai.repository.ScheduleRepository;
+import com.refa.ai.repository.ThreadPoolRepository;
+import com.refa.ai.repository.VersionMemoryRepository;
 import com.refa.ai.repository.VersionRepository;
 import com.refa.ai.service.ActionSetupService;
 import com.refa.ai.service.AreaSetService;
 import com.refa.ai.service.EventStatusService;
+import com.refa.ai.service.ImageService;
+import com.refa.ai.service.InsertImagesService;
 import com.refa.ai.service.OneSecDurService;
+import com.refa.ai.service.PostService;
 import com.refa.ai.service.RejectEventService;
+import com.refa.ai.service.ResponseEventsService;
 import com.refa.ai.service.WebSocketService;
 
 import lombok.RequiredArgsConstructor;
@@ -188,140 +198,53 @@ import sun.misc.BASE64Encoder;
 @Controller
 @RequiredArgsConstructor
 public class EventController {
-	private SimpMessagingTemplate template;
+	private final SimpMessagingTemplate template;
 
 	private final EventDao eventDao;
 	private final WebSession webSession;
 	private final WebSocketService webSocketService;
 	private final RejectEventService rejectEventService;
 	private final EventStatusService eventStatusService;
-	private final ActionSetupRepository actionSetupRepository;
 	private final ActionSetupService actionSetupService;
 	private final AreaSetService areaSetService;
-	private final Base64Repository base64Repository;
-	private final InsertImagesTimeRepository insertImagesTimeRepository;
 	private final ScheduleRepository scheduleRepository;
-	private final ActionEventRepository actionEventRepository;
+	private final ActionEventMemoryRepository actionEventMemoryRepository;
 	private final OneSecDurService oneSecDurService;
 	private final VersionRepository versionRepository;
 	private final GalleryRepository galleryRepository;
 	private final ImageDataRepository imageDataRepository;
+	private final ActionEventRepository actionEventRepository;
+	private final VersionMemoryRepository versionMemoryRepository;
+	private final PostService postService;
+	private final PostRepository postRepository;
+	private final ThreadPoolRepository threadPoolRepository;
+	private final InsertImagesService insertImagesService;
+	private final InsertImagesRepository insertImagesRepository;
+	private final ResponseEventsService responseEventsService;
+	private final ResponseEventsRepository responseEventsRepository;
+	private final ImageService imageService;
 
 	RestTemplate rest;
-	private List<Map> actionListTotal;
-	private JSONObject imageTotal;
 	private HttpClient client;
-	private List<Map<String, Object>> dashBoardInfo;
-	private ExecutorService executorService;
-	private int queue;
-	private VersionDto versionDto;
-	private String request_url;
-	private String client_code;
-	private String analyze_url;
-	private HttpPost postRequest;
-	// private HttpResponse response;
 	private String durationResponse;
-	private Timer timer;
-	private TimerTask task;
-	private Timer timerBackup;
-	private TimerTask taskBackup;
-	private Queue<String> insertImageQ;
-	private Queue<String> responseEventQ;
-	private String url;
-	private String user;
-	private String password;
-	private Connection conn;
-	private String str; // 라이센스 정보
 
 	private int drive_count; // 드라이브 갯수
-	private String master_drive_name; // 주 드라이브 이름(톰캣 설치되어 있는 것)
-	private String part_drive_name; // 부 드라이브 이름(주 드라이브 제외하고 알파벳순을 맨 앞)
 
-	private BlockingQueue<Map> insertQ;
-//	private BlockingQueue<ResponseEventDto> responseQ;
-	private BlockingQueue<Map> responseQ;
-	private BlockingQueue<Map> postQ;
-	private BlockingQueue<Map> eventActionQ;
 	private BlockingQueue<RequestScadaDto> requestScadaQ;
-
-	private Map resultMap;
-	private Map durationMap;
-	private Map<Integer, Map<String, Map>> scheduleList;
-
-	// private List<ActionDto> actionListTotal = eventDao.actionInfoIsuse();
 
 	@PostConstruct
 	public void init()
 			throws ParseException, java.text.ParseException, ClientProtocolException, IOException, SQLException {
-		actionListTotal = eventDao.actionInfoIsuse();
-		client = HttpClientBuilder.create().build(); // HttpClient 생성
-
-		versionDto = versionRepository.selectVersionInfo("kwater");
-		request_url = versionDto.getRequest_url();
-		client_code = versionDto.getClient_code();
-		analyze_url = versionDto.getAnalyze_url();
-		postRequest = new HttpPost(analyze_url);
-		postRequest.setHeader("Accept", "application/json");
-		postRequest.setHeader("Connection", "keep-alive");
-		postRequest.setHeader("Content-Type", "application/json");
-
-		dashBoardInfo = new ArrayList<Map<String, Object>>();
-		executorService = Executors.newCachedThreadPool();
-		insertImageQ = new LinkedList<String>();
-		responseEventQ = new LinkedList<String>();
-		// response = client.execute(postRequest);
-//	    int thread_count = 100;
-//	    executorService = Executors.newFixedThreadPool(thread_count);
-		// executorService = Executors.newSingleThreadExecutor();
-		// insertImageTime();
-		// responseEventTime();
-		url = "jdbc:postgresql://localhost:5432/postgres";
-		user = "postgres";
-		password = "1234";
-		conn = DriverManager.getConnection(url, user, password);
-		conn.setAutoCommit(false);
-		// renewal_license_date();
-		// getLicenseInfo(analyze_url.substring(0, analyze_url.lastIndexOf("/")) +
-		// "/get_license");
-		init_drive_name();
 		backupImageDay(null);
 		deleteImageDay(null);
 		if (drive_count > 1) {
 			deleteImageDay2(null);
 		}
 
-		insertQ = new LinkedBlockingQueue<Map>();
-//		responseQ = new LinkedBlockingQueue<ResponseEventDto>();
-		responseQ = new LinkedBlockingQueue<Map>();
-		postQ = new LinkedBlockingQueue<Map>();
-		eventActionQ = new LinkedBlockingQueue<Map>();
 		requestScadaQ = new LinkedBlockingQueue<RequestScadaDto>();
 
-		resultMap = new HashMap();
-		resultMap.put("KWATER_Falldown_Detection", "boxes");
-		resultMap.put("KWATER_Fire_Detection", "segments");
-		resultMap.put("KWATER_Flood_Detection", "segments");
-		resultMap.put("KWATER_Glove_Detection", "boxes");
-		resultMap.put("KWATER_Invasion_Detection", "boxes");
-		resultMap.put("KWATER_Leak_Detection", "segments");
-		resultMap.put("KWATER_Loitering_Detection", "boxes");
-		resultMap.put("KWATER_HandAction_Detection", "boxes");
-		resultMap.put("KWATER_Spin_Detection", "boxes");
-
-		durationMap = new ConcurrentHashMap();
-
-		startInsertQ();
-		startResponseQ();
-		startPostQ();
 		startRequestScadaQ();
 		// startEventActionQ();
-
-		scheduleList = scheduleRepository.findAll();
-	}
-
-	@Autowired
-	public void setMessagingTemplate(SimpMessagingTemplate template) {
-		this.template = template;
 	}
 
 	@RequestMapping(value = "/imageInfo")
@@ -573,7 +496,7 @@ public class EventController {
 			msg = mapper.writeValueAsString(map);
 		} catch (JsonProcessingException e1) {
 			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			System.out.println("searchDevice Error");
 		}
 
 		Map returnMap = new HashMap();
@@ -678,10 +601,8 @@ public class EventController {
 
 	@GetMapping("/urlSetup")
 	public String urlSetup(Model model) {
-		// System.out.println();
-
-		model.addAttribute("request_url", request_url);
-		model.addAttribute("analyze_url", analyze_url);
+		model.addAttribute("request_url", versionMemoryRepository.findVersion().getRequest_url());
+		model.addAttribute("analyze_url", versionMemoryRepository.findVersion().getAnalyze_url());
 
 		return "./setup/urlSetup";
 	}
@@ -691,17 +612,16 @@ public class EventController {
 	public Map urlSetup(@RequestBody Map map) {
 		// System.out.println("urlSetupPost()");
 
-		request_url = map.get("request_url").toString();
-		analyze_url = map.get("analyze_url").toString();
-
-		String socketUrl = request_url.substring(request_url.lastIndexOf("/", 10) + 1, request_url.lastIndexOf("/"))
+		VersionDto versionDto = versionMemoryRepository.findVersion();
+		versionDto.setRequest_url(map.get("request_url").toString());
+		versionDto.setAnalyze_url(map.get("analyze_url").toString());
+		
+		String requestUrl = versionMemoryRepository.findVersion().getRequest_url();
+		
+		String socketUrl = requestUrl.substring(requestUrl.lastIndexOf("/", 10) + 1, requestUrl.lastIndexOf("/"))
 				+ "/broadsocket";
+		
 		map.put("socketUrl", socketUrl);
-
-		postRequest = new HttpPost(analyze_url);
-		postRequest.setHeader("Accept", "application/json");
-		postRequest.setHeader("Connection", "keep-alive");
-		postRequest.setHeader("Content-Type", "application/json");
 
 		eventDao.updateUrlSetup(map);
 		eventDao.updateDeviceUrlSetup(map);
@@ -827,7 +747,7 @@ public class EventController {
 			}
 			response.close();
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.out.println("getSpeakerList Error");
 		}
 
 		return body;
@@ -890,129 +810,10 @@ public class EventController {
 			}
 			response.close();
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.out.println("sendSpeakerNumber Error");
 		}
 
 		return map;
-	}
-
-	public void playNetworkSpeaker(Map returnMap, Map map) {
-//		System.out.println("sendSpeakerNumber()");
-
-		String body = "";
-//		String id = "root";
-		String id = map.get("network_id").toString();
-//		String pw = "00pp;;//";
-		String pw = map.get("network_pwd").toString();
-		String enc = id + ":" + pw;
-		String ip = map.get("network_ip").toString();
-		String port = map.get("network_port").toString();
-
-		String model_name = returnMap.get("action_event").toString();
-
-		int num = 0;
-
-		if (model_name.toLowerCase().equals("KWATER_Falldown_Detection".toLowerCase())) {
-			if (!map.get("network_falldown").toString().equals("")) {
-				num = Integer.parseInt(map.get("network_falldown").toString().split(", ")[1]);
-			}
-		} else if (model_name.toLowerCase().equals("KWATER_Fire_Detection".toLowerCase())) {
-			if (!map.get("network_fire").toString().equals("")) {
-				num = Integer.parseInt(map.get("network_fire").toString().split(", ")[1]);
-			}
-		} else if (model_name.toLowerCase().equals("KWATER_Flood_Detection".toLowerCase())) {
-			if (!map.get("network_flood").toString().equals("")) {
-				num = Integer.parseInt(map.get("network_flood").toString().split(", ")[1]);
-			}
-		} else if (model_name.toLowerCase().equals("KWATER_Glove_Detection".toLowerCase())) {
-			if (!map.get("network_glove").toString().equals("")) {
-				num = Integer.parseInt(map.get("network_glove").toString().split(", ")[1]);
-			}
-		} else if (model_name.toLowerCase().equals("KWATER_Invasion_Detection".toLowerCase())) {
-			if (!map.get("network_invasion").toString().equals("")) {
-				num = Integer.parseInt(map.get("network_invasion").toString().split(", ")[1]);
-			}
-		} else if (model_name.toLowerCase().equals("KWATER_Leak_Detection".toLowerCase())) {
-			if (!map.get("network_leak").toString().equals("")) {
-				num = Integer.parseInt(map.get("network_leak").toString().split(", ")[1]);
-			}
-		} else if (model_name.toLowerCase().equals("KWATER_Loitering_Detection".toLowerCase())) {
-			if (!map.get("network_loitering").toString().equals("")) {
-				num = Integer.parseInt(map.get("network_loitering").toString().split(", ")[1]);
-			}
-		} else if (model_name.toLowerCase().equals("KWATER_HandAction_Detection".toLowerCase())) {
-			if (!map.get("network_handaction").toString().equals("")) {
-				num = Integer.parseInt(map.get("network_handaction").toString().split(", ")[1]);
-			}
-		} else if (model_name.toLowerCase().equals("KWATER_Spin_Detection".toLowerCase())) {
-			if (!map.get("network_spin").toString().equals("")) {
-				num = Integer.parseInt(map.get("network_spin").toString().split(", ")[1]);
-			}
-		} else if (model_name.toLowerCase().equals("KWATER_Cmtank_leak".toLowerCase())) {
-			if (!map.get("network_cmtank").toString().equals("")) {
-				num = Integer.parseInt(map.get("network_cmtank").toString().split(", ")[1]);
-			}
-		} else if (model_name.toLowerCase().equals("KWATER_Outtank_leak".toLowerCase())) {
-			if (!map.get("network_outtank").toString().equals("")) {
-				num = Integer.parseInt(map.get("network_outtank").toString().split(", ")[1]);
-			}
-		} else if (model_name.toLowerCase().equals("KWATER_Overflow".toLowerCase())) {
-			if (!map.get("network_overflow").toString().equals("")) {
-				num = Integer.parseInt(map.get("network_overflow").toString().split(", ")[1]);
-			}
-		}
-
-//		System.out.println("alarm num = " + num);
-		
-		if (num >= 0) {
-			String postUrl = "http://" + ip + ":" + port + "/axis-cgi/playclip.cgi?clip=" + num;
-
-//			System.out.println("postUrl = " + postUrl);
-			
-			try {
-				CloseableHttpClient Getclient = HttpClients.createDefault(); // HttpClient 생성
-
-				URL url = new URL(postUrl);
-
-				HttpHost GetpostRequest = new HttpHost(url.getHost(), url.getPort(), url.getProtocol()); // POST 메소드 URL
-																											// 새성
-				HttpClientContext context = HttpClientContext.create();
-
-				CredentialsProvider credsProvider = new BasicCredentialsProvider();
-				credsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(id, pw));
-				AuthCache authCache = new BasicAuthCache();
-				DigestScheme digestScheme = new DigestScheme();
-				digestScheme.overrideParamter("realm", "realm");
-				digestScheme.overrideParamter("nonce", "whatever");
-				digestScheme.overrideParamter("clip", "0");
-				authCache.put(GetpostRequest, digestScheme);
-
-				context.setCredentialsProvider(credsProvider);
-				context.setAuthCache(authCache);
-//			    String payload = "clip=0";
-//			    HttpPost httpPost = new HttpPost(url.getPath());
-//			    httpPost.setEntity(new StringEntity(payload));
-
-				HttpGet httpGet = new HttpGet(postUrl);
-
-				// HttpGet httpGet = new
-				// HttpGet("http://192.168.100.57/axis-cgi/playclip.cgi?clip=0");
-				// CloseableHttpResponse response = Getclient.execute(GetpostRequest, httpGet,
-				// context);
-				CloseableHttpResponse response = Getclient.execute(GetpostRequest, httpGet, context);
-
-				if (response.getStatusLine().getStatusCode() == 200) {
-					ResponseHandler<String> handler = new BasicResponseHandler();
-					body = handler.handleResponse(response);
-//					System.out.println("스피커 = " + body);
-				} else {
-					System.out.println("response is error : " + response.getStatusLine().getStatusCode());
-				}
-				response.close();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
 	}
 
 	@GetMapping("/eventStatusSetup")
@@ -1177,7 +978,7 @@ public class EventController {
 		Map devinfo = eventDao.deviceInfoOne2(map);
 		model.addAttribute("dev_title", devinfo.get("dev_title").toString());
 
-		String path = part_drive_name + ":/web_server/" + "roi/";
+		String path = versionMemoryRepository.findPartDriveName() + ":/web_server/" + "roi/";
 
 		File folder = new File(path);
 
@@ -1185,7 +986,7 @@ public class EventController {
 			try {
 				folder.mkdir();
 			} catch (Exception e) {
-				e.getStackTrace();
+				System.out.println("areaSet 폴더 생성 Error");
 			}
 		}
 
@@ -1307,13 +1108,13 @@ public class EventController {
 		return "./setup/license";
 	}
 
-	@RequestMapping(value = "/get_license_info")
-	@ResponseBody
-	public String get_license_info() {
-		// System.out.println("get_license_info()");
-
-		return str;
-	}
+//	@RequestMapping(value = "/get_license_info")
+//	@ResponseBody
+//	public String get_license_info() {
+//		// System.out.println("get_license_info()");
+//
+//		return str;
+//	}
 
 	@RequestMapping(value = "/get_license_request_code")
 	@ResponseBody
@@ -1328,7 +1129,9 @@ public class EventController {
 
 		HttpURLConnection con = null;
 
-		String get_url = analyze_url.substring(0, analyze_url.lastIndexOf("/")) + "/get_license_request_code";
+		String analyzeUrl = versionMemoryRepository.findVersion().getAnalyze_url();
+		
+		String get_url = analyzeUrl.substring(0, analyzeUrl.lastIndexOf("/")) + "/get_license_request_code";
 
 		try {
 			URL req = new URL(get_url);
@@ -1342,27 +1145,28 @@ public class EventController {
 				sb.append(line);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.out.println("get_license_request_code Error");
 		} finally {
+			if (con != null)
+				con.disconnect();
 			try {
-				if (con != null)
-					con.disconnect();
 				if (in != null)
 					in.close();
 			} catch (Exception se) {
+				in = null;
 			}
 		}
 
 		// System.out.println(sb.toString());
 
-		String uploadPath = master_drive_name + ":/web_server/";
+		String uploadPath = versionMemoryRepository.findMasterDriveName() + ":/web_server/";
 		File folder = new File(uploadPath);
 
 		if (!folder.exists()) {
 			try {
 				folder.mkdir();
 			} catch (Exception e) {
-				e.getStackTrace();
+				System.out.println("get_license_request_code 폴더 생성 Error");
 			}
 		}
 
@@ -1373,7 +1177,7 @@ public class EventController {
 			try {
 				folder.mkdir();
 			} catch (Exception e) {
-				e.getStackTrace();
+				System.out.println("get_license_request_code 폴더 생성 Error");
 			}
 		}
 
@@ -1392,10 +1196,10 @@ public class EventController {
 			writer.write(json.get("request_code").toString());
 			writer.close();
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.out.println("get_license_request_code Image Error");
 		}
 
-		uploadPath = uploadPath.replace(master_drive_name + ":/web_server", "/webserver") + date;
+		uploadPath = uploadPath.replace(versionMemoryRepository.findMasterDriveName() + ":/web_server", "/webserver") + date;
 
 		return uploadPath;
 	}
@@ -1412,7 +1216,9 @@ public class EventController {
 
 		String body = "";
 
-		String requestURL = analyze_url.substring(0, analyze_url.lastIndexOf("/")) + "/set_license_code";
+		String analyzeUrl = versionMemoryRepository.findVersion().getAnalyze_url();
+		
+		String requestURL = analyzeUrl.substring(0, analyzeUrl.lastIndexOf("/")) + "/set_license_code";
 
 		try {
 			HttpClient client1 = HttpClientBuilder.create().build(); // HttpClient 생성
@@ -1438,7 +1244,7 @@ public class EventController {
 				// response1.getStatusLine().getStatusCode());
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.out.println("set_license_code Error");
 		}
 
 		return result;
@@ -1469,7 +1275,7 @@ public class EventController {
 		List<Map> itemDto = eventDao.itemInfo();
 
 		list.add(itemDto);
-		list.add(eventDao.actionInfoIsuse());
+		list.add(actionEventRepository.findByIsuse());
 
 		return list;
 	}
@@ -1517,9 +1323,8 @@ public class EventController {
 			saveMap.put("action_event", eventList.get(i));
 			saveMap.put("action_key", action_key);
 			Map result = eventDao.insertActionInfo(saveMap);
-			actionEventRepository.save(saveMap);
+			actionEventMemoryRepository.save(saveMap);
 			if (result != null) {
-				actionListTotal.add(result);
 				returnList.add(result);
 			}
 		}
@@ -1568,7 +1373,7 @@ public class EventController {
 		updateMap.put("action_event", map.get("action_event").toString());
 		updateMap.put("dev_title", map.get("dev_title").toString());
 
-		actionEventRepository.update(updateMap);
+		actionEventMemoryRepository.update(updateMap);
 
 		return updateMap;
 	}
@@ -1583,14 +1388,7 @@ public class EventController {
 		// System.out.println("deleteActionInfo()");
 
 		eventDao.deleteActionInfo(map);
-		actionEventRepository.deleteOne(map.get("dev_title").toString(), map.get("action_event").toString());
-
-//		for (int i = 0; i < actionListTotal.size(); i++) {
-//			if (actionListTotal.get(i).get("action_key").equals(map.get("action_key"))) {
-//				actionListTotal.remove(i);
-//				break;
-//			}
-//		}
+		actionEventMemoryRepository.deleteOne(map.get("dev_title").toString(), map.get("action_event").toString());
 
 		Map return_map = new HashMap();
 		return_map.put("status", "success");
@@ -1631,167 +1429,6 @@ public class EventController {
 	@Resource(name = "uploadPath")
 	private String uploadPath;
 
-	/*
-	 * // �옣鍮꾨줈遺��꽣 �뜲�씠�꽣 諛쏆븘�샂
-	 * 
-	 * @RequestMapping(value = "/insert")
-	 * 
-	 * @ResponseBody public void insert(@RequestBody EventDto eventDto) {
-	 * System.out.println("insert()");
-	 * 
-	 * File folder = new File(uploadPath);
-	 * 
-	 * if (!folder.exists()) { try { System.out.println("폴더 생성"); folder.mkdir(); }
-	 * catch (Exception e) { e.getStackTrace(); } } else {
-	 * System.out.println("폴더가 이미 존재합니다."); }
-	 * 
-	 * ObjectMapper mapper = new ObjectMapper(); //
-	 * mapper.configure(Feature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER, true);
-	 * String jsonStr = "";
-	 * 
-	 * try { jsonStr = mapper.writeValueAsString(eventDto); } catch
-	 * (JsonProcessingException e1) { System.out.println("오류 발생");
-	 * e1.printStackTrace(); }
-	 * 
-	 * if (eventDto.getImg_type() != null && eventDto.getImg_type() != null &&
-	 * (eventDto.getImg_type().equals("jpg") || eventDto.getImg_type().equals("bmp")
-	 * || eventDto.getImg_type().equals("png"))) {
-	 * 
-	 * //eventDto.setImg_data(eventDto.getImg_data().replaceAll("_", "/"));
-	 * //eventDto.setImg_data(eventDto.getImg_data().replaceAll("-", "+"));
-	 * 
-	 * 
-	 * byte[] decodedBytes =
-	 * DatatypeConverter.parseBase64Binary(eventDto.getImg_data());
-	 * 
-	 * // int num = Integer.parseInt(eventDao.countImage()) + 40; String name =
-	 * eventDto.getDev_ip() + "_" + eventDto.getDev_channel() + "_" +
-	 * eventDto.getEvent_name().replaceAll(" ", "_") + "_" +
-	 * eventDto.getEvent_time().replaceAll("-", "").replaceAll(":",
-	 * "").replaceAll(" ", "_"); System.out.println(name);
-	 * 
-	 * try { BufferedImage bufImg = ImageIO.read(new
-	 * ByteArrayInputStream(decodedBytes)); ImageIO.write(bufImg, "jpg", new
-	 * File(uploadPath + "/" + name + "." + eventDto.getImg_type()));
-	 * eventDto.setImage_name(uploadPath + "/" + name + "." +
-	 * eventDto.getImg_type()); System.out.println(eventDto.getImage_name());
-	 * //eventDao.insertImage(eventDto);
-	 * this.template.setMessageConverter((MessageConverter) new
-	 * StringMessageConverter()); this.template.convertAndSend("/showImage",
-	 * eventDto.getImage_name()); } catch (IOException e) { e.printStackTrace(); } }
-	 * 
-	 * if (eventDto.getEvent_name() != "test" && eventDto.getEvent_name() != "Test")
-	 * { if (Integer.parseInt(eventDao.selectCount(eventDto).get(0)) > 0) {
-	 * eventDao.updateCount(eventDto); } else { eventDao.insertCount(eventDto); }
-	 * eventDao.insertJson(eventDto); }
-	 * 
-	 * this.template.setMessageConverter((MessageConverter) new
-	 * StringMessageConverter()); this.template.convertAndSend("/receiveMessage",
-	 * jsonStr);
-	 * 
-	 * this.template.setMessageConverter((MessageConverter) new
-	 * StringMessageConverter()); this.template.convertAndSend("/receiveCount",
-	 * jsonStr);
-	 * 
-	 * }
-	 */
-	public void startPostQ() {
-		// System.out.println("startPostQ()");
-
-		Runnable runnable = new Runnable() {
-			@Override
-			public void run() {
-				// 스레드에게 시킬 작업 내용
-				while (true) {
-					Map map;
-					try {
-//						System.out.println("in = " + postQ.size());
-
-						map = postQ.take();
-
-						ObjectMapper mapper = new ObjectMapper();
-
-						String json = null;
-
-						try {
-							json = mapper.writeValueAsString(map);
-						} catch (JsonProcessingException e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
-						}
-
-						String body = "";
-
-						try {
-							// HttpClient client = HttpClientBuilder.create().build(); // HttpClient 생성
-							long now = System.currentTimeMillis();
-
-							URL url = new URL(analyze_url);
-							HttpURLConnection con = (HttpURLConnection) url.openConnection();
-							con.setRequestMethod("POST");
-//							con.setRequestProperty("Content-Type", "application/json; utf-8");
-							con.setRequestProperty("Content-Type", "application/json");
-							con.setRequestProperty("Accept", "application/json");
-
-							con.setDoOutput(true);
-							DataOutputStream wr = new DataOutputStream(con.getOutputStream());
-							wr.writeBytes(json);
-							wr.flush();
-							wr.close();
-
-//							System.out.println("postQ code = " + con.getResponseCode());
-
-							Charset charset = Charset.forName("UTF-8");
-							BufferedReader in = new BufferedReader(
-									new InputStreamReader(con.getInputStream(), charset));
-
-							String inputLine;
-							StringBuffer response = new StringBuffer();
-
-							while ((inputLine = in.readLine()) != null) {
-								response.append(inputLine);
-							}
-
-							in.close();
-
-							long start = System.currentTimeMillis();
-
-							// Response 출력
-
-							/*
-							 * if (con.getResponseCode() == 200) { ResponseHandler<String> handler = new
-							 * BasicResponseHandler(); body = handler.handleResponse(response); } else {
-							 * //System.out.println("response is error : " +
-							 * response.getStatusLine().getStatusCode()); client =
-							 * HttpClientBuilder.create().build(); // HttpClient 생성 postRequest = new
-							 * HttpPost(analyze_url); postRequest.setHeader("Accept", "application/json");
-							 * postRequest.setHeader("Connection", "keep-alive");
-							 * postRequest.setHeader("Content-Type", "application/json"); }
-							 */
-						} catch (Exception e) {
-							System.err.println(e.toString());
-							StringWriter error = new StringWriter();
-							e.printStackTrace(new PrintWriter(error));
-							String errorMsg = error.toString();
-							ErrorLogDto errorLogDto = new ErrorLogDto();
-							errorLogDto.setLog_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
-							errorLogDto.setLog_place("POST 오류");
-							errorLogDto.setLog_content(errorMsg);
-							eventDao.insertErrorLog(errorLogDto);
-							errorWebsocket(errorLogDto);
-						}
-
-					} catch (Exception e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-				}
-			}
-		};
-		// 스레드풀에게 작업 처리 요청
-		executorService.submit(runnable);
-	}
-
 	JSONObject durationJSON = new JSONObject();
 	int testCount = 0;
 	Date date4 = new Date();
@@ -1807,850 +1444,25 @@ public class EventController {
 
 		Map returnMap = new HashMap();
 
-		if (postQ.size() <= 60) {
-			try {
-				insertQ.put(map);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+		if (postService.chkQSize()) {
+			insertImagesService.insertInsertQ(map);
 
 			returnMap.put("status", "ok");
 		} else {
 			returnMap.put("status", "postQ is full");
 		}
 
-		returnMap.put("insertQ", insertQ.size());
-		returnMap.put("postQ", postQ.size());
-		returnMap.put("responseQ", responseQ.size());
+		returnMap.put("insertQ", insertImagesRepository.size());
+		returnMap.put("postQ", postRepository.size());
+		returnMap.put("responseQ", responseEventsRepository.size());
 
 		return returnMap;
-	}
-
-	public void startInsertQ() {
-		Runnable runnable = new Runnable() {
-			@Override
-			public void run() {
-				while (true) {
-					Map map;
-					try {
-						map = insertQ.take();
-
-						if (postQ.size() <= 60) {
-							if (map.get("img_data") != null) {
-
-								// sendMonitor(map);
-
-								// insertImageLogJson(map);
-
-								// insertImageLog(map);
-
-								Map postMap = new HashMap();
-
-								String base64 = map.get("img_data").toString();
-
-								Map metadata = new HashMap();
-
-								long start = System.currentTimeMillis();
-								int dev_ch = Integer.parseInt(map.get("dev_ch").toString());
-								String event_time = map.get("event_time").toString();
-
-								if (insertImagesTimeRepository.findTime(dev_ch).isPresent()) {
-									SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-									Date now = dateFormat.parse(event_time);
-									Date past = dateFormat.parse(insertImagesTimeRepository.findTime(dev_ch).get());
-
-									int second = 40;
-
-									if (now.getTime() - past.getTime() > second * 1000) {
-										insertImagesTimeRepository.insertTime(dev_ch, event_time);
-//										base64Repository.save(dev_ch, base64);
-
-										String uploadPath = part_drive_name + ":/web_server/" + "roi/";
-
-										File folder = new File(uploadPath);
-
-										if (!folder.exists()) {
-											try {
-												folder.mkdir();
-											} catch (Exception e) {
-												e.getStackTrace();
-											}
-										}
-
-										uploadPath += dev_ch + ".jpg";
-
-										String data = base64;
-
-										byte[] imageBytes = DatatypeConverter.parseBase64Binary(data);
-
-										try {
-											File lOutFile = new File(uploadPath);
-
-											FileOutputStream lFileOutputStream = new FileOutputStream(lOutFile);
-
-											lFileOutputStream.write(imageBytes);
-
-											lFileOutputStream.close();
-
-										} catch (Exception e) {
-											e.printStackTrace();
-											System.out.println("원본 이미지 저장 안됨");
-										}
-									}
-								} else {
-									insertImagesTimeRepository.insertTime(dev_ch, event_time);
-//									base64Repository.save(dev_ch, base64);
-
-									String uploadPath = part_drive_name + ":/web_server/" + "roi/";
-
-									File folder = new File(uploadPath);
-
-									if (!folder.exists()) {
-										try {
-											folder.mkdir();
-										} catch (Exception e) {
-											e.getStackTrace();
-										}
-									}
-
-									uploadPath += dev_ch + ".jpg";
-
-									String data = base64;
-
-									byte[] imageBytes = DatatypeConverter.parseBase64Binary(data);
-
-									try {
-										File lOutFile = new File(uploadPath);
-
-										FileOutputStream lFileOutputStream = new FileOutputStream(lOutFile);
-
-										lFileOutputStream.write(imageBytes);
-
-										lFileOutputStream.close();
-
-									} catch (Exception e) {
-										e.printStackTrace();
-										System.out.println("원본 이미지 저장 안됨");
-									}
-								}
-
-								postMap.put("dev_ch", dev_ch);
-								Map devInfo = eventDao.deviceInfoOne2(map);
-
-								if (devInfo != null) {
-									String dev_title = devInfo.get("dev_title").toString();
-
-									String img_name = "ch" + dev_ch + "_" + event_time.split(" ")[1].replaceAll(":", "")
-											+ ".jpg";
-
-									int dev_web_port = Integer.parseInt(map.get("dev_web_port").toString());
-									int dev_port = Integer.parseInt(map.get("dev_port").toString());
-
-									metadata.put("start", start);
-									metadata.put("item_name", map.get("item_name").toString());
-									metadata.put("dev_ip", map.get("dev_ip").toString());
-									metadata.put("dev_id", map.get("dev_id").toString());
-									metadata.put("dev_pwd", map.get("dev_pw").toString());
-									metadata.put("dev_port", dev_port);
-									metadata.put("dev_web_port", dev_web_port);
-									metadata.put("dev_ch", dev_ch);
-									metadata.put("event_time", event_time);
-									metadata.put("user_name", map.get("user_name").toString());
-									metadata.put("user_passwd", map.get("user_passwd").toString());
-									metadata.put("img_name", img_name);
-
-									List ml_functions = new ArrayList();
-
-									Map actionEvent = actionSetupService.selectOne(dev_ch);
-
-									LocalDate date = LocalDate.of(
-											Integer.parseInt(event_time.split(" ")[0].split("-")[0].toString()),
-											Integer.parseInt(event_time.split(" ")[0].split("-")[1].toString()),
-											Integer.parseInt(event_time.split(" ")[0].split("-")[2].toString()));
-									DayOfWeek dayOfWeek = date.getDayOfWeek();
-
-									String day = dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.KOREAN) + "_"
-											+ Integer.parseInt(event_time.split(" ")[1].split(":")[0].toString());
-
-									if (actionEvent != null) {
-										if (Integer.parseInt(actionEvent.get("action_fire").toString()) == 0
-												&& scheduleRepository.chkDate(dev_ch, "fire", day)) {
-											ml_functions.add("kwater_fire");
-										}
-										if (Integer.parseInt(actionEvent.get("action_falldown").toString()) == 0
-												&& scheduleRepository.chkDate(dev_ch, "falldown", day)) {
-											ml_functions.add("kwater_falldown");
-										}
-										if (Integer.parseInt(actionEvent.get("actopm_flood").toString()) == 0
-												&& scheduleRepository.chkDate(dev_ch, "flood", day)) {
-											ml_functions.add("kwater_flood");
-										}
-										if (Integer.parseInt(actionEvent.get("action_glove").toString()) == 0
-												&& scheduleRepository.chkDate(dev_ch, "glove", day)) {
-											ml_functions.add("kwater_glove");
-											Map areaMap = new HashMap();
-											areaMap.put("dev_ch", dev_ch);
-											areaMap.put("area_event", "glove");
-											Map area = areaSetService.selectOne(areaMap);
-											if (area != null) {
-												ArrayList<Map> list = new ObjectMapper().readValue(
-														area.get("area_total").toString(),
-														new TypeReference<List<Map>>() {
-														});
-												List pathList = new ArrayList();
-												List tmpList = new ArrayList();
-												List returnList = new ArrayList();
-												for (int i = 0; i < list.size(); i++) {
-													Map listMap = list.get(i);
-													if (listMap.get("x") != null) {
-														pathList = new ArrayList();
-														pathList.add(listMap.get("x"));
-														pathList.add(listMap.get("y"));
-														tmpList.add(pathList);
-														if (i == list.size() - 1) {
-															returnList.add(tmpList);
-														}
-													} else {
-														if (i != 0) {
-															returnList.add(tmpList);
-															tmpList = new ArrayList();
-														}
-													}
-												}
-												metadata.put("panel_areas", returnList);
-											}
-										}
-										if (Integer.parseInt(actionEvent.get("action_invasion").toString()) == 0
-												&& scheduleRepository.chkDate(dev_ch, "invasion", day)) {
-											ml_functions.add("kwater_invasion");
-											Map areaMap = new HashMap();
-											areaMap.put("dev_ch", dev_ch);
-											areaMap.put("area_event", "invasion");
-											Map area = areaSetService.selectOne(areaMap);
-											if (area != null) {
-												ArrayList<Map> list = new ObjectMapper().readValue(
-														area.get("area_total").toString(),
-														new TypeReference<List<Map>>() {
-														});
-												List pathList = new ArrayList();
-												List tmpList = new ArrayList();
-												List returnList = new ArrayList();
-												for (int i = 0; i < list.size(); i++) {
-													Map listMap = list.get(i);
-													if (listMap.get("x") != null) {
-														pathList = new ArrayList();
-														pathList.add(listMap.get("x"));
-														pathList.add(listMap.get("y"));
-														tmpList.add(pathList);
-														if (i == list.size() - 1) {
-															returnList.add(tmpList);
-														}
-													} else {
-														if (i != 0) {
-															returnList.add(tmpList);
-															tmpList = new ArrayList();
-														}
-													}
-												}
-												metadata.put("invasion_areas", returnList);
-											}
-										}
-										if (Integer.parseInt(actionEvent.get("actopm_leak").toString()) == 0
-												&& scheduleRepository.chkDate(dev_ch, "leak", day)) {
-											ml_functions.add("kwater_leak");
-										}
-										if (Integer.parseInt(actionEvent.get("action_loitering").toString()) == 0
-												&& scheduleRepository.chkDate(dev_ch, "loitering", day)) {
-											ml_functions.add("kwater_loitering");
-											Map areaMap = new HashMap();
-											areaMap.put("dev_ch", dev_ch);
-											areaMap.put("area_event", "loitering");
-											Map area = areaSetService.selectOne(areaMap);
-											if (area != null) {
-												ArrayList<Map> list = new ObjectMapper().readValue(
-														area.get("area_total").toString(),
-														new TypeReference<List<Map>>() {
-														});
-												List pathList = new ArrayList();
-												List tmpList = new ArrayList();
-												List returnList = new ArrayList();
-												for (int i = 0; i < list.size(); i++) {
-													Map listMap = list.get(i);
-													if (listMap.get("x") != null) {
-														pathList = new ArrayList();
-														pathList.add(listMap.get("x"));
-														pathList.add(listMap.get("y"));
-														tmpList.add(pathList);
-														if (i == list.size() - 1) {
-															returnList.add(tmpList);
-														}
-													} else {
-														if (i != 0) {
-															returnList.add(tmpList);
-															tmpList = new ArrayList();
-														}
-													}
-												}
-												metadata.put("loitering_areas", returnList);
-											}
-										}
-										if (Integer.parseInt(actionEvent.get("action_handaction").toString()) == 0
-												&& scheduleRepository.chkDate(dev_ch, "handaction", day)) {
-											ml_functions.add("kwater_handaction");
-										}
-										if (Integer.parseInt(actionEvent.get("action_spin").toString()) == 0
-												&& scheduleRepository.chkDate(dev_ch, "spin", day)) {
-											ml_functions.add("kwater_spin");
-										}
-
-										if (ml_functions.size() != 0) {
-											postMap.put("base64", base64);
-											postMap.put("base64_return", true);
-											postMap.put("metadata", metadata);
-											postMap.put("ml_functions", ml_functions);
-											postMap.put("callback_url", request_url);
-
-											postQ.put(postMap);
-//											System.out.println("postQ.size() = " + postQ.size());
-										}
-									}
-								}
-							}
-						}
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-			}
-		};
-		// 스레드풀에게 작업 처리 요청
-		executorService.submit(runnable);
-	}
-
-	@RequestMapping(value = "/insertImage", method = RequestMethod.POST)
-	@ResponseBody
-	public String insertImage(@RequestBody String tmpResponse)
-			throws IOException, ParseException, ImageProcessingException, java.text.ParseException {
-		// System.out.println("insertImage()");
-
-		long start = System.currentTimeMillis();
-
-		/*
-		 * testCount ++; Date date5 = new Date(); long duration5 = date5.getTime(); if
-		 * ((duration5 - duration4) / 1000 == 10 || (duration5 - duration4) / 1000 > 10)
-		 * { //System.out.println("count = " + testCount); date4 = new Date(); duration4
-		 * = date4.getTime(); testCount = 0; }
-		 */
-
-		try {
-			// insertImageLogJson(tmpResponse);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			System.err.println(e.toString());
-			StringWriter error = new StringWriter();
-			e.printStackTrace(new PrintWriter(error));
-			String errorMsg = error.toString();
-			ErrorLogDto errorLogDto = new ErrorLogDto();
-			errorLogDto.setLog_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
-			errorLogDto.setLog_place("insertImage JSON 형태 로그 저장 오류");
-			errorLogDto.setLog_content(errorMsg);
-			eventDao.insertErrorLog(errorLogDto);
-			errorWebsocket(errorLogDto);
-		}
-		long nano = System.currentTimeMillis();
-		// System.out.println("insertImageLogJson 받는 시간 = " + (nano - start)/1000.0 +
-		// "초");
-
-		try {
-			// insertImageLog(tmpResponse);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			System.err.println(e.toString());
-			StringWriter error = new StringWriter();
-			e.printStackTrace(new PrintWriter(error));
-			String errorMsg = error.toString();
-			ErrorLogDto errorLogDto = new ErrorLogDto();
-			errorLogDto.setLog_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
-			errorLogDto.setLog_place("insertImage 테이블 형태 로그 저장 오류");
-			errorLogDto.setLog_content(errorMsg);
-			eventDao.insertErrorLog(errorLogDto);
-			errorWebsocket(errorLogDto);
-		}
-		nano = System.currentTimeMillis();
-		// System.out.println("insertImageLog 받는 시간 = " + (nano - start)/1000.0 + "초");
-
-		JSONParser jsonParser = new JSONParser();
-		JSONObject json = new JSONObject();
-
-		try {
-			json = (JSONObject) jsonParser.parse(tmpResponse);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			System.err.println(e.toString());
-			StringWriter error = new StringWriter();
-			e.printStackTrace(new PrintWriter(error));
-			String errorMsg = error.toString();
-			ErrorLogDto errorLogDto = new ErrorLogDto();
-			errorLogDto.setLog_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
-			errorLogDto.setLog_place("insertImage 문자열을 JSON 형태로 형변환 하는 과정 오류");
-			errorLogDto.setLog_content(errorMsg);
-			eventDao.insertErrorLog(errorLogDto);
-			errorWebsocket(errorLogDto);
-		}
-
-		if (json.get("img_data") == null) {
-			// requestJson.put("status", "failed");
-			// System.out.println("insertImage() 이미지 없음");
-		} else {
-			String item_name = json.get("item_name").toString();
-			String dev_ip = json.get("dev_ip").toString();
-			String dev_id = json.get("dev_id").toString();
-			String dev_ch = json.get("dev_ch").toString();
-			String dev_port = json.get("dev_port").toString();
-			String dev_web_port = json.get("dev_web_port").toString();
-			String dev_pw = json.get("dev_pw").toString();
-			String event_time = json.get("event_time").toString();
-
-			String duration_keyword = item_name + "_" + dev_ip + "_" + dev_id + "_" + dev_port + "_" + dev_ch;
-
-			Date date = null;
-			try {
-				date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(event_time);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				System.err.println(e.toString());
-				StringWriter error = new StringWriter();
-				e.printStackTrace(new PrintWriter(error));
-				String errorMsg = error.toString();
-				ErrorLogDto errorLogDto = new ErrorLogDto();
-				errorLogDto.setLog_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
-				errorLogDto.setLog_place("insertImage 날짜 문자열을 날짜 객체로 형변환 오류1");
-				errorLogDto.setLog_content(errorMsg);
-				eventDao.insertErrorLog(errorLogDto);
-				errorWebsocket(errorLogDto);
-			}
-			long duration1 = date.getTime();
-			long duration;
-
-			long durationTime = 0; // 1000 = 초, 60000 = 분, 3600000 = 시간
-
-			JSONObject jsonObject = null;
-			ArrayList<String> originalTags = null;
-
-			// System.out.println("duration_keyword = " + duration_keyword);
-			// System.out.println("durationJSON.get(duration_keyword) != null = " +
-			// (durationJSON.get(duration_keyword) != null));
-
-			if (durationJSON.get(duration_keyword) != null) {
-				JSONParser jsonParser2 = new JSONParser();
-				JSONObject durationResponse = (JSONObject) durationJSON.get(duration_keyword);
-				try {
-					jsonObject = (JSONObject) jsonParser.parse(durationResponse.get("durationResponse").toString());
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					System.err.println(e.toString());
-					StringWriter error = new StringWriter();
-					e.printStackTrace(new PrintWriter(error));
-					String errorMsg = error.toString();
-					ErrorLogDto errorLogDto = new ErrorLogDto();
-					errorLogDto.setLog_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
-					errorLogDto.setLog_place("insertImage 해당 장비의 이전 데이터 형변환 도중 오류");
-					errorLogDto.setLog_content(errorMsg);
-					eventDao.insertErrorLog(errorLogDto);
-					errorWebsocket(errorLogDto);
-				}
-				try {
-					date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(event_time);
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					System.err.println(e.toString());
-					StringWriter error = new StringWriter();
-					e.printStackTrace(new PrintWriter(error));
-					String errorMsg = error.toString();
-					ErrorLogDto errorLogDto = new ErrorLogDto();
-					errorLogDto.setLog_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
-					errorLogDto.setLog_place("insertImage 날짜 문자열을 날짜 객체로 형변환 오류2");
-					errorLogDto.setLog_content(errorMsg);
-					eventDao.insertErrorLog(errorLogDto);
-					errorWebsocket(errorLogDto);
-				}
-				duration1 = date.getTime();
-				duration = (Long) durationResponse.get("duration");
-				// System.out.println("event_time = " + event_time);
-				// System.out.println(new SimpleDateFormat ("yyyy-MM-dd HH:mm:ss").format(new
-				// Date(duration)));
-				// System.out.println(new SimpleDateFormat ("yyyy-MM-dd HH:mm:ss").format(date)
-				// + " = " + new SimpleDateFormat ("yyyy-MM-dd HH:mm:ss").format(new
-				// Date(duration)));
-				durationTime = (duration1 - duration) / 1000;
-				// System.out.println("durationTime = " + durationTime);
-				originalTags = (JSONArray) jsonObject.get("tags");
-			}
-
-			// System.out.println("ch = " + dev_ch + " / duration1 = " + duration1 + " /
-			// durationTime = " + Math.abs(durationTime));
-
-			if ((durationJSON.get(duration_keyword) != null) && (Math.abs(durationTime) < 5)) {
-				// JSONObject jsonObject =
-				// (JSONObject)jsonParser2.parse(durationJSON.get(duration_keyword).toString());
-				/*
-				 * JSONObject req_info = (JSONObject)jsonObject.get("req_info");
-				 * req_info.put("event_time", event_time); req_info.put("img_data",
-				 * json.get("img_data").toString()); String img_name = "ch" + dev_ch + "_" +
-				 * event_time.split(" ")[1].split(":")[0] +
-				 * event_time.split(" ")[1].split(":")[1] +
-				 * event_time.split(" ")[1].split(":")[2] + ".jpg"; jsonObject.put("img_name",
-				 * img_name); jsonObject.put("req_info", req_info);
-				 * //System.out.println(jsonObject.toJSONString().replaceAll("\\\\", ""));
-				 * //System.out.println(jsonObject.toJSONString().replaceAll("\\\\", "")); try {
-				 * responseEvent2(jsonObject.toJSONString().replaceAll("\\\\", "")); } catch
-				 * (Exception e) { // TODO Auto-generated catch block e.printStackTrace(); }
-				 */
-			} else {
-				JSONObject req_info = new JSONObject();
-				req_info.put("item_name", item_name);
-				req_info.put("dev_ip", dev_ip);
-				req_info.put("dev_id", dev_id);
-				req_info.put("dev_pwd", dev_pw);
-				req_info.put("dev_port", dev_port);
-				req_info.put("dev_web_port", dev_web_port);
-				req_info.put("dev_ch", dev_ch);
-				req_info.put("event_time", event_time);
-				req_info.put("start_time", start);
-				req_info.put("img_data", json.get("img_data").toString());
-
-				String img_data = json.get("img_data").toString();
-
-				if (json.get("mot_data") != null) {
-					img_data = json.get("mot_data").toString();
-				}
-
-				String img_type = json.get("img_type").toString();
-				String user_name = json.get("user_name").toString();
-				String img_name = "ch" + dev_ch + "_" + event_time.split(" ")[1].split(":")[0]
-						+ event_time.split(" ")[1].split(":")[1] + event_time.split(" ")[1].split(":")[2] + ".jpg";
-				json = new JSONObject();
-				json.put("req_info", req_info);
-				json.put("img_name", img_name);
-				json.put("img_data", img_data);
-				json.put("img_type", "jpg");
-				json.put("client_code", client_code);
-
-				if (client_code.equals("poldrone")) {
-					json.put("event_request", "People Detect");
-				}
-				// json.put("client_code", "samsung_heavy_industries"); //cheongju_battalion
-				// samsung_heavy_industries
-				json.put("user_name", user_name);
-				json.put("user_passwd", "12lsxdfq");
-				json.put("request_url", request_url);
-				// json.put("request_url", "https://192.168.100.101:20101/responseEvent");
-
-				// String response = post("http://192.168.100.102:5000/search_async",
-				// json.toJSONString().replaceAll("\\\\", ""));
-
-				// System.out.println("보내고 결과 받는 시간 = " + (now - start)/1000.0 + "초");
-
-				// post(json.toJSONString().replaceAll("\\\\", ""));
-
-				// json.put("event_request", "People Detect");
-				// json.put("request_url", "https://211.117.45.3:20101/responseEvent");
-				// json.put("request_url", "http://127.0.0.1:20102/responseEvent");
-				// String response = post("http://59.10.218.200:5000/search_async",
-				// json.toJSONString().replaceAll("\\\\", ""));
-				// jsonParser = new JSONParser();
-				// JSONObject queue = (JSONObject)jsonParser.parse(response);
-
-				long now = System.currentTimeMillis();
-				if ((now - start) / 1000.0 > 0.03) {
-					// System.out.println("insertImage 분석 시간 = " + (now - start)/1000.0 + "초");
-				}
-				// System.out.println("쓰레드 갯수 = " + ((ThreadPoolExecutor)
-				// executorService).getPoolSize());
-			}
-			// requestJson.put("status", "success");
-		}
-
-		JSONParser jsonParser2 = new JSONParser();
-		JSONObject json2 = new JSONObject();
-
-		try {
-			json2 = (JSONObject) jsonParser2.parse(tmpResponse);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		String item_name = json2.get("item_name").toString();
-		String dev_ip = json2.get("dev_ip").toString();
-		String dev_id = json2.get("dev_id").toString();
-		String dev_port = json2.get("dev_port").toString();
-		String dev_ch = json2.get("dev_ch").toString();
-
-		String duration_keyword = item_name + "_" + dev_ip + "_" + dev_id + "_" + dev_port + "_" + dev_ch;
-
-		String event_time = json2.get("event_time").toString();
-		String event_result = "none";
-		String ch = dev_ch;
-
-		if (insertImageReturn.get(duration_keyword) != null) {
-			JSONObject insertImageReturnResponse = (JSONObject) insertImageReturn.get(duration_keyword);
-			event_time = insertImageReturnResponse.get("event_time").toString();
-			event_result = insertImageReturnResponse.get("event_result").toString();
-			ch = insertImageReturnResponse.get("ch").toString();
-		}
-
-		JSONObject requestJson = new JSONObject();
-		requestJson.put("status", "success");
-		requestJson.put("event_result", event_result);
-		requestJson.put("event_time", event_time);
-		requestJson.put("ch", Integer.parseInt(ch));
-
-		long nono = System.currentTimeMillis();
-
-		// System.out.println("insertImage() = " + (nano - start)/1000.0 + "초");
-		// System.out.println("16채널 기준 insertImage() = " + (((nano - start)/1000.0) *
-		// 16) + "초");
-		insertImageTime = (((nano - start) / 1000.0) * 16);
-
-		return requestJson.toJSONString().replaceAll("\\\\", "");
-	}
-
-	@RequestMapping(value = "/responseEvent_poldrone", method = RequestMethod.POST)
-	@ResponseBody
-	public void responseEvent_poldrone(@RequestBody String tmpResponse)
-			throws IOException, ParseException, ImageProcessingException, java.text.ParseException {
-		// System.out.println("responseEvent_poldrone()");
-		long start = System.currentTimeMillis();
-
-		JSONParser jsonParser = new JSONParser();
-		JSONObject jsonObject = new JSONObject();
-		try {
-			jsonObject = (JSONObject) jsonParser.parse(tmpResponse);
-		} catch (Exception e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
-		}
-
-		jsonObject.put("color_tags", (JSONArray) jsonObject.get("tags"));
-		jsonObject.remove("tags");
-
-		JSONArray object_list = (JSONArray) jsonObject.get("object_list");
-
-		LinkedHashSet<String> linkedHashSet = new LinkedHashSet<String>();
-
-		for (int i = 0; i < object_list.size(); i++) {
-			JSONObject object_json = (JSONObject) object_list.get(i);
-			linkedHashSet.add(object_json.get("class_name").toString());
-		}
-
-		object_list = new JSONArray();
-
-		for (int i = 0; i < linkedHashSet.size(); i++) {
-			if (linkedHashSet.toArray()[i].equals("person")) {
-				object_list.add(linkedHashSet.toArray()[i]);
-			}
-		}
-
-		jsonObject.put("tags", object_list);
-		jsonObject.remove("object_list");
-
-		tmpResponse = jsonObject.toJSONString().replaceAll("\\\\", "");
-
-		long nano = System.currentTimeMillis();
-		// System.out.println("1차 보내고 결과 받는 시간 = " + (nano - start)/1000.0 + "초");
-		JSONObject req_info = (JSONObject) jsonObject.get("req_info");
-
-		if (jsonObject.get("req_info") != null) {
-			nano = System.currentTimeMillis();
-			// System.out.println("4차 보내고 결과 받는 시간 = " + (nano - start)/1000.0 + "초");
-			try {
-				// saveImage(tmpResponse);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			nano = System.currentTimeMillis();
-			// System.out.println("saveImage 결과 받는 시간 = " + (nano - start)/1000.0 + "초");
-			try {
-				insertResponseLogJson(tmpResponse);
-			} catch (Exception e2) {
-				// TODO Auto-generated catch block
-				e2.printStackTrace();
-			}
-			nano = System.currentTimeMillis();
-			// System.out.println("insertResponseLogJson 결과 받는 시간 = " + (nano -
-			// start)/1000.0 + "초");
-
-			String event_time = req_info.get("event_time").toString();
-
-			Date date = new Date();
-			try {
-				date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(event_time);
-			} catch (Exception e2) {
-				// TODO Auto-generated catch block
-				e2.printStackTrace();
-			}
-			long duration1 = date.getTime();
-			long duration;
-			// System.out.println("json 변수 만드는 시간 = " + (now - start)/1000.0 + "초");
-
-			long durationTime = 0; // 1000 = 초, 60000 = 분, 3600000 = 시간
-
-			String item_name = req_info.get("item_name").toString();
-			String dev_ip = req_info.get("dev_ip").toString();
-			String dev_id = req_info.get("dev_id").toString();
-			String dev_port = req_info.get("dev_port").toString();
-			String dev_ch = req_info.get("dev_ch").toString();
-
-			String duration_keyword = item_name + "_" + dev_ip + "_" + dev_id + "_" + dev_port + "_" + dev_ch;
-
-			ArrayList<String> originalTags = (JSONArray) jsonObject.get("tags");
-
-			int count = originalTags.size();
-
-			String event_result = "";
-
-			if (count > 0) {
-				event_result = "detect";
-			} else {
-				event_result = "none";
-			}
-
-			JSONObject insertImageJson = new JSONObject();
-			insertImageJson.put("event_time", event_time);
-			insertImageJson.put("event_result", event_result);
-			insertImageJson.put("ch", dev_ch);
-
-			insertImageReturn.put(duration_keyword, insertImageJson);
-
-			// System.out.println("태그 존재 여부 = " + count);
-
-			if (durationJSON.get(duration_keyword) != null) {
-				JSONParser jsonParser2 = new JSONParser();
-				JSONObject durationResponse = (JSONObject) durationJSON.get(duration_keyword);
-				try {
-					jsonObject = (JSONObject) jsonParser2.parse(durationResponse.get("durationResponse").toString());
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				duration = (Long) durationResponse.get("duration");
-				durationTime = (duration1 - duration) / 1000;
-			}
-
-			if (count > 0 && (durationJSON.get(duration_keyword) == null || Math.abs(durationTime) == 5
-					|| Math.abs(durationTime) > 5)) {
-				// System.out.println("durationTime = ch" + dev_ch + "_" + event_time);
-				JSONObject json = new JSONObject();
-				((JSONObject) jsonObject.get("req_info")).remove("img_data");
-				durationResponse = jsonObject.toJSONString().replaceAll("\\\\", "");
-				duration = date.getTime();
-				json.put("durationResponse", durationResponse);
-				json.put("date", date);
-				json.put("duration", duration);
-				durationJSON.put(duration_keyword, json);
-			}
-			/*
-			 * if (durationJSON.get(duration_keyword) != null && durationTime < 10) { } else
-			 * { }
-			 */
-			// System.out.println("분석 서버에서 받은 시간 = " + new SimpleDateFormat("yyyy-MM-dd
-			// HH:mm:ss.SSS").format(nano));
-
-			nano = System.currentTimeMillis();
-			// System.out.println("2차 보내고 결과 받는 시간 = " + (nano - start)/1000.0 + "초");
-			try {
-				updateImageLog(tmpResponse);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			nano = System.currentTimeMillis();
-			// System.out.println("updateImageLog 결과 받는 시간 = " + (nano - start)/1000.0 +
-			// "초");
-			try {
-				insertResponseLog(tmpResponse);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			nano = System.currentTimeMillis();
-			// System.out.println("insertResponseLog 결과 받는 시간 = " + (nano - start)/1000.0 +
-			// "초");
-			try {
-				// saveImageData(tmpResponse);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			nano = System.currentTimeMillis();
-			// System.out.println("saveImageData 결과 받는 시간 = " + (nano - start)/1000.0 +
-			// "초");
-			try {
-				// dashThread(tmpResponse);
-			} catch (Exception e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-			nano = System.currentTimeMillis();
-			// System.out.println("7차 보내고 결과 받는 시간 = " + (nano - start)/1000.0 + "초");
-			try {
-				// logThread(tmpResponse);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			nano = System.currentTimeMillis();
-			// System.out.println("8차 보내고 결과 받는 시간 = " + (nano - start)/1000.0 + "초");
-			try {
-				// monitoringThread(tmpResponse);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			nano = System.currentTimeMillis();
-			// System.out.println("9차 보내고 결과 받는 시간 = " + (nano - start)/1000.0 + "초");
-			try {
-				sendEventAction(tmpResponse);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			nano = System.currentTimeMillis();
-			// System.out.println("10차 보내고 결과 받는 시간 = " + (nano - start)/1000.0 + "초");
-
-			ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) executorService;
-
-			// System.out.println("전체 쓰레드 갯수 = " + threadPoolExecutor.getPoolSize());
-
-			// System.out.println("responseEvent 결과 = " + tmpResponse.toString());
-			if (count > 0) {
-				long now = System.currentTimeMillis();
-
-				// System.out.println("responseEvent() = " + (now - start)/1000.0 + "초");
-				// System.out.println("16채널 기준 responseEvent() = " + (((now - start)/1000.0) *
-				// 16) + "초");
-				System.out.println("16채널 기준 insert + response = " + (insertImageTime + (((now - start) / 1000.0) * 16))
-						+ "초" + " / 검출 객체 수 = " + count + "개");
-				if ((insertImageTime + (((now - start) / 1000.0) * 16)) > 1) {
-					System.out.println("insertImage() = " + insertImageTime);
-					System.out.println("responseEvent() = " + (((now - start) / 1000.0) * 16));
-				}
-			} else {
-				// System.out.println("검출된 객체 없음");
-			}
-		}
-		long end = System.currentTimeMillis();
-		// System.out.println("responseEvent() = " + (end - start)/1000.0 + "초");
 	}
 
 	@PostMapping("/responseEvents")
 	@ResponseBody
 //	public Map responseEvents(@RequestBody ResponseEventDto responseEventDto) throws JsonProcessingException, java.text.ParseException {
-	public Map responseEvents(@RequestBody Map map) throws JsonProcessingException, java.text.ParseException {
+	public Map responseEvents(@RequestBody Map map) throws JsonProcessingException, java.text.ParseException, InterruptedException {
 //		System.out.println("responseEvents()");
 		
 //		MetadataDto metadata = responseEventDto.getMetadata();
@@ -2672,7 +1484,7 @@ public class EventController {
 //			System.out.println("model_name = " + model_name);
 //			System.out.println("resultMap.get(model_name) = " + resultMap.get(model_name));
 //			System.out.println("===== responseEvents 검사 종료 =====");
-			if (resultMap.get(model_name) == null) {
+			if (responseEventsRepository.isBox(model_name)) {
 				returnMap.put("status", "failed");
 				returnMap.put("detail", "not support");
 				returnMap.put("model_name", model_name);
@@ -2682,15 +1494,9 @@ public class EventController {
 		}
 		
 		if (oneSecDurService.join(oneSecDurDto)) {
-			try {
-//				responseQ.put(responseEventDto);
-				responseQ.put(map);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			responseEventsService.insertResponseQ(map);
 
-			returnMap.put("queue", responseQ.size());
+			returnMap.put("queue", responseEventsRepository.size());
 			returnMap.put("status", "ok");
 
 			return returnMap;
@@ -2700,72 +1506,6 @@ public class EventController {
 		returnMap.put("detail", "please one second over");
 	
 		return returnMap;
-	}
-
-	@Transactional
-	public void startResponseQ() {
-		Runnable runnable = new Runnable() {
-			@Override
-			public void run() {
-				while (true) {
-//					ResponseEventDto responseEventDto;
-					Map map;
-					try {
-//						responseEventDto = responseQ.take();
-						map = responseQ.take();
-
-//						String base64 = responseEventDto.getBase64();
-						String base64 = map.get("base64").toString();
-						
-//						MetadataDto metadata = responseEventDto.getMetadata();
-						Map metadata = (Map) map.get("metadata");
-						
-//						List<MlResultDto> ml_result = responseEventDto.getMl_result();
-						ArrayList ml_result = (ArrayList) map.get("ml_result");
-						
-						// insertResponseLogJson(map); // 추후 수정
-
-						// insertResponseLog(map); // 추후 수정
-
-						/**
-						 * 1. 반복문 1바퀴 돌 때마다 로직 여러 개를 넣음
-						 * 2. 그 반복문 작업을 controller에서 할 지 service에서 할 지 고민 중
-						 *   if i) controller에서 하면 controller가 지저분해짐(특이 사항이 없으면 이 방법을 택할 예정)
-						 *   if ii) service에서 하면 service에서 service를 호출하는 일이 벌어짐 
-						 * 3. 이미지 서비스는 원본 이미지와 썸네일 이미지 만드는 로직이 각각 존재하며 매개변수는 dto를 만들 예정
-						 * 4. 검색 결과(monitoring) 서비스도 이미지 저장(썸네일과 원본이미지 중복?)과 이미지 데이터 저장이 별도로 존재하며 매개변수는 dto로 만들어야 함?
-						 * 5. 스카다로 웹소켓을 보내는 로직은 반복문으로 이벤트를 리스트에 넣은 후 로직 실행
-						 * 6. 쓰레드까지 계획에 넣어놔야 하므로 컨트롤러에서는 이미지 + 데이터를 하나의 로직으로 실행할 수 있다는 것도 고려해야 함
-						 * 7. 그 외 이벤트 액션도 개편 예정인데 쓰레드에 통합으로 넣을 지 각각 넣을 지는 좀 더 고민해봐야 함 
-						 */
-						
-						boolean isDuration = saveImage(metadata, ml_result, base64);
-						if (isDuration) {
-							saveImageData(metadata, ml_result);
-
-							monitoringThread(metadata, ml_result);
-
-							sendScada(map);
-
-							dashThread(metadata, ml_result);
-
-							logThread(metadata, ml_result);
-
-							// sendEventAction(metadata, ml_result); // 추후 수정
-
-							checkShowPopUp(metadata, ml_result);
-
-							sendWebsocket(map);
-						}
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-			}
-		};
-		// 스레드풀에게 작업 처리 요청
-		executorService.submit(runnable);
 	}
 
 	@PostMapping("/requestScada")
@@ -2788,7 +1528,7 @@ public class EventController {
 				requestScadaQ.put(requestScadaDto);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				System.out.println("requestScada Error");
 			}
 
 			Map map = new HashMap();
@@ -2822,7 +1562,7 @@ public class EventController {
 						
 						ImageTableDto imageTableDto = imageDataRepository.findByChAndTime(requestScadaDto);
 						
-						String img_size = saveImage(":/web_server/", imageTableDto.getUser_name(), imageTableDto.getItem_name(), imageTableDto.getEvent_time(), base64, imageTableDto.getImage_name().substring(imageTableDto.getImage_name().lastIndexOf("/") + 1));
+						String img_size = imageService.saveImage(":/web_server/", imageTableDto.getUser_name(), imageTableDto.getItem_name(), imageTableDto.getEvent_time(), base64, imageTableDto.getImage_name().substring(imageTableDto.getImage_name().lastIndexOf("/") + 1));
 
 						int width = Integer.parseInt(img_size.split("-")[0]);
 												
@@ -2835,223 +1575,15 @@ public class EventController {
 					
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
-						e.printStackTrace();
+						System.out.println("startRequestScadaQ Error");
 					}
 				}
 			}
 		};
 		// 스레드풀에게 작업 처리 요청
-		executorService.submit(runnable);
+		threadPoolRepository.execute(runnable);
 	}
 	
-	@RequestMapping(value = "/responseEvent", method = RequestMethod.POST)
-	@ResponseBody
-	public void responseEvent(@RequestBody String tmpResponse)
-			throws IOException, ParseException, ImageProcessingException, java.text.ParseException {
-		// System.out.println("responseEvent()");
-
-		// System.out.println("tmpResponse = " + tmpResponse);
-
-		long start = System.currentTimeMillis();
-
-		JSONParser jsonParser = new JSONParser();
-		JSONObject jsonObject = new JSONObject();
-
-		try {
-			jsonObject = (JSONObject) jsonParser.parse(tmpResponse);
-		} catch (Exception e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
-		}
-
-		long nano = System.currentTimeMillis();
-		// System.out.println("1차 보내고 결과 받는 시간 = " + (nano - start)/1000.0 + "초");
-		JSONObject req_info = (JSONObject) jsonObject.get("req_info");
-
-		if (jsonObject.get("req_info") != null) {
-			nano = System.currentTimeMillis();
-			// System.out.println("4차 보내고 결과 받는 시간 = " + (nano - start)/1000.0 + "초");
-			try {
-				// saveImage(tmpResponse);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			nano = System.currentTimeMillis();
-			// System.out.println("saveImage 결과 받는 시간 = " + (nano - start)/1000.0 + "초");
-			try {
-				insertResponseLogJson(tmpResponse);
-			} catch (Exception e2) {
-				// TODO Auto-generated catch block
-				e2.printStackTrace();
-			}
-			nano = System.currentTimeMillis();
-			// System.out.println("insertResponseLogJson 결과 받는 시간 = " + (nano -
-			// start)/1000.0 + "초");
-
-			String event_time = req_info.get("event_time").toString();
-
-			Date date = new Date();
-			try {
-				date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(event_time);
-			} catch (Exception e2) {
-				// TODO Auto-generated catch block
-				e2.printStackTrace();
-			}
-			long duration1 = date.getTime();
-			long duration;
-			// System.out.println("json 변수 만드는 시간 = " + (now - start)/1000.0 + "초");
-
-			long durationTime = 0; // 1000 = 초, 60000 = 분, 3600000 = 시간
-
-			String item_name = req_info.get("item_name").toString();
-			String dev_ip = req_info.get("dev_ip").toString();
-			String dev_id = req_info.get("dev_id").toString();
-			String dev_port = req_info.get("dev_port").toString();
-			String dev_ch = req_info.get("dev_ch").toString();
-
-			String duration_keyword = item_name + "_" + dev_ip + "_" + dev_id + "_" + dev_port + "_" + dev_ch;
-
-			ArrayList<String> originalTags = (JSONArray) jsonObject.get("tags");
-
-			int count = originalTags.size();
-
-			String event_result = "";
-
-			if (count > 0) {
-				event_result = "detect";
-			} else {
-				event_result = "none";
-			}
-
-			JSONObject insertImageJson = new JSONObject();
-			insertImageJson.put("event_time", event_time);
-			insertImageJson.put("event_result", event_result);
-			insertImageJson.put("ch", dev_ch);
-
-			insertImageReturn.put(duration_keyword, insertImageJson);
-
-			// System.out.println("태그 존재 여부 = " + count);
-
-			if (durationJSON.get(duration_keyword) != null) {
-				JSONParser jsonParser2 = new JSONParser();
-				JSONObject durationResponse = (JSONObject) durationJSON.get(duration_keyword);
-				try {
-					jsonObject = (JSONObject) jsonParser2.parse(durationResponse.get("durationResponse").toString());
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				duration = (Long) durationResponse.get("duration");
-				durationTime = (duration1 - duration) / 1000;
-			}
-
-			if (count > 0 && (durationJSON.get(duration_keyword) == null || Math.abs(durationTime) == 5
-					|| Math.abs(durationTime) > 5)) {
-				// System.out.println("durationTime = ch" + dev_ch + "_" + event_time);
-				JSONObject json = new JSONObject();
-				((JSONObject) jsonObject.get("req_info")).remove("img_data");
-				durationResponse = jsonObject.toJSONString().replaceAll("\\\\", "");
-				duration = date.getTime();
-				json.put("durationResponse", durationResponse);
-				json.put("date", date);
-				json.put("duration", duration);
-				durationJSON.put(duration_keyword, json);
-			}
-			/*
-			 * if (durationJSON.get(duration_keyword) != null && durationTime < 10) { } else
-			 * { }
-			 */
-			// System.out.println("분석 서버에서 받은 시간 = " + new SimpleDateFormat("yyyy-MM-dd
-			// HH:mm:ss.SSS").format(nano));
-
-			nano = System.currentTimeMillis();
-			// System.out.println("2차 보내고 결과 받는 시간 = " + (nano - start)/1000.0 + "초");
-			try {
-				updateImageLog(tmpResponse);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			nano = System.currentTimeMillis();
-			// System.out.println("updateImageLog 결과 받는 시간 = " + (nano - start)/1000.0 +
-			// "초");
-			try {
-				insertResponseLog(tmpResponse);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			nano = System.currentTimeMillis();
-			// System.out.println("insertResponseLog 결과 받는 시간 = " + (nano - start)/1000.0 +
-			// "초");
-			try {
-				// saveImageData(tmpResponse);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			nano = System.currentTimeMillis();
-			// System.out.println("saveImageData 결과 받는 시간 = " + (nano - start)/1000.0 +
-			// "초");
-			try {
-				// dashThread(tmpResponse);
-			} catch (Exception e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-			nano = System.currentTimeMillis();
-			// System.out.println("7차 보내고 결과 받는 시간 = " + (nano - start)/1000.0 + "초");
-			try {
-				// logThread(tmpResponse);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			nano = System.currentTimeMillis();
-			// System.out.println("8차 보내고 결과 받는 시간 = " + (nano - start)/1000.0 + "초");
-			try {
-				// monitoringThread(tmpResponse);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			nano = System.currentTimeMillis();
-			// System.out.println("9차 보내고 결과 받는 시간 = " + (nano - start)/1000.0 + "초");
-			try {
-				sendEventAction(tmpResponse);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			nano = System.currentTimeMillis();
-			// System.out.println("10차 보내고 결과 받는 시간 = " + (nano - start)/1000.0 + "초");
-
-			ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) executorService;
-
-			// System.out.println("전체 쓰레드 갯수 = " + threadPoolExecutor.getPoolSize());
-
-			// System.out.println("responseEvent 결과 = " + tmpResponse.toString());
-			if (count > 0) {
-				long now = System.currentTimeMillis();
-
-				// System.out.println("responseEvent() = " + (now - start)/1000.0 + "초");
-				// System.out.println("16채널 기준 responseEvent() = " + (((now - start)/1000.0) *
-				// 16) + "초");
-				System.out.println("16채널 기준 insert + response = " + (insertImageTime + (((now - start) / 1000.0) * 16))
-						+ "초" + " / 검출 객체 수 = " + count + "개");
-				if ((insertImageTime + (((now - start) / 1000.0) * 16)) > 1) {
-					System.out.println("insertImage() = " + insertImageTime);
-					System.out.println("responseEvent() = " + (((now - start) / 1000.0) * 16));
-				}
-			} else {
-				// System.out.println("검출된 객체 없음");
-			}
-		}
-		long end = System.currentTimeMillis();
-		// System.out.println("responseEvent() = " + (end - start)/1000.0 + "초");
-	}
-
 	@RequestMapping(value = "/requestImage", method = RequestMethod.POST)
 	@ResponseBody
 	public String requestImage(@RequestBody String tmpResponse) {
@@ -3061,307 +1593,6 @@ public class EventController {
 		jsonObject.put("status", "success");
 
 		return jsonObject.toJSONString().replaceAll("\\\\", "");
-	}
-
-	public boolean saveImage(Map metadata, ArrayList ml_result, String base64)
-			throws ParseException, java.text.ParseException {
-		// System.out.println("saveImage()");
-		boolean isDuration = false;
-		if (ml_result.size() > 0) {
-
-			String class_name = "";
-			String monitoring_info = "";
-
-			/**
-			 * duration 적용 해당 이미지의 검출 결과가 존재할 때 검출된 모델 중 단 하나라도 듀레이션(default 10초)이 오버되면 작업
-			 * 시작 1.반복문 돌아서 검출 결과 확인 2.검출 결과 확인하면서 있으면 듀레이션 확인 3.돌다가 중간에 하나라도 듀레이션 오버되면
-			 * true(아니면 false 그대로) 문제점 : 반복문 돌다가 중간 또는 마지막에서 듀레이션 오버된 게 검출되면 다시 처음부터 반복문 돌면서
-			 * 듀레이션 초기화 할 것인가 생각해봐야할 점 : 모델 갯수만큼 반복문 도는 게 과연 메모리에 조금이라도 무리가 갈 것인가(최대 10개미만)
-			 * 결론 : 무리 안 갈 것 같으므로 그냥 반복문 돌림
-			 */
-
-			String dev_ip = metadata.get("dev_ip").toString();
-			String dev_ch = metadata.get("dev_ch").toString();
-			String event_time = metadata.get("event_time").toString();
-
-			LocalDate date = LocalDate.of(
-					Integer.parseInt(event_time.split(" ")[0].split("-")[0].toString()),
-					Integer.parseInt(event_time.split(" ")[0].split("-")[1].toString()),
-					Integer.parseInt(event_time.split(" ")[0].split("-")[2].toString()));
-			DayOfWeek dayOfWeek = date.getDayOfWeek();
-
-			String day = dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.KOREAN) + "_"
-					+ Integer.parseInt(event_time.split(" ")[1].split(":")[0].toString());
-
-			for (int i = 0; i < ml_result.size(); i++) {
-				Map ml_result_map = (Map) ml_result.get(i);
-				if (ml_result_map.get("status").toString().equals("SUCCESS")
-						&& Integer.parseInt(ml_result_map.get("count").toString()) > 0) {
-					String model_name = ml_result_map.get("model_name").toString();
-					class_name += model_name + 1;
-					monitoring_info += "/" + model_name + ":" + 1;
-
-					
-//					System.out.println("=====EventController isDuration 체크 시작=====");
-					
-//					System.out.println("model_name = " + model_name);
-
-					boolean isTrue = scheduleRepository.chkDate(Integer.parseInt(dev_ch), model_name.split("_")[1].toLowerCase(), day);
-					boolean isTrue1 = actionSetupService.checkOn(Integer.parseInt(dev_ch), model_name);
-					boolean isTrue2 = actionSetupService.selectOne(Integer.parseInt(dev_ch)) != null;
-					boolean isTrue3 = actionSetupService.selectOne(Integer.parseInt(dev_ch)).get("confidence") == null;
-					boolean isTrue4 = Integer.parseInt(actionSetupService.selectOne(Integer.parseInt(dev_ch))
-							.get("confidence").toString()) == 1;
-					boolean isTrue5 = Integer.parseInt(actionSetupService.selectOne(Integer.parseInt(dev_ch))
-							.get("confidence").toString()) <= Double.parseDouble(
-									((Map) ((List) ml_result_map.get(resultMap.get(model_name))).get(0))
-											.get("confidence").toString());
-					boolean isTrue6 = chkDuration(dev_ip, dev_ch, model_name, event_time);
-
-//					System.out.println("isTrue = " + isTrue);
-//					System.out.println("isTrue1 = " + isTrue1);
-//					System.out.println("isTrue2 = " + isTrue2);
-//					System.out.println("isTrueMiddle = " + (isTrue3 || isTrue4 || isTrue5));
-//					System.out.println("isTrue6 = " + isTrue6);
-					
-//					System.out.println("=====EventController isDuration 체크 종료=====");
-					
-					if (isTrue && isTrue1 && isTrue2 && (isTrue3 || isTrue4 || isTrue5) && isTrue6) {
-						isDuration = true;
-						durationMap.put(dev_ip + "_" + dev_ch + "_" + model_name, event_time);
-					}
-//					List class_list = (List) ml_result_map.get(resultMap.get(ml_result_map.get("model_name")));
-//					for (int j = 0; j < class_list.size(); j++) {
-//						Map class_map = (Map) class_list.get(j);
-//						class_name += class_map.get("class").toString() + 1; 
-//						monitoring_info += "/" + class_map.get("class").toString() + ":" + 1;
-//					} 
-				}
-			}
-
-			if (isDuration) {
-				String firstPath = ":/web_server/";
-				String img_name = metadata.get("img_name").toString(); // 원본 이미지 파일명으로 받음
-				String login_id = metadata.get("user_name").toString(); // 사용자 ID
-				String item_name = metadata.get("item_name").toString();
-				String img_data = base64;
-				String monitoring_tag = item_name + "_ch" + dev_ch + "_" + event_time.split(" ")[0].replaceAll("-", "")
-						+ "_" + class_name;
-
-				String img_size = saveImage(firstPath, login_id, item_name, event_time, img_data, img_name);
-				
-				String uploadPath = master_drive_name + firstPath + login_id + "/" + item_name + "/" + event_time.split(" ")[0].split("-")[0] + event_time.split(" ")[0].split("-")[1]
-						+ event_time.split(" ")[0].split("-")[2] + "/" + img_name;
-				
-				String thumb_name = (uploadPath + img_name).substring(0, (uploadPath + img_name).lastIndexOf("."))
-						+ "_thumb.jpg";
- 				
-				MonitoringDto monitoringDto = new MonitoringDto();
-				monitoringDto.setMonitoring_src(thumb_name.substring(thumb_name.indexOf("/")));
-				monitoringDto.setMonitoring_time(event_time);
-				monitoringDto.setMonitoring_item(item_name);
-				monitoringDto.setMonitoring_ch(dev_ch);
-				monitoringDto.setMonitoring_tag(monitoring_tag);
-				monitoringDto.setMonitoring_info(monitoring_info.substring(1));
-				monitoringDto.setLogin_id(login_id);
-				monitoringDto.setMonitoring_size(img_size);
-
-				sendMonitoring(monitoringDto);
-			}
-		}
-		return isDuration;
-	}
-
-	private String saveImage(String firstPath, String login_id, String item_name, String event_time, String img_data, String img_name) {
-		// 폴더 경로 잡아줌 - 장비 및 채널 정보 가져와서 추가로 만들어줌
-		String uploadPath = master_drive_name + firstPath;
-		File folder = new File(uploadPath);
-
-		if (!folder.exists()) {
-			try {
-				folder.mkdir();
-			} catch (Exception e) {
-				e.getStackTrace();
-			}
-		}
-
-		uploadPath += login_id + "/";
-		folder = new File(uploadPath);
-
-		if (!folder.exists()) {
-			try {
-				folder.mkdir();
-			} catch (Exception e) {
-				e.getStackTrace();
-			}
-		}
-
-		uploadPath += item_name + "/";
-		folder = new File(uploadPath);
-
-		if (!folder.exists()) {
-			try {
-				folder.mkdir();
-			} catch (Exception e) {
-				e.getStackTrace();
-			}
-		}
-
-		uploadPath += event_time.split(" ")[0].split("-")[0] + event_time.split(" ")[0].split("-")[1]
-				+ event_time.split(" ")[0].split("-")[2] + "/";
-		folder = new File(uploadPath);
-
-		if (!folder.exists()) {
-			try {
-				folder.mkdir();
-			} catch (Exception e) {
-				e.getStackTrace();
-			}
-		}
-
-		String data = img_data;
-
-		byte[] imageBytes = DatatypeConverter.parseBase64Binary(data);
-
-		try {
-			File lOutFile = new File(uploadPath + img_name);
-
-			FileOutputStream lFileOutputStream = new FileOutputStream(lOutFile);
-
-			lFileOutputStream.write(imageBytes);
-
-			lFileOutputStream.close();
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.out.println("원본 이미지 저장 안됨");
-		}
-
-		File f = new File(uploadPath + img_name);
-		String thumb_name = (uploadPath + img_name).substring(0, (uploadPath + img_name).lastIndexOf("."))
-				+ "_thumb.jpg";
-		
-		String img_size = "";
-		
-		try {
-			EasyImage easyImage = new EasyImage(f);
-			BufferedImage bi = ImageIO.read(f);
-
-			if (!easyImage.isSupportedImageFormat()) {
-				System.out.println("not supported image type");
-			}
-
-			int hWidth = bi.getWidth();
-			int hHeight = bi.getHeight();
-
-			img_size = hWidth + "-" + hHeight;
-
-			if (hWidth < 640 || hHeight < 480) {
-				File lOutFile = new File(thumb_name);
-
-				FileOutputStream lFileOutputStream = new FileOutputStream(lOutFile);
-
-				lFileOutputStream.write(imageBytes);
-
-				lFileOutputStream.close();
-
-			} else {
-				// resize
-				EasyImage resizedImage = easyImage.resize(640, 480);
-
-				FileOutputStream out = new FileOutputStream(thumb_name);
-
-				resizedImage.writeTo(out, "jpg");
-
-				out.close();
-			}
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			System.out.println("썸네일 이미지 저장 안됨");
-		}
-
-		return img_size;
-	}
-
-	public void saveImageData(Map metadata, ArrayList ml_result) throws ParseException, IOException {
-		// System.out.println("saveImageData()");
-
-		if (ml_result.size() > 0) {
-			boolean isResult = false;
-
-			String class_name = "";
-			List originalTags = new ArrayList();
-			List colorTags = new ArrayList();
-
-			for (int i = 0; i < ml_result.size(); i++) {
-				Map ml_result_map = (Map) ml_result.get(i);
-				if (ml_result_map.get("status").toString().equals("SUCCESS")
-						&& Integer.parseInt(ml_result_map.get("count").toString()) > 0) {
-					isResult = true;
-					class_name += ml_result_map.get("model_name").toString() + 1;
-					originalTags.add(ml_result_map.get("model_name").toString());
-				}
-			}
-
-			if (isResult) {
-				ImageTableDto imageTableDto = new ImageTableDto();
-
-				String login_id = metadata.get("user_name").toString(); // 사용자 ID
-				String dev_ch = metadata.get("dev_ch").toString();
-				String item_name = metadata.get("item_name").toString();
-				String dev_ip = metadata.get("dev_ip").toString();
-				String event_time = metadata.get("event_time").toString();
-				String dev_pwd = metadata.get("dev_pwd").toString();
-				String dev_port = metadata.get("dev_port").toString();
-				String dev_web_port = metadata.get("dev_web_port").toString();
-				String dev_id = metadata.get("dev_id").toString();
-				String user_passwd = metadata.get("user_passwd").toString();
-				long start = (Long) metadata.get("start");
-
-				String img_name = metadata.get("img_name").toString(); // 원본 이미지 파일명으로 받음
-				String monitoring_tag = item_name + "_ch" + dev_ch + "_" + event_time.split(" ")[0].replaceAll("-", "")
-						+ "_" + class_name;
-
-				String uploadPath = master_drive_name + ":/web_server/" + login_id + "/" + item_name + "/"
-						+ event_time.split(" ")[0].split("-")[0] + event_time.split(" ")[0].split("-")[1]
-						+ event_time.split(" ")[0].split("-")[2] + "/" + img_name;
-
-				File f = new File(uploadPath);
-
-				BufferedImage bi = ImageIO.read(f);
-
-				int hWidth = bi.getWidth();
-				int hHeight = bi.getHeight();
-
-				uploadPath = uploadPath.replace("web_server", "webserver");
-				
-				imageTableDto.setLogin_id(login_id);
-				imageTableDto.setDev_ch(dev_ch);
-				imageTableDto.setDev_pwd(dev_pwd);
-				imageTableDto.setStart_time(start);
-				imageTableDto.setItem_name(item_name);
-				imageTableDto.setDev_ip(dev_ip);
-				imageTableDto.setDev_port(dev_port);
-				imageTableDto.setEvent_time(event_time);
-				imageTableDto.setDev_id(dev_id);
-				imageTableDto.setDev_web_port(dev_web_port);
-				imageTableDto.setImage_name(uploadPath.substring(uploadPath.indexOf("/")));
-				imageTableDto.setMonitoring_tag(monitoring_tag);
-				imageTableDto.setUser_name(login_id);
-				imageTableDto.setUser_passwd(user_passwd);
-
-				imageTableDto.setImage_queue(0);
-				imageTableDto.setThumb_name(
-						uploadPath.substring(uploadPath.indexOf("/"), uploadPath.lastIndexOf(".")) + "_thumb.jpg");
-				imageTableDto.setWidth(hWidth);
-				imageTableDto.setHeight(hHeight);
-				imageTableDto.setColor_tags(colorTags.toString());
-				imageTableDto.setTags(originalTags.toString().replaceAll("\\\\", ""));
-
-				eventDao.insertImageEvent(imageTableDto);
-			}
-		}
 	}
 
 	JFrame jFrame;
@@ -3386,290 +1617,6 @@ public class EventController {
 
 		// System.out.println("알람 던진 시간 = " + new SimpleDateFormat("yyyy-MM-dd
 		// HH:mm:ss.SSS").format(nano));
-	}
-
-	public void sendEventAction(String tmpResponse) throws ParseException, IOException {
-		// System.out.println("sendEventAction()");
-
-		JSONParser jsonParser = new JSONParser();
-		JSONObject jsonObject = (JSONObject) jsonParser.parse(tmpResponse);
-
-		final ArrayList<String> originalTags = (JSONArray) jsonObject.get("tags");
-		JSONObject req_info = (JSONObject) jsonObject.get("req_info");
-		final String dev_ch = req_info.get("dev_ch").toString();
-		final String dev_ip = req_info.get("dev_ip").toString();
-		final String dev_id = req_info.get("dev_id").toString();
-		final String dev_port = req_info.get("dev_port").toString();
-		final String event_time = req_info.get("event_time").toString();
-		final String dev_web_port = req_info.get("dev_web_port").toString();
-		final String login_id = jsonObject.get("user_name").toString(); // 사용자 ID
-		final String item_name = req_info.get("item_name").toString();
-		final JSONObject img_size = (JSONObject) jsonObject.get("img_size");
-
-		String img_name = jsonObject.get("img_name").toString(); // 원본 이미지 파일명으로 받음
-
-		final String uploadPath = "/web_server/" + login_id + "/" + item_name + "/"
-				+ event_time.split(" ")[0].split("-")[0] + event_time.split(" ")[0].split("-")[1]
-				+ event_time.split(" ")[0].split("-")[2] + "/" + img_name;
-
-		img_size.put("img_name", uploadPath);
-		img_size.put("dev_ip", dev_ip);
-		img_size.put("login_id", login_id);
-
-		final ActionLogDto actionLogDto = new ActionLogDto();
-		actionLogDto.setAction_ip(dev_ip);
-		actionLogDto.setAction_channel(dev_ch);
-		// actionLogDto.set
-
-		// img_name = (uploadPath + "/" + img_name).substring((uploadPath + "/" +
-		// img_name).indexOf("/"));
-		// uploadPath = "D:" + img_name;
-
-		if (originalTags.size() > 0) {
-			// 스레드에게 시킬 작업 내용
-			for (int j = 0; j < originalTags.size(); j++) {
-				String event_name = originalTags.get(j);
-				img_size.put("event_name", event_name);
-				actionLogDto.setAction_event(event_name);
-				actionLogDto.setAction_src(uploadPath);
-				for (int i = 0; i < actionListTotal.size(); i++) {
-					Map action = actionListTotal.get(i);
-					if (action.get("action_isuse").equals("Y") && action.get("action_event").equals(event_name)
-							&& action.get("action_ip").equals(dev_ip) && action.get("action_channel").equals(dev_ch)
-							&& !action.get("action_target").equals("admin")) {
-						actionLogDto.setAction_target(action.get("action_target").toString());
-						if (action.get("action_action").toString().indexOf("라인 메세지 보내기") > -1) { // 라인일 경우
-							// System.out.println("라인 출발");
-							if (tokkenTime.get(event_name + "_" + dev_ip + "_" + dev_ch) != null) {
-								long end = Long
-										.parseLong(tokkenTime.get(event_name + "_" + dev_ip + "_" + dev_ch).toString());
-								long now = System.currentTimeMillis();
-
-								if ((now - end) / 1000.0 > 300) {
-									String tokkenAddress = eventDao
-											.selectUser_Tokken(action.get("action_target").toString());
-									String message = "[ReCon-Now] 이벤트발생(" + event_name + ") "
-											+ event_time.split(" ")[0].split("-")[0] + "년 "
-											+ Integer.parseInt(event_time.split(" ")[0].split("-")[1]) + "월 "
-											+ Integer.parseInt(event_time.split(" ")[0].split("-")[2]) + "일 "
-											+ event_time.split(" ")[1].split(":")[0] + "시 "
-											+ event_time.split(" ")[1].split(":")[1] + "분 "
-											+ event_time.split(" ")[1].split(":")[2] + "초 " + " 장비 : " + dev_ip + "(채널"
-											+ dev_ch + ")";
-									String encoded;
-									try {
-										encoded = URLEncoder.encode(message, "UTF-8");
-										// System.out.println(message);
-										tokenTest("https://notify-api.line.me/api/notify?message=" + encoded,
-												"Bearer " + tokkenAddress);
-									} catch (Exception e) {
-										// TODO Auto-generated catch block
-										e.printStackTrace();
-									}
-
-									tokkenTime.put(event_name + "_" + dev_ip + "_" + dev_ch, now + "");
-								}
-							} else {
-								String tokkenAddress = eventDao
-										.selectUser_Tokken(action.get("action_target").toString());
-								String message = "[ReCon-Now] 이벤트발생(" + event_name + ") "
-										+ event_time.split(" ")[0].split("-")[0] + "년 "
-										+ Integer.parseInt(event_time.split(" ")[0].split("-")[1]) + "월 "
-										+ Integer.parseInt(event_time.split(" ")[0].split("-")[2]) + "일 "
-										+ event_time.split(" ")[1].split(":")[0] + "시 "
-										+ event_time.split(" ")[1].split(":")[1] + "분 "
-										+ event_time.split(" ")[1].split(":")[2] + "초 " + " 장비 : " + dev_ip + "(채널"
-										+ dev_ch + ")";
-								String encoded;
-								try {
-									encoded = URLEncoder.encode(message, "UTF-8");
-									// System.out.println(message);
-									tokenTest("https://notify-api.line.me/api/notify?message=" + encoded,
-											"Bearer " + tokkenAddress);
-								} catch (Exception e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
-
-								tokkenTime.put(event_name + "_" + dev_ip + "_" + dev_ch,
-										System.currentTimeMillis() + "");
-							}
-
-							action.put("action_src", uploadPath);
-							// action.setAction_action("라인");
-							actionLogDto.setAction_action("라인");
-							// eventDao.insertActionLogInfo(actionLogDto);
-
-							long start = System.currentTimeMillis();
-//							ResponseEvent responseEvent = new ResponseEvent();
-							// responseEvent.insertActionLogInfo(actionLogDto, conn);
-							long nano = System.currentTimeMillis();
-							// System.out.println("라인 = " + (nano - start)/1000.0 + "초");
-						}
-
-						if (action.get("action_action").toString().indexOf("팝업") > -1) { // 팝업일 경우
-							String duration_keyword = item_name + "_" + dev_ip + "_" + dev_id + "_" + dev_port + "_"
-									+ dev_ch;
-
-							if (insertImageReturn.get(duration_keyword) != null) {
-								JSONObject insertImageReturnResponse = (JSONObject) insertImageReturn
-										.get(duration_keyword);
-								insertImageReturnResponse.put("event_action", "popup");
-								insertImageReturn.put(duration_keyword, insertImageReturnResponse);
-							}
-
-							String event_result = "none";
-							String ch = dev_ch;
-
-							action.put("action_src", uploadPath);
-							actionLogDto.setAction_action("팝업");
-							action.put("action_action", "팝업");
-							// System.out.println("알람 팝업 ip = " + actionLogDto.getAction_ip());
-							// System.out.println("알람 팝업 ch = " + actionLogDto.getAction_channel());
-							showPopupImage(img_size.toJSONString().replaceAll("\\\\", ""), actionLogDto);
-
-							// eventDao.insertActionLogInfo(actionLogDto);
-
-							long start = System.currentTimeMillis();
-//							ResponseEvent responseEvent = new ResponseEvent();
-							// responseEvent.insertActionLogInfo(actionLogDto, conn);
-							long nano = System.currentTimeMillis();
-							// System.out.println("팝업 = " + (nano - start)/1000.0 + "초");
-						}
-
-						if (action.get("action_action").toString().indexOf("알람") > -1) { // 알람일 경우
-							action.put("action_src", uploadPath);
-							actionLogDto.setAction_action("알람");
-							action.put("action_action", "알람");
-							playAlarm(img_size.toJSONString().replaceAll("\\\\", ""), actionLogDto);
-							// eventDao.insertActionLogInfo(actionLogDto);
-							long start = System.currentTimeMillis();
-//							ResponseEvent responseEvent = new ResponseEvent();
-							// responseEvent.insertActionLogInfo(actionLogDto, conn);
-							long nano = System.currentTimeMillis();
-							// System.out.println("알람 = " + (nano - start)/1000.0 + "초");
-						}
-
-						if (actionLogDto.getAction_event().equals("person")
-								&& action.get("action_action").toString().indexOf("침입") > -1) { // 카메라일 경우
-							action.put("action_src", uploadPath);
-							actionLogDto.setAction_action("침입");
-							// System.out.println("http://" + dev_ip + ":" + dev_web_port +
-							// "/cgi-bin/net_io_Box.cgi?method=GetBoxStatus&BoxInput=fffffe&BoxRelay=0");
-							// sendGet("http://" + dev_ip + ":" + dev_web_port +
-							// "/cgi-bin/net_io_Box.cgi?method=GetBoxStatus&BoxInput=fffffe&BoxRelay=0",
-							// actionLogDto);
-							// eventDao.insertActionLogInfo(actionLogDto);
-							long start = System.currentTimeMillis();
-//							ResponseEvent responseEvent = new ResponseEvent();
-							// responseEvent.insertActionLogInfo(actionLogDto, conn);
-							long nano = System.currentTimeMillis();
-							// System.out.println("침입 = " + (nano - start)/1000.0 + "초");
-						}
-					}
-				}
-			}
-			/*
-			 * Runnable runnable = new Runnable() {
-			 * 
-			 * @Override public void run() { } }; //스레드풀에게 작업 처리 요청
-			 * executorService.submit(runnable);
-			 */
-		}
-	}
-
-	public void insertDash(EventDto eventDto) {
-		// System.out.println("insertDash()");
-
-		eventDao.updateCount(eventDto);
-
-		// System.out.println("updateCount = " + (nano - start2)/1000.0 + "초");
-
-		String jsonStr = "";
-		ObjectMapper mapper = new ObjectMapper();
-
-		try {
-			jsonStr = mapper.writeValueAsString(eventDto);
-		} catch (Exception e1) {
-			System.out.println("오류 발생");
-			e1.printStackTrace();
-		}
-
-		this.template.setMessageConverter((MessageConverter) new StringMessageConverter());
-		this.template.convertAndSend("/receiveCount", jsonStr);
-
-	}
-
-	public void dashThread(Map metadata, ArrayList ml_result) throws ParseException {
-		// System.out.println("dashThread()");
-
-		if (ml_result.size() > 0) {
-			boolean isResult = false;
-
-			String class_name = "";
-			List originalTags = new ArrayList();
-
-			for (int i = 0; i < ml_result.size(); i++) {
-				Map ml_result_map = (Map) ml_result.get(i);
-				if (ml_result_map.get("status").toString().equals("SUCCESS")
-						&& Integer.parseInt(ml_result_map.get("count").toString()) > 0) {
-					isResult = true;
-					String model_name = ml_result_map.get("model_name").toString();
-					class_name += model_name + 1;
-					originalTags.add(model_name);
-				}
-			}
-
-			if (isResult) {
-				String item_name = metadata.get("item_name").toString();
-				String dev_ip = metadata.get("dev_ip").toString();
-				String dev_id = metadata.get("dev_id").toString();
-				String dev_pwd = metadata.get("dev_pwd").toString();
-				String dev_port = metadata.get("dev_port").toString();
-				String dev_web_port = metadata.get("dev_web_port").toString();
-
-				String dev_channel = metadata.get("dev_ch").toString();
-				String event_time = metadata.get("event_time").toString();
-				String event_info = "count : " + 1;
-				String user_id = metadata.get("user_name").toString();
-				String img_name = "/web_server/" + user_id + "/" + item_name + "/"
-						+ event_time.split(" ")[0].split("-")[0] + event_time.split(" ")[0].split("-")[1]
-						+ event_time.split(" ")[0].split("-")[2] + "/" + metadata.get("img_name").toString();
-
-				EventDto eventDto = new EventDto();
-
-				// 스레드에게 시킬 작업 내용
-				for (int i = 0; i < originalTags.size(); i++) {
-					eventDto.setItem_name(item_name);
-					eventDto.setDev_ip(dev_ip);
-					eventDto.setDev_channel(dev_channel);
-					eventDto.setEvent_time(event_time);
-					eventDto.setUser_id(user_id);
-
-					eventDto.setItem_type("1");
-					eventDto.setItem_ip(dev_ip);
-					eventDto.setItem_id(user_id);
-					eventDto.setItem_pwd("00pp;;//");
-					eventDto.setItem_port("7000");
-					eventDto.setItem_mac("000C280B691B");
-					eventDto.setDev_mac("000C280B691B");
-					eventDto.setDev_id(dev_id);
-					eventDto.setDev_pwd(dev_pwd);
-					eventDto.setDev_port(dev_port);
-					eventDto.setDev_web_port(dev_web_port);
-					eventDto.setImage_name(img_name);
-
-					eventDto.setEvent_info(event_info);
-
-					String event_name = originalTags.get(i).toString();
-
-					eventDto.setEvent_name(event_name);
-
-					insertDash(eventDto);
-
-				}
-			}
-		}
 	}
 
 	public void insertImageLogJson(Map map) throws ParseException {
@@ -4034,122 +1981,6 @@ public class EventController {
 		 */
 	}
 
-	public void insertLog(EventDto eventDto) {
-
-		eventDao.insertJson(eventDto);
-
-		String jsonStr = "";
-		ObjectMapper mapper = new ObjectMapper();
-
-		try {
-			jsonStr = mapper.writeValueAsString(eventDto);
-		} catch (Exception e1) {
-			System.out.println("오류 발생");
-			e1.printStackTrace();
-		}
-
-		this.template.setMessageConverter((MessageConverter) new StringMessageConverter());
-		this.template.convertAndSend("/receiveMessage", jsonStr);
-
-	}
-
-	public void logThread(Map metadata, ArrayList ml_result) throws ParseException {
-		if (ml_result.size() > 0) {
-			boolean isResult = false;
-
-			String class_name = "";
-			List originalTags = new ArrayList();
-
-			for (int i = 0; i < ml_result.size(); i++) {
-				Map ml_result_map = (Map) ml_result.get(i);
-				if (ml_result_map.get("status").toString().equals("SUCCESS")
-						&& Integer.parseInt(ml_result_map.get("count").toString()) > 0) {
-					isResult = true;
-					class_name += ml_result_map.get("model_name").toString() + 1;
-					originalTags.add(ml_result_map.get("model_name").toString());
-				}
-			}
-
-			if (isResult) {
-				String item_name = metadata.get("item_name").toString();
-				String dev_ip = metadata.get("dev_ip").toString();
-				String dev_id = metadata.get("dev_id").toString();
-				String dev_pwd = metadata.get("dev_pwd").toString();
-				String dev_port = metadata.get("dev_port").toString();
-				String dev_web_port = metadata.get("dev_web_port").toString();
-
-				String dev_channel = metadata.get("dev_ch").toString();
-				String event_time = metadata.get("event_time").toString();
-				String event_info = "count : " + 1;
-				String user_id = metadata.get("user_name").toString();
-
-				for (int i = 0; i < originalTags.size(); i++) {
-					String event_name = originalTags.get(i).toString();
-
-					EventDto eventDto = new EventDto();
-
-					eventDto.setItem_name(item_name);
-					eventDto.setDev_ip(dev_ip);
-					eventDto.setDev_channel(dev_channel);
-					// System.out.println("insertLog = " + dev_channel);
-					eventDto.setEvent_time(event_time);
-					eventDto.setUser_id(user_id);
-
-					eventDto.setItem_type("1");
-					eventDto.setItem_ip(dev_ip);
-					eventDto.setItem_id(user_id);
-					eventDto.setItem_pwd("00pp;;//");
-					eventDto.setItem_port("7000");
-					eventDto.setItem_mac("000C280B691B");
-					eventDto.setDev_mac("000C280B691B");
-					eventDto.setDev_id(dev_id);
-					eventDto.setDev_pwd(dev_pwd);
-					eventDto.setDev_port(dev_port);
-					eventDto.setDev_web_port(dev_web_port);
-					eventDto.setEvent_source("지능형안전관리시스템");
-
-					eventDto.setEvent_info(event_info);
-
-					eventDto.setEvent_name(event_name);
-
-					insertLog(eventDto);
-				}
-			}
-		}
-	}
-
-	public void sendMonitoring(MonitoringDto monitoringDto) {
-		JSONObject jsonObjec2 = new JSONObject();
-
-		jsonObjec2.put("src", monitoringDto.getMonitoring_src());
-		jsonObjec2.put("dev_ch", monitoringDto.getMonitoring_ch());
-
-		Map map = new HashMap();
-		map.put("dev_ch", monitoringDto.getMonitoring_ch());
-		Map return_map = eventDao.deviceInfoOne2(map);
-
-		if (return_map != null) {
-			jsonObjec2.put("dev_title", return_map.get("dev_title"));
-
-			this.template.setMessageConverter((MessageConverter) new StringMessageConverter());
-			this.template.convertAndSend("/showMonitor", jsonObjec2.toJSONString());
-
-			eventDao.updateMonitoring(monitoringDto);
-
-			jsonObjec2.put("monitoring_src", monitoringDto.getMonitoring_src());
-			jsonObjec2.put("monitoring_time", monitoringDto.getMonitoring_time());
-			jsonObjec2.put("monitoring_item", monitoringDto.getMonitoring_item());
-			jsonObjec2.put("monitoring_ch", monitoringDto.getMonitoring_ch());
-			jsonObjec2.put("monitoring_tag", monitoringDto.getMonitoring_tag());
-			jsonObjec2.put("monitoring_info", monitoringDto.getMonitoring_info());
-			jsonObjec2.put("login_id", monitoringDto.getLogin_id());
-			jsonObjec2.put("monitoring_size", monitoringDto.getMonitoring_size());
-
-//			this.template.setMessageConverter((MessageConverter) new StringMessageConverter());
-//			this.template.convertAndSend("/showImage", jsonObjec2.toJSONString());
-		}
-	}
-
 	public void insertMonitoring(MonitoringDto monitoringDto) {
 		Map map = new HashMap();
 		map.put("dev_ch", monitoringDto.getMonitoring_ch());
@@ -4182,7 +2013,7 @@ public class EventController {
 			String dev_ip = metadata.get("dev_ip").toString();
 			JSONObject img_size = (JSONObject) metadata.get("img_size");
 
-			String uploadPath = master_drive_name + ":/web_server/" + login_id + "/" + item_name + "/"
+			String uploadPath = versionMemoryRepository.findMasterDriveName() + ":/web_server/" + login_id + "/" + item_name + "/"
 					+ event_time.split(" ")[0].split("-")[0] + event_time.split(" ")[0].split("-")[1]
 					+ event_time.split(" ")[0].split("-")[2] + "/" + img_name;
 
@@ -4247,7 +2078,7 @@ public class EventController {
 					String dev_ip = metadata.get("dev_ip").toString();
 					JSONObject img_size = (JSONObject) metadata.get("img_size");
 
-					String uploadPath = master_drive_name + ":/web_server/" + login_id + "/" + item_name + "/"
+					String uploadPath = versionMemoryRepository.findMasterDriveName() + ":/web_server/" + login_id + "/" + item_name + "/"
 							+ event_time.split(" ")[0].split("-")[0] + event_time.split(" ")[0].split("-")[1]
 							+ event_time.split(" ")[0].split("-")[2] + "/" + img_name;
 
@@ -4305,27 +2136,27 @@ public class EventController {
 		int count = 0;
 		
 		for (Map i : imageList) {
-			if (new File(master_drive_name + ":" + i.get("image_name").toString().replace("webserver", "web_server")).exists()) {
-				files.add(master_drive_name + ":" + i.get("image_name").toString().replace("webserver", "web_server"));
-				file_size += FileUtils.sizeOf(new File(master_drive_name + ":" + i.get("image_name").toString().replace("webserver", "web_server")));
+			if (new File(versionMemoryRepository.findMasterDriveName() + ":" + i.get("image_name").toString().replace("webserver", "web_server")).exists()) {
+				files.add(versionMemoryRepository.findMasterDriveName() + ":" + i.get("image_name").toString().replace("webserver", "web_server"));
+				file_size += FileUtils.sizeOf(new File(versionMemoryRepository.findMasterDriveName() + ":" + i.get("image_name").toString().replace("webserver", "web_server")));
 				count++;
 				continue;
 			}
-			if (new File(part_drive_name + ":" + i.get("image_name").toString().replace("webserver", "web_server")).exists()) {
-				files.add(part_drive_name + ":" + i.get("image_name").toString().replace("webserver", "web_server"));
-				file_size += FileUtils.sizeOf(new File(part_drive_name + ":" + i.get("image_name").toString().replace("webserver", "web_server")));
+			if (new File(versionMemoryRepository.findPartDriveName() + ":" + i.get("image_name").toString().replace("webserver", "web_server")).exists()) {
+				files.add(versionMemoryRepository.findPartDriveName() + ":" + i.get("image_name").toString().replace("webserver", "web_server"));
+				file_size += FileUtils.sizeOf(new File(versionMemoryRepository.findPartDriveName() + ":" + i.get("image_name").toString().replace("webserver", "web_server")));
 				count++;
 			}
 		}
 
 		if (files.size() > 0) {
 			if (drive_count > 1) {
-				tempPath = part_drive_name + ":/web_server/";
+				tempPath = versionMemoryRepository.findPartDriveName() + ":/web_server/";
 				File[] roots = File.listRoots();
 				double usableSpace = 0;
 				for (File root : roots) {
 					String drive = root.getAbsolutePath().substring(0, 1);
-					if (drive.equals(part_drive_name)) {
+					if (drive.equals(versionMemoryRepository.findPartDriveName())) {
 						// 사용가능한 디스크 용량
 						usableSpace = root.getUsableSpace();
 						break;
@@ -4335,12 +2166,12 @@ public class EventController {
 					return "";
 				}
 			} else {
-				tempPath = master_drive_name + ":/web_server/";
+				tempPath = versionMemoryRepository.findMasterDriveName() + ":/web_server/";
 				File[] roots = File.listRoots();
 				double usableSpace = 0;
 				for (File root : roots) {
 					String drive = root.getAbsolutePath().substring(0, 1);
-					if (drive.equals(master_drive_name)) {
+					if (drive.equals(versionMemoryRepository.findMasterDriveName())) {
 						// 사용가능한 디스크 용량
 						usableSpace = root.getUsableSpace();
 						break;
@@ -4358,7 +2189,7 @@ public class EventController {
 					// System.out.println("폴더 생성");
 					folder.mkdir();
 				} catch (Exception e) {
-					e.getStackTrace();
+					System.out.println("downloadZipGroup 폴더 생성 Error");
 				}
 			} else {
 				// System.out.println("폴더가 이미 존재합니다.");
@@ -4373,7 +2204,7 @@ public class EventController {
 					// System.out.println("폴더 생성");
 					folder.mkdir();
 				} catch (Exception e) {
-					e.getStackTrace();
+					System.out.println("downloadZipGroup 폴더 생성 Error");
 				}
 			} else {
 				// System.out.println("폴더가 이미 존재합니다.");
@@ -4439,9 +2270,9 @@ public class EventController {
 		
 		for (Map i : imageList) {
 			if (i.get("image_name").toString().indexOf("web_server") > 0) {
-				files.add(part_drive_name + ":" + i.get("image_name").toString());
+				files.add(versionMemoryRepository.findPartDriveName() + ":" + i.get("image_name").toString());
 			} else {
-				files.add(master_drive_name + ":" + i.get("image_name").toString().replace("webserver", "web_server"));
+				files.add(versionMemoryRepository.findMasterDriveName() + ":" + i.get("image_name").toString().replace("webserver", "web_server"));
 			}
 			
 			if (new File(i.get("image_name").toString()).exists()) {
@@ -4452,12 +2283,12 @@ public class EventController {
 
 		if (files.size() > 0) {
 			if (drive_count > 1) {
-				tempPath = part_drive_name + ":/web_server/" + "/download/";
+				tempPath = versionMemoryRepository.findPartDriveName() + ":/web_server/" + "/download/";
 				File[] roots = File.listRoots();
 				double usableSpace = 0;
 				for (File root : roots) {
 					String drive = root.getAbsolutePath().substring(0, 1);
-					if (drive.equals(part_drive_name)) {
+					if (drive.equals(versionMemoryRepository.findPartDriveName())) {
 						// 사용가능한 디스크 용량
 						usableSpace = root.getUsableSpace();
 						break;
@@ -4467,12 +2298,12 @@ public class EventController {
 					return "";
 				}
 			} else {
-				tempPath = master_drive_name + ":/web_server/" + "/download/";
+				tempPath = versionMemoryRepository.findMasterDriveName() + ":/web_server/" + "/download/";
 				File[] roots = File.listRoots();
 				double usableSpace = 0;
 				for (File root : roots) {
 					String drive = root.getAbsolutePath().substring(0, 1);
-					if (drive.equals(master_drive_name)) {
+					if (drive.equals(versionMemoryRepository.findMasterDriveName())) {
 						// 사용가능한 디스크 용량
 						usableSpace = root.getUsableSpace();
 						break;
@@ -4490,7 +2321,7 @@ public class EventController {
 					// System.out.println("폴더 생성");
 					folder.mkdir();
 				} catch (Exception e) {
-					e.getStackTrace();
+					System.out.println("downloadZip 폴더 생성 Error");
 				}
 			} else {
 				// System.out.println("폴더가 이미 존재합니다.");
@@ -4656,8 +2487,8 @@ public class EventController {
 	public String isErrorImg(@RequestBody ImageTableDto imageDto) throws IOException {
 		System.out.println("isErrorImg()");
 
-		String image_name = part_drive_name + ":" + imageDto.getImage_name();
-		String thumb_name = part_drive_name + ":" + imageDto.getThumb_name();
+		String image_name = versionMemoryRepository.findPartDriveName() + ":" + imageDto.getImage_name();
+		String thumb_name = versionMemoryRepository.findPartDriveName() + ":" + imageDto.getThumb_name();
 
 		File f = new File(image_name);
 
@@ -4779,8 +2610,8 @@ public class EventController {
 
 		Date firstTime = new Date(calendar.getTimeInMillis());
 		firstTime = new Date();
-		timer = new Timer();
-		task = new TimerTask() {
+		Timer timer = new Timer();
+		TimerTask task = new TimerTask() {
 			@Override
 			public void run() {
 				Calendar cal = Calendar.getInstance();
@@ -4795,7 +2626,7 @@ public class EventController {
 
 				for (File root : roots) {
 					drive = root.getAbsolutePath().substring(0, 1);
-					if (drive.equals(part_drive_name)) {
+					if (drive.equals(versionMemoryRepository.findPartDriveName())) {
 						// 하드디스크 전체 용량
 						totalSpace = Math.round(root.getTotalSpace() / Math.pow(1024, 3) * n2) / n2;
 						// 사용가능한 디스크 용량
@@ -4808,7 +2639,7 @@ public class EventController {
 					}
 				}
 
-				String uploadPath = part_drive_name + ":/web_server";
+				String uploadPath = versionMemoryRepository.findPartDriveName() + ":/web_server";
 				File folder = new File(uploadPath);
 
 				if (!folder.exists()) {
@@ -4817,11 +2648,11 @@ public class EventController {
 					} catch (Exception e) {
 						String errorMsg = null;
 						StringWriter error = new StringWriter();
-						e.printStackTrace(new PrintWriter(error));
+						System.out.println("드라이브 web_server폴더 생성 시 오류");
 						errorMsg = error.toString();
 						ErrorLogDto errorLogDto = new ErrorLogDto();
 						errorLogDto.setLog_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
-						errorLogDto.setLog_place(part_drive_name + "드라이브 web_server폴더 생성 시 오류");
+						errorLogDto.setLog_place(versionMemoryRepository.findPartDriveName() + "드라이브 web_server폴더 생성 시 오류");
 						errorLogDto.setLog_content(errorMsg);
 						eventDao.insertErrorLog(errorLogDto);
 						deleteImageDay2(null);
@@ -4871,10 +2702,10 @@ public class EventController {
 						n2 = Math.pow(10.0, n);
 						for (int i = 0; i < imageTableDtoList.size(); i++) {
 							ImageTableDto imageTableDto = imageTableDtoList.get(i);
-							System.out.println(part_drive_name + ":" + imageTableDto.getImage_name());
+							System.out.println(versionMemoryRepository.findPartDriveName() + ":" + imageTableDto.getImage_name());
 							eventDao.deleteOverDateMonitoring2(imageTableDto);
-							File file = new File(part_drive_name + ":" + imageTableDto.getImage_name());
-							backupLogDto.setLog_content(part_drive_name + "드라이브 / " + part_drive_name + ":"
+							File file = new File(versionMemoryRepository.findPartDriveName() + ":" + imageTableDto.getImage_name());
+							backupLogDto.setLog_content(versionMemoryRepository.findPartDriveName() + "드라이브 / " + versionMemoryRepository.findPartDriveName() + ":"
 									+ imageTableDto.getImage_name());
 							try {
 								file_size += Math.round(FileUtils.sizeOfDirectory(file) * n2) / n2;
@@ -4882,11 +2713,11 @@ public class EventController {
 								FileUtils.deleteDirectory(file);
 							} catch (Exception e) {
 								StringWriter error = new StringWriter();
-								e.printStackTrace(new PrintWriter(error));
+								System.out.println("드라이브 폴더 삭제 오류");
 								errorMsg = error.toString();
 								ErrorLogDto errorLogDto = new ErrorLogDto();
 								errorLogDto.setLog_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
-								errorLogDto.setLog_place(part_drive_name + "드라이브 폴더 삭제 시 오류");
+								errorLogDto.setLog_place(versionMemoryRepository.findPartDriveName() + "드라이브 폴더 삭제 시 오류");
 								errorLogDto.setLog_content(errorMsg);
 								eventDao.insertErrorLog(errorLogDto);
 								deleteImageDay2(null);
@@ -4898,7 +2729,7 @@ public class EventController {
 							String imageList[] = image_path.split("/");
 							for (int j = 0; j < 2; j++) {
 								image_path = image_path.substring(0, image_path.lastIndexOf("/"));
-								file = new File(part_drive_name + ":" + image_path);
+								file = new File(versionMemoryRepository.findPartDriveName() + ":" + image_path);
 								if (file.exists()) {
 									String fileList[] = file.list();
 									try {
@@ -4909,12 +2740,12 @@ public class EventController {
 										}
 									} catch (Exception e) {
 										StringWriter error = new StringWriter();
-										e.printStackTrace(new PrintWriter(error));
+										System.out.println("드라이브 폴더 삭제 오류");
 										errorMsg = error.toString();
 										ErrorLogDto errorLogDto = new ErrorLogDto();
 										errorLogDto.setLog_time(
 												new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
-										errorLogDto.setLog_place(part_drive_name + "드라이브 이미지 삭제 후 폴더 삭제");
+										errorLogDto.setLog_place(versionMemoryRepository.findPartDriveName() + "드라이브 이미지 삭제 후 폴더 삭제");
 										errorLogDto.setLog_content(errorMsg);
 										eventDao.insertErrorLog(errorLogDto);
 										deleteImageDay2(null);
@@ -4937,7 +2768,7 @@ public class EventController {
 
 					for (File root : roots) {
 						drive = root.getAbsolutePath().substring(0, 1);
-						if (drive.equals(part_drive_name)) {
+						if (drive.equals(versionMemoryRepository.findPartDriveName())) {
 							// 하드디스크 전체 용량
 							totalSpace = Math.round(root.getTotalSpace() / Math.pow(1024, 3) * n2) / n2;
 							// 사용가능한 디스크 용량
@@ -4979,8 +2810,8 @@ public class EventController {
 
 		Date firstTime = new Date(calendar.getTimeInMillis());
 		firstTime = new Date();
-		timer = new Timer();
-		task = new TimerTask() {
+		Timer timer = new Timer();
+		TimerTask task = new TimerTask() {
 			@Override
 			public void run() {
 				Calendar cal = Calendar.getInstance();
@@ -4995,7 +2826,7 @@ public class EventController {
 
 				for (File root : roots) {
 					drive = root.getAbsolutePath().substring(0, 1);
-					if (drive.equals(master_drive_name)) {
+					if (drive.equals(versionMemoryRepository.findMasterDriveName())) {
 						// 하드디스크 전체 용량
 						totalSpace = Math.round(root.getTotalSpace() / Math.pow(1024, 3) * n2) / n2;
 						// 사용가능한 디스크 용량
@@ -5009,7 +2840,7 @@ public class EventController {
 				}
 
 				if (drive_count > 1) {
-					String uploadPath = part_drive_name + ":/web_server";
+					String uploadPath = versionMemoryRepository.findPartDriveName() + ":/web_server";
 					File folder = new File(uploadPath);
 
 					if (!folder.exists()) {
@@ -5018,11 +2849,11 @@ public class EventController {
 						} catch (Exception e) {
 							String errorMsg = null;
 							StringWriter error = new StringWriter();
-							e.printStackTrace(new PrintWriter(error));
+							System.out.println("드라이브 폴더 생성 오류");
 							errorMsg = error.toString();
 							ErrorLogDto errorLogDto = new ErrorLogDto();
 							errorLogDto.setLog_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
-							errorLogDto.setLog_place(master_drive_name + "드라이브 web_server폴더 생성 오류");
+							errorLogDto.setLog_place(versionMemoryRepository.findMasterDriveName() + "드라이브 web_server폴더 생성 오류");
 							errorLogDto.setLog_content(errorMsg);
 							eventDao.insertErrorLog(errorLogDto);
 							deleteImageDay(null);
@@ -5056,8 +2887,8 @@ public class EventController {
 						limitedSpace = totalImageTableDto.getLimit_num();
 					}
 
-//					System.out.println(master_drive_name + "드라이브 남은 용량 = " + usableSpace + "GB");
-//					System.out.println(master_drive_name + "드라이브 제한 용량 = " + limitedSpace + "GB");
+//					System.out.println(versionMemoryRepository.findMasterDriveName() + "드라이브 남은 용량 = " + usableSpace + "GB");
+//					System.out.println(versionMemoryRepository.findMasterDriveName() + "드라이브 제한 용량 = " + limitedSpace + "GB");
 
 					while (usableSpace < limitedSpace && dateCount > 0) { // 102번 : 60기가
 						String errorMsg = null;
@@ -5072,34 +2903,34 @@ public class EventController {
 							n2 = Math.pow(10.0, n);
 							for (int i = 0; i < imageTableDtoList.size(); i++) {
 								ImageTableDto imageTableDto = imageTableDtoList.get(i);
-								backupLogDto.setLog_content(master_drive_name + "드라이브 / " + master_drive_name + ":"
+								backupLogDto.setLog_content(versionMemoryRepository.findMasterDriveName() + "드라이브 / " + versionMemoryRepository.findMasterDriveName() + ":"
 										+ imageTableDto.getImage_name());
 								// System.out.println("백업 로그 = " + backupLogDto.getLog_content());
-								File file = new File(master_drive_name + ":" + imageTableDto.getImage_name());
-								File file2 = new File(part_drive_name + ":" + imageTableDto.getImage_name());
+								File file = new File(versionMemoryRepository.findMasterDriveName() + ":" + imageTableDto.getImage_name());
+								File file2 = new File(versionMemoryRepository.findPartDriveName() + ":" + imageTableDto.getImage_name());
 								String imageDate = imageTableDto.getImage_name().substring(0,
 										imageTableDto.getImage_name().lastIndexOf("/"));
 								imageDate = imageDate.substring(imageDate.lastIndexOf("/") + 1);
-								if (new File(master_drive_name + ":" + imageTableDto.getImage_name()).exists()) {
+								if (new File(versionMemoryRepository.findMasterDriveName() + ":" + imageTableDto.getImage_name()).exists()) {
 									if (imageDate.equals(new SimpleDateFormat("yyyyMMdd").format(new Date()))) {
 										String fileList[] = new File(
-												master_drive_name + ":" + imageTableDto.getImage_name()).list();
+												versionMemoryRepository.findMasterDriveName() + ":" + imageTableDto.getImage_name()).list();
 										try {
-											uploadPath = part_drive_name + ":" + imageTableDto.getImage_name();
-											folder = new File(uploadPath);
+											String deleteUploadPath = versionMemoryRepository.findPartDriveName() + ":" + imageTableDto.getImage_name();
+											folder = new File(deleteUploadPath);
 
 											if (!folder.exists()) {
 												try {
 													folder.mkdir();
 												} catch (Exception e) {
 													StringWriter error = new StringWriter();
-													e.printStackTrace(new PrintWriter(error));
+													System.out.println("드라이브 이미지 백업 폴더 생성 오류");
 													errorMsg = error.toString();
 													ErrorLogDto errorLogDto = new ErrorLogDto();
 													errorLogDto.setLog_time(
 															new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
 													errorLogDto.setLog_place(
-															"오늘자 " + master_drive_name + "드라이브 이미지 백업 폴더 생성 오류");
+															"오늘자 " + versionMemoryRepository.findMasterDriveName() + "드라이브 이미지 백업 폴더 생성 오류");
 													errorLogDto.setLog_content(errorMsg);
 													eventDao.insertErrorLog(errorLogDto);
 													deleteImageDay(null);
@@ -5109,63 +2940,63 @@ public class EventController {
 
 											if (fileList != null) {
 												for (int j = 0; j < fileList.length; j++) {
-													file_size += Math.round(new File(master_drive_name + ":"
+													file_size += Math.round(new File(versionMemoryRepository.findMasterDriveName() + ":"
 															+ imageTableDto.getImage_name() + fileList[j]).length() * n2) / n2;
 													if (!(new File(
-															part_drive_name + ":" + imageTableDto.getImage_name() + fileList[j])
+															versionMemoryRepository.findPartDriveName() + ":" + imageTableDto.getImage_name() + fileList[j])
 																	.exists())) {
 														try {
 															FileUtils.moveFile(
-																	new File(master_drive_name + ":"
+																	new File(versionMemoryRepository.findMasterDriveName() + ":"
 																			+ imageTableDto.getImage_name() + fileList[j]),
-																	new File(part_drive_name + ":"
+																	new File(versionMemoryRepository.findPartDriveName() + ":"
 																			+ imageTableDto.getImage_name() + fileList[j]));
 														} catch (Exception e) {
 															StringWriter error = new StringWriter();
-															e.printStackTrace(new PrintWriter(error));
+															System.out.println("드라이브 이미지 백업 폴더 생성 오류");
 															errorMsg = error.toString();
 															ErrorLogDto errorLogDto = new ErrorLogDto();
 															errorLogDto.setLog_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
 																	.format(new Date()));
 															errorLogDto
-																	.setLog_place("오늘자 " + master_drive_name + "드라이브 이미지 백업");
+																	.setLog_place("오늘자 " + versionMemoryRepository.findMasterDriveName() + "드라이브 이미지 백업");
 															errorLogDto.setLog_content(errorMsg);
 															eventDao.insertErrorLog(errorLogDto);
 															deleteImageDay(null);
 															errorWebsocket(errorLogDto);
 														} // 조건에 맞게 디렉토리를 옮길 수도 있고 삭제할 수도 있음
 													} else {
-														FileUtils.deleteQuietly(new File(master_drive_name + ":"
+														FileUtils.deleteQuietly(new File(versionMemoryRepository.findMasterDriveName() + ":"
 																+ imageTableDto.getImage_name() + fileList[j]));
 													}
 												}
 											}
 										} catch(Exception e) {
-											e.printStackTrace();
+											System.out.println("deleteImageDay backup Error");
 										}
 										
 									} else {
-										if (!(new File(part_drive_name + ":" + imageTableDto.getImage_name())
+										if (!(new File(versionMemoryRepository.findPartDriveName() + ":" + imageTableDto.getImage_name())
 												.exists())) { // D드라이브에 폴더는 존재함
 											try {
 												file_size += Math.round(FileUtils.sizeOfDirectory(new File(
-														master_drive_name + ":" + imageTableDto.getImage_name())) * n2)
+														versionMemoryRepository.findMasterDriveName() + ":" + imageTableDto.getImage_name())) * n2)
 														/ n2;
 												FileUtils.moveDirectory(
-														new File(master_drive_name + ":"
+														new File(versionMemoryRepository.findMasterDriveName() + ":"
 																+ imageTableDto.getImage_name()),
 														new File(
-																part_drive_name + ":" + imageTableDto.getImage_name()));
+																versionMemoryRepository.findPartDriveName() + ":" + imageTableDto.getImage_name()));
 											} catch (Exception e) {
 												// TODO Auto-generated catch block
 												StringWriter error = new StringWriter();
-												e.printStackTrace(new PrintWriter(error));
+												System.out.println("드라이브 이미지 백업 폴더 생성 오류");
 												errorMsg = error.toString();
 												ErrorLogDto errorLogDto = new ErrorLogDto();
 												errorLogDto.setLog_time(
 														new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
 												errorLogDto.setLog_place(
-														"D드라이브에 폴더 없는 " + master_drive_name + "드라이브 이미지 백업");
+														"D드라이브에 폴더 없는 " + versionMemoryRepository.findMasterDriveName() + "드라이브 이미지 백업");
 												errorLogDto.setLog_content(errorMsg);
 												eventDao.insertErrorLog(errorLogDto);
 												deleteImageDay(null);
@@ -5173,32 +3004,32 @@ public class EventController {
 											}
 										} else { // D드라이브에 폴더도 존재하지 않음
 											String fileList[] = new File(
-													master_drive_name + ":" + imageTableDto.getImage_name()).list();
+													versionMemoryRepository.findMasterDriveName() + ":" + imageTableDto.getImage_name()).list();
 											try {
 												if (fileList != null) {
 													for (int j = 0; j < fileList.length; j++) {
-														if (!(new File(part_drive_name + ":" + imageTableDto.getImage_name()
+														if (!(new File(versionMemoryRepository.findPartDriveName() + ":" + imageTableDto.getImage_name()
 																+ fileList[j]).exists())) {
 															try {
-																file_size += Math.round(new File(master_drive_name + ":"
+																file_size += Math.round(new File(versionMemoryRepository.findMasterDriveName() + ":"
 																		+ imageTableDto.getImage_name() + fileList[j]).length()
 																		* n2) / n2;
 																FileUtils.moveFile(
-																		new File(master_drive_name + ":"
+																		new File(versionMemoryRepository.findMasterDriveName() + ":"
 																				+ imageTableDto.getImage_name() + fileList[j]),
-																		new File(part_drive_name + ":"
+																		new File(versionMemoryRepository.findPartDriveName() + ":"
 																				+ imageTableDto.getImage_name() + fileList[j]));
 															} catch (Exception e) {
 																// TODO Auto-generated catch block
 																StringWriter error = new StringWriter();
-																e.printStackTrace(new PrintWriter(error));
+																System.out.println("드라이브 이미지 백업 폴더 생성 오류");
 																errorMsg = error.toString();
 																ErrorLogDto errorLogDto = new ErrorLogDto();
 																errorLogDto
 																		.setLog_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
 																				.format(new Date()));
 																errorLogDto.setLog_place(
-																		"D드라이브에 폴더 있는 " + master_drive_name + "드라이브 이미지 백업");
+																		"D드라이브에 폴더 있는 " + versionMemoryRepository.findMasterDriveName() + "드라이브 이미지 백업");
 																errorLogDto.setLog_content(errorMsg);
 																eventDao.insertErrorLog(errorLogDto);
 																deleteImageDay(null);
@@ -5208,7 +3039,7 @@ public class EventController {
 													}
 												}
 											} catch(Exception e) {
-												e.printStackTrace();
+												System.out.println("deleteImageDay no Image Error");
 											}
 										}
 									}
@@ -5218,7 +3049,7 @@ public class EventController {
 								String imageList[] = image_path.split("/");
 								for (int j = 0; j < 3; j++) {
 									image_path = image_path.substring(0, image_path.lastIndexOf("/"));
-									file = new File(master_drive_name + ":" + image_path);
+									file = new File(versionMemoryRepository.findMasterDriveName() + ":" + image_path);
 									// System.out.println("C:" + image_path);
 									if (file.exists()) {
 										try {
@@ -5230,12 +3061,12 @@ public class EventController {
 											}
 										} catch (Exception e) {
 											StringWriter error = new StringWriter();
-											e.printStackTrace(new PrintWriter(error));
+											System.out.println("드라이브 이미지 백업 폴더 삭제 오류");
 											errorMsg = error.toString();
 											ErrorLogDto errorLogDto = new ErrorLogDto();
 											errorLogDto.setLog_time(
 													new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
-											errorLogDto.setLog_place(master_drive_name + "드라이브 백업 후 폴더 삭제");
+											errorLogDto.setLog_place(versionMemoryRepository.findMasterDriveName() + "드라이브 백업 후 폴더 삭제");
 											errorLogDto.setLog_content(errorMsg);
 											eventDao.insertErrorLog(errorLogDto);
 											deleteImageDay2(null);
@@ -5250,19 +3081,19 @@ public class EventController {
 								long now = System.currentTimeMillis();
 								backupLogDto.setLog_taken((now - end) / 1000.0 + "초");
 								if (file_size > 0) {
-//									System.out.println(master_drive_name + "드라이브 청소 시작");
-//									System.out.println(master_drive_name + "C드라이브 옮긴 용량 = " + file_size);
-//									System.out.println(master_drive_name + "드라이브 삭제 용량 = " + file_size + "MB");
+//									System.out.println(versionMemoryRepository.findMasterDriveName() + "드라이브 청소 시작");
+//									System.out.println(versionMemoryRepository.findMasterDriveName() + "C드라이브 옮긴 용량 = " + file_size);
+//									System.out.println(versionMemoryRepository.findMasterDriveName() + "드라이브 삭제 용량 = " + file_size + "MB");
 									// eventDao.insertBackupLog(backupLogDto);
 									backupWebsocket(backupLogDto);
-//									System.out.println(master_drive_name + "드라이브 청소 끝");
+//									System.out.println(versionMemoryRepository.findMasterDriveName() + "드라이브 청소 끝");
 								}
 							}
 						}
 
 						for (File root : roots) {
 							drive = root.getAbsolutePath().substring(0, 1);
-							if (drive.equals(master_drive_name)) {
+							if (drive.equals(versionMemoryRepository.findMasterDriveName())) {
 								// 하드디스크 전체 용량
 								totalSpace = Math.round(root.getTotalSpace() / Math.pow(1024, 3) * n2) / n2;
 								// 사용가능한 디스크 용량
@@ -5276,7 +3107,7 @@ public class EventController {
 						}
 					}
 				} else {
-					String uploadPath = part_drive_name + ":/web_server";
+					String uploadPath = versionMemoryRepository.findPartDriveName() + ":/web_server";
 					File folder = new File(uploadPath);
 
 					if (!folder.exists()) {
@@ -5285,11 +3116,11 @@ public class EventController {
 						} catch (Exception e) {
 							String errorMsg = null;
 							StringWriter error = new StringWriter();
-							e.printStackTrace(new PrintWriter(error));
+							System.out.println("드라이브 web_server폴더 생성 오류");
 							errorMsg = error.toString();
 							ErrorLogDto errorLogDto = new ErrorLogDto();
 							errorLogDto.setLog_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
-							errorLogDto.setLog_place(master_drive_name + "드라이브 web_server폴더 생성 오류");
+							errorLogDto.setLog_place(versionMemoryRepository.findMasterDriveName() + "드라이브 web_server폴더 생성 오류");
 							errorLogDto.setLog_content(errorMsg);
 							eventDao.insertErrorLog(errorLogDto);
 							deleteImageDay(null);
@@ -5323,8 +3154,8 @@ public class EventController {
 						limitedSpace = totalImageTableDto.getLimit_num();
 					}
 
-//					System.out.println(master_drive_name + "드라이브 남은 용량 = " + usableSpace + "GB");
-//					System.out.println(master_drive_name + "드라이브 제한 용량 = " + limitedSpace + "GB");
+//					System.out.println(versionMemoryRepository.findMasterDriveName() + "드라이브 남은 용량 = " + usableSpace + "GB");
+//					System.out.println(versionMemoryRepository.findMasterDriveName() + "드라이브 제한 용량 = " + limitedSpace + "GB");
 
 					while (usableSpace < limitedSpace && dateCount > 0) { // 102번 : 60기가
 						String errorMsg = null;
@@ -5339,14 +3170,14 @@ public class EventController {
 							n2 = Math.pow(10.0, n);
 							for (int i = 0; i < imageTableDtoList.size(); i++) {
 								ImageTableDto imageTableDto = imageTableDtoList.get(i);
-								backupLogDto.setLog_content(master_drive_name + "드라이브 / " + master_drive_name + ":"
+								backupLogDto.setLog_content(versionMemoryRepository.findMasterDriveName() + "드라이브 / " + versionMemoryRepository.findMasterDriveName() + ":"
 										+ imageTableDto.getImage_name());
-								File file = new File(master_drive_name + ":" + imageTableDto.getImage_name());
+								File file = new File(versionMemoryRepository.findMasterDriveName() + ":" + imageTableDto.getImage_name());
 								String imageDate = imageTableDto.getImage_name().substring(0,
 										imageTableDto.getImage_name().lastIndexOf("/"));
 								imageDate = imageDate.substring(imageDate.lastIndexOf("/") + 1);
 								if (file.exists()) {
-									backupLogDto.setLog_content(master_drive_name + "드라이브 / " + master_drive_name + ":"
+									backupLogDto.setLog_content(versionMemoryRepository.findMasterDriveName() + "드라이브 / " + versionMemoryRepository.findMasterDriveName() + ":"
 											+ imageTableDto.getImage_name());
 									try {
 										file_size += Math.round(FileUtils.sizeOfDirectory(file) * n2) / n2;
@@ -5354,12 +3185,12 @@ public class EventController {
 										FileUtils.deleteDirectory(file);
 									} catch (Exception e) {
 										StringWriter error = new StringWriter();
-										e.printStackTrace(new PrintWriter(error));
+										System.out.println("드라이브 폴더 삭제 시 오류");
 										errorMsg = error.toString();
 										ErrorLogDto errorLogDto = new ErrorLogDto();
 										errorLogDto.setLog_time(
 												new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
-										errorLogDto.setLog_place(master_drive_name + "드라이브 폴더 삭제 시 오류");
+										errorLogDto.setLog_place(versionMemoryRepository.findMasterDriveName() + "드라이브 폴더 삭제 시 오류");
 										errorLogDto.setLog_content(errorMsg);
 										eventDao.insertErrorLog(errorLogDto);
 										deleteImageDay(null);
@@ -5372,7 +3203,7 @@ public class EventController {
 								String imageList[] = image_path.split("/");
 								for (int j = 0; j < 2; j++) {
 									image_path = image_path.substring(0, image_path.lastIndexOf("/"));
-									file = new File(master_drive_name + ":" + image_path);
+									file = new File(versionMemoryRepository.findMasterDriveName() + ":" + image_path);
 									if (file.exists()) {
 										String fileList[] = file.list();
 										try {
@@ -5383,12 +3214,12 @@ public class EventController {
 											}
 										} catch (Exception e) {
 											StringWriter error = new StringWriter();
-											e.printStackTrace(new PrintWriter(error));
+											System.out.println("드라이브 이미지 삭제 후 폴더 삭제");
 											errorMsg = error.toString();
 											ErrorLogDto errorLogDto = new ErrorLogDto();
 											errorLogDto.setLog_time(
 													new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
-											errorLogDto.setLog_place(master_drive_name + "드라이브 이미지 삭제 후 폴더 삭제");
+											errorLogDto.setLog_place(versionMemoryRepository.findMasterDriveName() + "드라이브 이미지 삭제 후 폴더 삭제");
 											errorLogDto.setLog_content(errorMsg);
 											eventDao.insertErrorLog(errorLogDto);
 											deleteImageDay2(null);
@@ -5401,7 +3232,7 @@ public class EventController {
 										/ Math.pow(10.0, 3);
 
 								backupLogDto.setLog_size(file_size + "GB");
-								System.out.println(master_drive_name + "드라이브 삭제 용량 = " + file_size + "GB");
+								System.out.println(versionMemoryRepository.findMasterDriveName() + "드라이브 삭제 용량 = " + file_size + "GB");
 								long now = System.currentTimeMillis();
 								backupLogDto.setLog_taken((now - end) / 1000.0 + "초");
 								if (file_size > 0) {
@@ -5457,8 +3288,8 @@ public class EventController {
 		final String imageTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(calendar.getTimeInMillis());
 
 		// firstTime = new Date();
-		timerBackup = new Timer();
-		taskBackup = new TimerTask() {
+		Timer timerBackup = new Timer();
+		TimerTask taskBackup = new TimerTask() {
 			@Override
 			public void run() {
 				Calendar cal = Calendar.getInstance();
@@ -5468,7 +3299,7 @@ public class EventController {
 				NumberFormat nf = NumberFormat.getInstance();
 				nf.setMaximumFractionDigits(2);
 				if (drive_count > 1) {
-					String uploadPath = part_drive_name + ":/web_server";
+					String uploadPath = versionMemoryRepository.findPartDriveName() + ":/web_server";
 					File folder = new File(uploadPath);
 
 					if (!folder.exists()) {
@@ -5477,7 +3308,7 @@ public class EventController {
 						} catch (Exception e) {
 							String errorMsg = null;
 							StringWriter error = new StringWriter();
-							e.printStackTrace(new PrintWriter(error));
+							System.out.println("데일리 백업 web_server폴더 생성 시 오류");
 							errorMsg = error.toString();
 							ErrorLogDto errorLogDto = new ErrorLogDto();
 							errorLogDto.setLog_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
@@ -5516,28 +3347,27 @@ public class EventController {
 
 							// System.out.println("데일리네임 = " + image_name);
 
-							File path = new File(master_drive_name + ":" + image_name);
-							File path2 = new File(part_drive_name + ":" + image_name);
+							File path = new File(versionMemoryRepository.findMasterDriveName() + ":" + image_name);
+							File path2 = new File(versionMemoryRepository.findPartDriveName() + ":" + image_name);
 
 							if (path2.exists() && path.exists()) {
 								String fileList[] = path.list();
 								try {
 									if (fileList != null) {
 										for (int j = 0; j < fileList.length; j++) {
-											path = new File(master_drive_name + ":" + image_name + fileList[i]);
-											path2 = new File(part_drive_name + ":" + image_name + fileList[i]);
+											path = new File(versionMemoryRepository.findMasterDriveName() + ":" + image_name + fileList[i]);
+											path2 = new File(versionMemoryRepository.findPartDriveName() + ":" + image_name + fileList[i]);
 											if (!(path2.exists())) {
 												try {
 													file_size += Math.round(path.length() * n2) / n2;
 													FileUtils.copyFile(path, path2);
 												} catch (Exception e) {
 													StringWriter error = new StringWriter();
-													e.printStackTrace(new PrintWriter(error));
 													errorMsg = error.toString();
 													ErrorLogDto errorLogDto = new ErrorLogDto();
 													errorLogDto.setLog_time(
 															new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
-													errorLogDto.setLog_place("데일리 백업 이미지 복사 복사 시 오류");
+													errorLogDto.setLog_place("데일리 백업 이미지 복사 시 오류");
 													errorLogDto.setLog_content(errorMsg);
 													eventDao.insertErrorLog(errorLogDto);
 													backupImageDay(null);
@@ -5547,14 +3377,14 @@ public class EventController {
 										}
 									}
 								} catch(Exception e) {
-									e.printStackTrace();
+									System.out.println("데일리 백업 이미지 복사 시 오류");
 								}
 							} else {
 								if (!(path2.exists()) && path.exists()) {
 									try {
 										path2.mkdir();
 									} catch (Exception e) {
-										e.getStackTrace();
+										System.out.println("데일리 백업 이미지 복사 시 오류");
 									}
 									try {
 										file_size += Math.round(FileUtils.sizeOfDirectory(path) * n2) / n2;
@@ -5562,12 +3392,12 @@ public class EventController {
 									} catch (Exception e) {
 										// TODO Auto-generated catch block
 										StringWriter error = new StringWriter();
-										e.printStackTrace(new PrintWriter(error));
+										System.out.println("드라이브 폴더 복사 시 오류");
 										errorMsg = error.toString();
 										ErrorLogDto errorLogDto = new ErrorLogDto();
 										errorLogDto.setLog_time(
 												new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
-										errorLogDto.setLog_place("데일리 백업 " + master_drive_name + "드라이브 폴더 복사 시 오류");
+										errorLogDto.setLog_place("데일리 백업 " + versionMemoryRepository.findMasterDriveName() + "드라이브 폴더 복사 시 오류");
 										errorLogDto.setLog_content(errorMsg);
 										eventDao.insertErrorLog(errorLogDto);
 										backupImageDay(null);
@@ -5581,7 +3411,7 @@ public class EventController {
 							for (int j = 0; j < 3; j++) {
 								// System.out.println(j + " = " + image_path);
 								image_path = image_path.substring(0, image_path.lastIndexOf("/"));
-								path = new File(master_drive_name + ":" + image_path);
+								path = new File(versionMemoryRepository.findMasterDriveName() + ":" + image_path);
 								if (path.exists()) {
 									String fileList[] = path.list();
 									
@@ -5594,13 +3424,13 @@ public class EventController {
 									} catch (Exception e) {
 										// TODO Auto-generated catch block
 										StringWriter error = new StringWriter();
-										e.printStackTrace(new PrintWriter(error));
+										System.out.println("드라이브 완료 후 폴더 삭제 시 오류");
 										errorMsg = error.toString();
 										ErrorLogDto errorLogDto = new ErrorLogDto();
 										errorLogDto.setLog_time(
 												new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
 										errorLogDto.setLog_place(
-												"데일리 백업 " + master_drive_name + "드라이브 완료 후 폴더 삭제 시 오류");
+												"데일리 백업 " + versionMemoryRepository.findMasterDriveName() + "드라이브 완료 후 폴더 삭제 시 오류");
 										errorLogDto.setLog_content(errorMsg);
 										eventDao.insertErrorLog(errorLogDto);
 										backupImageDay(null);
@@ -5644,19 +3474,19 @@ public class EventController {
 						String errorMsg = null;
 						for (int k = 0; k < imageTableList2.size(); k++) {
 							ImageTableDto imageTableDto = imageTableList2.get(k);
-							File path = new File(part_drive_name + ":" + imageTableDto.getImage_name());
+							File path = new File(versionMemoryRepository.findPartDriveName() + ":" + imageTableDto.getImage_name());
 							if (path.exists()) {
 								try {
 									FileUtils.deleteDirectory(path);
 								} catch (Exception e) {
 									// TODO Auto-generated catch block
 									StringWriter error = new StringWriter();
-									e.printStackTrace(new PrintWriter(error));
+									System.out.println("드라이브 완료 후 폴더 삭제 시 오류");
 									errorMsg = error.toString();
 									ErrorLogDto errorLogDto = new ErrorLogDto();
 									errorLogDto.setLog_time(
 											new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
-									errorLogDto.setLog_place("데일리 백업 " + part_drive_name + "드라이브 폴더 삭제 시 오류");
+									errorLogDto.setLog_place("데일리 백업 " + versionMemoryRepository.findPartDriveName() + "드라이브 폴더 삭제 시 오류");
 									errorLogDto.setLog_content(errorMsg);
 									eventDao.insertErrorLog(errorLogDto);
 									backupImageDay(null);
@@ -5670,7 +3500,7 @@ public class EventController {
 							for (int j = 0; j < 2; j++) {
 								image_path = image_path.substring(0, image_path.lastIndexOf("/"));
 								System.out.println(j + " = " + image_path);
-								path = new File(master_drive_name + ":" + image_path);
+								path = new File(versionMemoryRepository.findMasterDriveName() + ":" + image_path);
 								if (path.exists()) {
 									String fileList[] = path.list();
 									
@@ -5683,13 +3513,13 @@ public class EventController {
 									} catch (Exception e) {
 										// TODO Auto-generated catch block
 										StringWriter error = new StringWriter();
-										e.printStackTrace(new PrintWriter(error));
+										System.out.println("드라이브 완료 후 폴더 삭제 시 오류");
 										errorMsg = error.toString();
 										ErrorLogDto errorLogDto = new ErrorLogDto();
 										errorLogDto.setLog_time(
 												new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
 										errorLogDto.setLog_place(
-												"데일리 백업 " + part_drive_name + "드라이브 폴더 완료 후 폴더 삭제 시 오류");
+												"데일리 백업 " + versionMemoryRepository.findPartDriveName() + "드라이브 폴더 완료 후 폴더 삭제 시 오류");
 										errorLogDto.setLog_content(errorMsg);
 										eventDao.insertErrorLog(errorLogDto);
 										backupImageDay(null);
@@ -5700,7 +3530,7 @@ public class EventController {
 						}
 					}
 				} else {
-					String uploadPath = master_drive_name + ":/web_server";
+					String uploadPath = versionMemoryRepository.findMasterDriveName() + ":/web_server";
 
 					DBackupDto dBackupDto = new DBackupDto();
 
@@ -5714,19 +3544,19 @@ public class EventController {
 						String errorMsg = null;
 						for (int k = 0; k < imageTableList2.size(); k++) {
 							ImageTableDto imageTableDto = imageTableList2.get(k);
-							File path = new File(master_drive_name + ":" + imageTableDto.getImage_name());
+							File path = new File(versionMemoryRepository.findMasterDriveName() + ":" + imageTableDto.getImage_name());
 							if (path.exists()) {
 								try {
 									FileUtils.deleteDirectory(path);
 								} catch (Exception e) {
 									// TODO Auto-generated catch block
 									StringWriter error = new StringWriter();
-									e.printStackTrace(new PrintWriter(error));
+									System.out.println("드라이브 완료 후 폴더 삭제 시 오류");
 									errorMsg = error.toString();
 									ErrorLogDto errorLogDto = new ErrorLogDto();
 									errorLogDto.setLog_time(
 											new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
-									errorLogDto.setLog_place("데일리 백업 " + part_drive_name + "드라이브 폴더 삭제 시 오류");
+									errorLogDto.setLog_place("데일리 백업 " + versionMemoryRepository.findPartDriveName() + "드라이브 폴더 삭제 시 오류");
 									errorLogDto.setLog_content(errorMsg);
 									eventDao.insertErrorLog(errorLogDto);
 									backupImageDay(null);
@@ -5740,7 +3570,7 @@ public class EventController {
 							for (int j = 0; j < 2; j++) {
 								image_path = image_path.substring(0, image_path.lastIndexOf("/"));
 								System.out.println(j + " = " + image_path);
-								path = new File(master_drive_name + ":" + image_path);
+								path = new File(versionMemoryRepository.findMasterDriveName() + ":" + image_path);
 								if (path.exists()) {
 									String fileList[] = path.list();
 									try {
@@ -5752,13 +3582,13 @@ public class EventController {
 									} catch (Exception e) {
 										// TODO Auto-generated catch block
 										StringWriter error = new StringWriter();
-										e.printStackTrace(new PrintWriter(error));
+										System.out.println("드라이브 완료 후 폴더 삭제 시 오류");
 										errorMsg = error.toString();
 										ErrorLogDto errorLogDto = new ErrorLogDto();
 										errorLogDto.setLog_time(
 												new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
 										errorLogDto.setLog_place(
-												"데일리 백업 " + part_drive_name + "드라이브 폴더 완료 후 폴더 삭제 시 오류");
+												"데일리 백업 " + versionMemoryRepository.findPartDriveName() + "드라이브 폴더 완료 후 폴더 삭제 시 오류");
 										errorLogDto.setLog_content(errorMsg);
 										eventDao.insertErrorLog(errorLogDto);
 										backupImageDay(null);
@@ -5786,7 +3616,6 @@ public class EventController {
 			jsonStr = mapper.writeValueAsString(backupLogDto);
 		} catch (Exception e1) {
 			System.out.println("오류 발생");
-			e1.printStackTrace();
 		}
 
 		// 임시 데이터
@@ -5805,7 +3634,6 @@ public class EventController {
 			jsonStr = mapper.writeValueAsString(errorLogDto);
 		} catch (Exception e1) {
 			System.out.println("오류 발생");
-			e1.printStackTrace();
 		}
 
 		// 임시 데이터
@@ -5835,7 +3663,7 @@ public class EventController {
 				sb.append(line);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.out.println("getLicenseInfo Error");
 		} finally {
 			try {
 				if (con != null)
@@ -5843,15 +3671,15 @@ public class EventController {
 				if (in != null)
 					in.close();
 			} catch (Exception se) {
+				con = null;
+				in = null;
 			}
 		}
 
 		// System.out.println(sb.toString());
 
-		str = sb.toString();
-
 		this.template.setMessageConverter((MessageConverter) new StringMessageConverter());
-		this.template.convertAndSend("/renewal_license_date", str);
+		this.template.convertAndSend("/renewal_license_date", sb.toString());
 	}
 
 	public void renewal_license_date() {
@@ -5877,43 +3705,15 @@ public class EventController {
 
 		String date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(firstTime);
 
-		timerBackup = new Timer();
-		taskBackup = new TimerTask() {
+		Timer timerBackup = new Timer();
+		TimerTask taskBackup = new TimerTask() {
 			@Override
 			public void run() {
-				getLicenseInfo(analyze_url.substring(0, analyze_url.lastIndexOf("/")) + "/get_license");
+				String analyzeUrl = versionMemoryRepository.findVersion().getAnalyze_url();
+				getLicenseInfo(analyzeUrl.substring(0, analyzeUrl.lastIndexOf("/")) + "/get_license");
 			}
 		};
 		timerBackup.scheduleAtFixedRate(taskBackup, firstTime, period);
-	}
-
-	public void init_drive_name() {
-		String drive;
-		File[] roots = File.listRoots();
-
-		drive_count = 0;
-
-		for (File root : roots) {
-			drive_count++;
-
-			// 루트 드라이버의 절대 경로
-			drive = root.getAbsolutePath().substring(0, 1);
-
-			String uploadPath = drive + ":/" + "Program Files/Apache Software Foundation";
-			File folder = new File(uploadPath);
-
-			if (folder.exists()) {
-				master_drive_name = drive;
-				if (part_drive_name != null) {
-					break;
-				}
-			} else {
-				part_drive_name = drive;
-				if (master_drive_name != null) {
-					break;
-				}
-			}
-		}
 	}
 
 	@RequestMapping(value = "/saveTestImage", method = RequestMethod.POST)
@@ -5930,7 +3730,7 @@ public class EventController {
 				folder.mkdir();
 				// System.out.println("폴더 생성");
 			} catch (Exception e) {
-				e.getStackTrace();
+				System.out.println("saveTestImage Error");
 			}
 		} else {
 			// System.out.println("폴더가 이미 존재합니다.");
@@ -5945,7 +3745,7 @@ public class EventController {
 				folder.mkdir();
 				// System.out.println("폴더 생성");
 			} catch (Exception e) {
-				e.getStackTrace();
+				System.out.println("saveTestImage 폴더 생성 Error");
 			}
 		} else {
 			// System.out.println("폴더가 이미 존재합니다.");
@@ -5964,7 +3764,7 @@ public class EventController {
 				folder.mkdir();
 				// System.out.println("폴더 생성");
 			} catch (Exception e) {
-				e.getStackTrace();
+				System.out.println("saveTestImage 폴더 생성 Error");
 			}
 		} else {
 			// System.out.println("폴더가 이미 존재합니다.");
@@ -6003,434 +3803,11 @@ public class EventController {
 					// System.out.println("썸네일 = " + uploadPath + "/" + i + "_thumb" + ".jpg");					
 				}
 			} catch(Exception e) {
-				e.printStackTrace();
+				System.out.println("police_upload Error");
 			}
 		}
 
 		return "index";
-	}
-
-	public boolean chkDuration(String dev_ip, String dev_ch, String model_name, String event_time)
-			throws java.text.ParseException {
-		if (durationMap.get(dev_ip + "_" + dev_ch + "_" + model_name) == null) {
-			durationMap.put(dev_ip + "_" + dev_ch + "_" + model_name, event_time);
-			return true;
-		} else {
-			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-			Date now = dateFormat.parse(event_time);
-			Date past = dateFormat.parse(durationMap.get(dev_ip + "_" + dev_ch + "_" + model_name).toString());
-
-			int second = 10;
-
-			if (actionSetupService.selectOne(Integer.parseInt(dev_ch)).get("duration") != null) {
-				second = Integer
-						.parseInt(actionSetupService.selectOne(Integer.parseInt(dev_ch)).get("duration").toString());
-			}
-
-//			System.out.println((now.getTime() - past.getTime()) / 1000 + "초 차이 남, 현재 시간 : " + dateFormat.format(now) + ", 과거 시간 : " + dateFormat.format(past));
-
-			if (now.getTime() - past.getTime() > second * 1000) {
-				durationMap.put(dev_ip + "_" + dev_ch + "_" + model_name, event_time);
-				return true;
-			}
-		}
-
-		return false;
-
-	}
-
-	public void checkShowPopUp(Map metadata, ArrayList ml_result) throws Exception { // 팝업 보여줄 지 확인하는 로직
-//		System.out.println("checkShowPopUp()");
-
-		if (ml_result.size() > 0) {
-			boolean isResult = false;
-
-			String class_name = "";
-			
-			String login_id = metadata.get("user_name").toString(); // 사용자 ID
-			String dev_ch = metadata.get("dev_ch").toString();
-			String dev_title = "";
-			String dev_mac_address = "";
-			Map return_map = eventDao.deviceInfoOne2(metadata);
-			if (return_map != null) {
-				if (return_map.get("dev_title") != null) {
-					dev_title = return_map.get("dev_title").toString();
-				}
-				if (return_map.get("dev_mac_address") != null) {
-					dev_mac_address = return_map.get("dev_mac_address").toString();
-				}
-			}
-			String dev_id = metadata.get("dev_id").toString();
-			String dev_pwd = metadata.get("dev_pwd").toString();
-			String item_name = metadata.get("item_name").toString();
-			String dev_ip = metadata.get("dev_ip").toString();
-			String event_time = metadata.get("event_time").toString();
-			String img_name = metadata.get("img_name").toString(); // 원본 이미지 파일명으로 받음
-			String dev_web_port = metadata.get("dev_web_port").toString();
-
-			for (int i = 0; i < ml_result.size(); i++) {
-				Map ml_result_map = (Map) ml_result.get(i);
-				if (ml_result_map.get("status").toString().equals("SUCCESS")
-						&& Integer.parseInt(ml_result_map.get("count").toString()) > 0) {
-					String model_name = ml_result_map.get("model_name").toString();
-
-					String uploadPath = master_drive_name + ":/web_server/" + login_id + "/" + item_name + "/"
-							+ event_time.split(" ")[0].split("-")[0] + event_time.split(" ")[0].split("-")[1]
-							+ event_time.split(" ")[0].split("-")[2] + "/" + img_name;
-
-					File f = new File(uploadPath);
-
-					BufferedImage bi = ImageIO.read(f);
-
-					int hWidth = bi.getWidth();
-					int hHeight = bi.getHeight();
-
-					Map map = new HashMap();
-					map.put("img_name", uploadPath.substring(uploadPath.indexOf("/")));
-					map.put("width", hWidth);
-					map.put("height", hHeight);
-					map.put("event_name", login_id + "_" + dev_ch + "_" + model_name);
-					map.put("dev_ip", dev_ip);
-					map.put("login_id", login_id);
-					map.put("dev_ch", dev_ch);
-					map.put("model_name", model_name);
-					map.put("event_time", event_time);
-					map.put("dev_title", dev_title);
-					map.put("action_source", "지능형안전관리시스템");
-					map.put("dev_id", dev_id);
-					map.put("dev_pwd", dev_pwd);
-					map.put("dev_web_port", dev_web_port);
-					map.put("dev_mac_address", dev_mac_address);
-
-					Date date_time = new Date();
-
-//					System.out.println("무시 여부 = " + rejectEventService.chkTime(Integer.parseInt(dev_ch), model_name, date_time));
-
-					if (rejectEventService.chkTime(Integer.parseInt(dev_ch), model_name,
-							new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(event_time))) {
-//						System.out.println(model_name + " / " + dev_ch);
-
-						eventReject(map);
-
-						if (actionEventRepository.findByEvent(dev_title, model_name) != null) {
-							Map actionMap = actionEventRepository.findByEvent(dev_title, model_name);
-
-							String action_action = actionMap.get("action_action").toString();
-
-							if (action_action.contains("팝업")) {
-								showPopupImage(map);
-							}
-
-							if (action_action.contains("알람")) {
-								playAlarm(map);
-							}
-
-							if (action_action.contains("프리셋")) {
-								goToPreset(map);
-							}
-
-						}
-
-					}
-				}
-			}
-
-			if (isResult) {
-			}
-		}
-	}
-
-	public void eventReject(Map map) throws JsonProcessingException {
-		// System.out.println("eventReject");
-
-		Map devInfo = eventDao.deviceInfoOne2(map);
-
-		if (devInfo != null) {
-			Map statusMap = new HashMap();
-			statusMap.put("action_source", map.get("action_source"));
-			statusMap.put("event_action", "무시");
-			statusMap.put("dev_ch", devInfo.get("dev_ch"));
-			statusMap.put("dev_title", devInfo.get("dev_title"));
-			statusMap.put("model_name", map.get("model_name"));
-			statusMap.put("dev_ip", devInfo.get("dev_ip"));
-			statusMap.put("event_time", map.get("event_time"));
-			statusMap.put("dev_id", devInfo.get("dev_id"));
-			statusMap.put("dev_pwd", devInfo.get("dev_pwd"));
-			statusMap.put("login_id", devInfo.get("login_id"));
-			statusMap.put("dev_web_port", devInfo.get("dev_web_port"));
-			statusMap.put("dev_mac_address", devInfo.get("dev_mac_address"));
-
-			boolean isPresent = eventStatusService.save(statusMap);
-
-			statusMap.put("isPresent", isPresent);
-
-			ObjectMapper mapper = new ObjectMapper();
-			String returnStr = mapper.writeValueAsString(statusMap);
-
-			this.template.setMessageConverter((MessageConverter) new StringMessageConverter());
-			this.template.convertAndSend("/eventStatus", returnStr);
-
-			this.template.setMessageConverter((MessageConverter) new StringMessageConverter());
-			this.template.convertAndSend("/receiveEventStatus", returnStr);
-		}
-	}
-
-	public void showPopupImage(Map map) throws JsonProcessingException { // 팝업을 보여줄 로직, 오버로딩
-		// System.out.println("showPopupImage()");
-
-		ObjectMapper mapper = new ObjectMapper();
-		String returnStr = mapper.writeValueAsString(map);
-
-		this.template.setMessageConverter((MessageConverter) new StringMessageConverter());
-		this.template.convertAndSend("/showPopupImage", returnStr);
-	}
-
-	public void playAlarm(Map map) throws JsonProcessingException {
-		// System.out.println("playAlarm()");
-
-		ObjectMapper mapper = new ObjectMapper();
-		String returnStr = mapper.writeValueAsString(map);
-
-		map.put("action_action", "알람");
-
-		String dev_title = "";
-		Map returnMap2 = eventDao.deviceInfoOne2(map);
-		if (returnMap2 != null) {
-			dev_title = returnMap2.get("dev_title").toString();
-		}
-		map.put("dev_title", dev_title);
-		map.put("isEvent", true);
-
-		Map returnMap = eventDao.selectEventActionByAction(map);
-
-		if (returnMap != null) {
-			// 이벤트 액션 설정 체크해야됨
-
-			List<Map> list = eventDao.selectNetworkSpeaker();
-
-			for (int i = 0; i < list.size(); i++) {
-				playNetworkSpeaker(returnMap, list.get(i));
-			}
-
-			this.template.setMessageConverter((MessageConverter) new StringMessageConverter());
-			this.template.convertAndSend("/playAlarm", returnStr);
-		}
-	}
-
-	public void goToPreset(Map map) throws JsonProcessingException {
-		// System.out.println("goToPreset()");
-
-		map.put("action_action", "프리셋");
-
-		String dev_title = "";
-		Map returnMap2 = eventDao.deviceInfoOne2(map);
-		if (returnMap2 != null) {
-			dev_title = returnMap2.get("dev_title").toString();
-		}
-
-		map.put("dev_title", dev_title);
-		map.put("isEvent", true);
-
-		Map return_map = eventDao.selectEventActionByAction(map);
-
-		if (return_map != null) {
-			// 이벤트 액션 설정 체크해야됨
-			Map statusMap = new HashMap();
-			statusMap.put("action_source", map.get("action_source"));
-			statusMap.put("event_action", "프리셋");
-			statusMap.put("dev_ch", return_map.get("dev_ch"));
-			statusMap.put("dev_title", return_map.get("dev_title"));
-			statusMap.put("model_name", map.get("model_name"));
-			statusMap.put("dev_ip", return_map.get("dev_ip"));
-			statusMap.put("event_time", map.get("event_time"));
-			statusMap.put("dev_id", return_map.get("dev_id"));
-			statusMap.put("dev_pwd", return_map.get("dev_pwd"));
-			statusMap.put("login_id", return_map.get("login_id"));
-			statusMap.put("dev_web_port", return_map.get("dev_web_port"));
-			statusMap.put("dev_mac_address", return_map.get("dev_mac_address"));
-			statusMap.put("pre_title", map.get("pre_title"));
-
-			boolean isPresent = eventStatusService.save(statusMap);
-
-			statusMap.put("isPresent", isPresent);
-
-			ObjectMapper mapper = new ObjectMapper();
-			String returnStr = mapper.writeValueAsString(statusMap);
-
-			this.template.setMessageConverter((MessageConverter) new StringMessageConverter());
-			this.template.convertAndSend("/receiveEventStatus", returnStr);
-
-			Map returnMap = new LinkedHashMap();
-			returnMap.put("command", "RF_REQ_GOTOPRESET");
-			returnMap.put("sender", "web");
-			returnMap.put("web_user", map.get("login_id"));
-			returnMap.put("ip", return_map.get("dev_ip"));
-			returnMap.put("id", return_map.get("dev_id"));
-			returnMap.put("pw", return_map.get("dev_pwd"));
-			returnMap.put("mac", return_map.get("dev_mac_address"));
-			returnMap.put("preset_name", return_map.get("pre_title"));
-			returnMap.put("port", return_map.get("dev_web_port"));
-
-			TextMessage return_message = new TextMessage(new ObjectMapper().writeValueAsString(returnMap));
-			webSession.sendMessage(return_message, webSocketService);
-		}
-	}
-
-	public void sendScada(Map responseMap) throws JsonProcessingException {
-		// System.out.println("sendWebsocket()");
-
-		Map metadata = (Map) responseMap.get("metadata");
-
-		ArrayList ml_result = (ArrayList) responseMap.get("ml_result");
-
-		if (ml_result.size() > 0) {
-			String ip = metadata.get("dev_ip").toString();
-			int port = Integer.parseInt(metadata.get("dev_port").toString());
-			int ch = Integer.parseInt(metadata.get("dev_ch").toString());
-			List list = new ArrayList();
-			String event_time = metadata.get("event_time").toString();
-			String scada = "SUCCESS";
-			boolean isResult = false;
-
-			List<Map> result_list = new ArrayList<Map>();
-
-			for (int i = 0; i < ml_result.size(); i++) {
-				Map ml_result_map = (Map) ml_result.get(i);
-				
-				boolean isTrue1 = ml_result_map.get("status").toString().equals("SUCCESS");
-				boolean isTrue2 = Integer.parseInt(ml_result_map.get("count").toString()) > 0;
-				
-				if (isTrue1 && isTrue2) {
-					result_list.add(ml_result_map);
-					String model_name = ml_result_map.get("model_name").toString();
-
-					list.add(model_name);
-
-					isResult = true;
-				}
-			}
-			
-			if (isResult) {
-				Map map = new LinkedHashMap();
-				map.put("ip", ip);
-				map.put("port", port);
-				map.put("ch", ch);
-				map.put("model_name", list);
-				map.put("result_list", result_list);
-				map.put("event_time", event_time);
-				map.put("event", scada);
-				map.put("isEventAction", "Y");
-
-				TextMessage return_message = new TextMessage(new ObjectMapper().writeValueAsString(map));
-				webSession.sendMessage(return_message, webSocketService);
-			}
-		}
-	}
-
-	public void sendWebsocket(Map responseMap) throws Exception {
-		// System.out.println("sendWebsocket()");
-
-		Map metadata = (Map) responseMap.get("metadata");
-
-		ArrayList ml_result = (ArrayList) responseMap.get("ml_result");
-
-		if (ml_result.size() > 0) {
-			boolean isResult = false;
-
-			String class_name = "";
-
-			String ip = metadata.get("dev_ip").toString();
-			int port = Integer.parseInt(metadata.get("dev_port").toString());
-			int ch = Integer.parseInt(metadata.get("dev_ch").toString());
-			List list = new ArrayList();
-			String event_time = metadata.get("event_time").toString();
-			String scada = "SUCCESS";
-
-			String login_id = metadata.get("user_name").toString(); // 사용자 ID
-			String dev_ch = metadata.get("dev_ch").toString();
-
-			String dev_title = "";
-			Map return_map = eventDao.deviceInfoOne2(metadata);
-			if (return_map != null) {
-				dev_title = return_map.get("dev_title").toString();
-			}
-			metadata.put("dev_title", dev_title);
-
-			String item_name = metadata.get("item_name").toString();
-			String img_name = metadata.get("img_name").toString(); // 원본 이미지 파일명으로 받음
-
-			List<Map> result_list = new ArrayList<Map>();
-
-			for (int i = 0; i < ml_result.size(); i++) {
-				Map ml_result_map = (Map) ml_result.get(i);
-				
-				boolean isTrue1 = ml_result_map.get("status").toString().equals("SUCCESS");
-				boolean isTrue2 = Integer.parseInt(ml_result_map.get("count").toString()) > 0;
-
-//				System.out.println("sendWebsocket method isTrue1 = " + isTrue1);
-//				System.out.println("sendWebsocket method isTrue2 = " + isTrue2);
-				
-				if (isTrue1 && isTrue2) {
-					result_list.add(ml_result_map);
-					String model_name = ml_result_map.get("model_name").toString();
-
-					Date date_time = new Date();
-					
-					boolean isTrue3 = rejectEventService.chkTime(Integer.parseInt(dev_ch), model_name,
-							new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(event_time));
-
-//					System.out.println("sendWebsocket method isTrue3 = " + isTrue3);
-					
-					if (!isTrue3) {
-						return;
-					}
-
-					metadata.put("model_name", model_name);
-					metadata.put("action_action", "SMS(SCADA)");
-					metadata.put("action_source", "지능형안전관리시스템");
-					metadata.put("isEvent", true);
-
-					Map returnMap = eventDao.selectEventActionByAction(metadata);
-
-					boolean isTrue4 = actionEventRepository.findByEvent(dev_title, model_name) != null;
-
-//					System.out.println("sendWebsocket method isTrue4 = " + isTrue4);
-					
-					if (isTrue4) {
-						Map actionMap = actionEventRepository.findByEvent(dev_title, model_name);
-
-						String action_action = actionMap.get("action_action").toString();
-
-						boolean isTrue5 = returnMap != null && action_action.indexOf("SMS(SCADA)") != -1;
-
-//						System.out.println("sendWebsocket method isTrue5 = " + isTrue5);
-						
-						if (isTrue5) {
-							isResult = true;
-						}
-					}
-
-					list.add(model_name);
-				}
-			}
-			
-//			System.out.println("sendWebsocket method isResult = " + isResult);
-
-			if (isResult) {
-				Map map = new LinkedHashMap();
-				map.put("ip", ip);
-				map.put("port", port);
-				map.put("ch", ch);
-				map.put("model_name", list);
-				map.put("result_list", result_list);
-				map.put("event_time", event_time);
-				map.put("scada", scada);
-				map.put("isEventAction", "Y");
-
-				TextMessage return_message = new TextMessage(new ObjectMapper().writeValueAsString(map));
-				webSession.sendMessage(return_message, webSocketService);
-			}
-		}
 	}
 
 	public void sendMonitor(Map map) throws MessagingException, JsonProcessingException {
@@ -6446,7 +3823,7 @@ public class EventController {
 			try {
 				folder.mkdir();
 			} catch (Exception e) {
-				e.getStackTrace();
+				System.out.println("sendMonitor 폴더 생성 Error");
 			}
 		}
 
@@ -6467,8 +3844,7 @@ public class EventController {
 			lFileOutputStream.close();
 
 		} catch (Exception e) {
-			// e.printStackTrace();
-			// System.out.println("sendMonitor 이미지 저장 안됨 = " + img_name);
+			System.out.println("sendMonitor 이미지 저장 안됨 = " + img_name);
 		}
 	}
 
@@ -6502,7 +3878,7 @@ public class EventController {
 				// response1.getStatusLine().getStatusCode());
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.out.println("testTokken Error");
 		}
 
 		return result;

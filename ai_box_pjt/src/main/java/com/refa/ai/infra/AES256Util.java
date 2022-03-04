@@ -41,7 +41,7 @@ public class AES256Util {
     		this.ivString = pbeEnc.decrypt(properties.getProperty("security.iv"));
     		
         } catch (IOException e) {
-            e.printStackTrace();
+        	System.out.println("AES256Util 생성자 오류");
         }
 	}
 
@@ -78,7 +78,7 @@ public class AES256Util {
            
         } catch (Exception e) {
             cipherText = "";
-            e.printStackTrace();
+        	System.out.println("encryptAES 오류");
         }
 
         return cipherText;
@@ -113,7 +113,7 @@ public class AES256Util {
            
         } catch (Exception e) {
             plainText = "";
-            e.printStackTrace();
+        	System.out.println("decryptAES 오류");
         }
 
         return plainText;

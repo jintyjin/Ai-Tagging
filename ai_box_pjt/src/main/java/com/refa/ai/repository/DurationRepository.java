@@ -1,6 +1,7 @@
 package com.refa.ai.repository;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.stereotype.Repository;
@@ -20,7 +21,7 @@ public class DurationRepository {
 		durationList.put(key, eventTime);
 	}
 	
-	public String findByKey(String key) {
-		return durationList.get(key);
+	public Optional<String> findByKey(String key) {
+		return Optional.ofNullable(durationList.get(key));
 	}
 }

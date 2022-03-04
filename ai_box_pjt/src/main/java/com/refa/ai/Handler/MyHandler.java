@@ -45,7 +45,7 @@ import com.refa.ai.entity.Device;
 import com.refa.ai.entity.User;
 import com.refa.ai.infra.AES256Util;
 import com.refa.ai.infra.WebSession;
-import com.refa.ai.repository.ActionEventRepository;
+import com.refa.ai.repository.ActionEventMemoryRepository;
 import com.refa.ai.repository.DeviceRepository;
 import com.refa.ai.repository.PresetRepository;
 import com.refa.ai.repository.RejectEventRepository;
@@ -70,7 +70,7 @@ public class MyHandler extends AbstractWebSocketHandler {
 	private final ActionSetupService actionSetupService;
 	private final AreaSetService areaSetService;
 	private final ScheduleRepository scheduleRepository;
-	private final ActionEventRepository actionEventRepository;
+	private final ActionEventMemoryRepository actionEventRepository;
 	private final EventStatusService eventStatusService;
 	private final RejectEventService rejectEventService;
 	private final PresetRepository presetRepository;
@@ -469,8 +469,7 @@ public class MyHandler extends AbstractWebSocketHandler {
 						try {
 							jsonStr = mapper1.writeValueAsString(eventDto);
 						} catch (Exception e1) {
-							//System.out.println("오류 발생");
-							e1.printStackTrace();
+							System.out.println("SCADA Websocket Error");
 						}
 
 						this.template.setMessageConverter((MessageConverter) new StringMessageConverter());
@@ -748,7 +747,7 @@ public class MyHandler extends AbstractWebSocketHandler {
 				}
 				response.close();
 			} catch (Exception e) {
-				e.printStackTrace();
+				System.out.println("response is error");
 			}
 		}
 	}

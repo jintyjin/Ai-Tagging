@@ -36,7 +36,7 @@ public class WebSocketService {
 
 			} catch (IOException e) {				
 				// 에러가 발생하면 콘솔에 표시한다.
-				e.printStackTrace();				
+				System.out.println("sendEqualMessage Error");
 			}
 		}
     }
@@ -51,7 +51,7 @@ public class WebSocketService {
 
 			} catch (IOException e) {				
 				// 에러가 발생하면 콘솔에 표시한다.
-				e.printStackTrace();				
+				System.out.println("sendDifferentMessage Error");		
 			}
 		}
     }
