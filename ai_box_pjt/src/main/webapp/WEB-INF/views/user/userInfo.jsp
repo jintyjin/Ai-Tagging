@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -37,6 +38,7 @@
 <script type="text/javascript" src="./resources/js/jqwidgets/jqxvalidator.js"></script>
 <script type="text/javascript" src="./resources/js/jqwidgets/jqxdata.export.js"></script> 
 <script type="text/javascript" src="./resources/js/jqwidgets/jqxgrid.export.js"></script>
+<script type="text/javascript" src="/resources/js/translate.js"></script>
 <style>
 button {
 	font-family: Lucida Sans, Arial, Helvetica, sans-serif;
@@ -757,15 +759,15 @@ $(document).ready(function () {
 				filterable: true,
 				editable: true,
 		        columns: [
-		            { text: '번호', datafield: 'dev_idx', width: '10%', editable: false, hidden:true},
-		            { text: '장치 종류', datafield: 'dev_type', width: '10%', editable: false, cellbeginedit: cellbeginedit, cellsrenderer: cellsrenderer},
-		            { text: '채널', datafield: 'dev_ch', width: '10%', editable: false, cellbeginedit: cellbeginedit, cellsrenderer: cellsrenderer },
-		            { text: '장치 이름', datafield: 'dev_title', width: '20%', editable: false, cellbeginedit: cellbeginedit, cellsrenderer: cellsrenderer },
-		            { text: '모델명', datafield: 'dev_model_name', width: '20%', editable: false, cellbeginedit: cellbeginedit, cellsrenderer: cellsrenderer },
-		            { text: 'IP/DDNS', datafield: 'dev_ip', width: '20%', editable: false, cellbeginedit: cellbeginedit, cellsrenderer: cellsrenderer },
-		            { text: '포트', datafield: 'dev_web_port', width: '12%', editable: false, cellbeginedit: cellbeginedit, cellsrenderer: cellsrenderer },
-		            { text: '연결 상태', datafield: 'dev_isconnect', width: '8%', editable: false, cellbeginedit: cellbeginedit, cellsrenderer: cellsrenderer },
-		            { text: '사용자', datafield: 'login_id', width: '10%', editable: false, hidden:true}
+		            { text: getTranslate('idx'), datafield: 'dev_idx', width: '10%', editable: false, hidden:true},
+		            { text: getTranslate('device_type'), datafield: 'dev_type', width: '10%', editable: false, cellbeginedit: cellbeginedit, cellsrenderer: cellsrenderer},
+		            { text: getTranslate('device_channel'), datafield: 'dev_ch', width: '10%', editable: false, cellbeginedit: cellbeginedit, cellsrenderer: cellsrenderer },
+		            { text: getTranslate('device_title'), datafield: 'dev_title', width: '20%', editable: false, cellbeginedit: cellbeginedit, cellsrenderer: cellsrenderer },
+		            { text: getTranslate('device_model_name'), datafield: 'dev_model_name', width: '20%', editable: false, cellbeginedit: cellbeginedit, cellsrenderer: cellsrenderer },
+		            { text: getTranslate('device_ip'), datafield: 'dev_ip', width: '20%', editable: false, cellbeginedit: cellbeginedit, cellsrenderer: cellsrenderer },
+		            { text: getTranslate('device_web_port'), datafield: 'dev_web_port', width: '12%', editable: false, cellbeginedit: cellbeginedit, cellsrenderer: cellsrenderer },
+		            { text: getTranslate('device_isconnect'), datafield: 'dev_isconnect', width: '8%', editable: false, cellbeginedit: cellbeginedit, cellsrenderer: cellsrenderer },
+		            { text: getTranslate('device_login_id'), datafield: 'login_id', width: '10%', editable: false, hidden:true}
 		        ]
 		    });
 		},
@@ -790,7 +792,7 @@ $(document).ready(function () {
 		popup_window[POPUP_MORE] = openWindow('./resources/Line%20Help.htm', 'LINE', 1400, 880);
 	});
 	$('.button_modify').click(function () {
-		if (confirm('수정하시겠습니까?')) {
+		if (confirm(getTranslate('수정하시겠습니까'))) {
 			var jsonUrl = "/updateUserInfo";
 			
 			var obj = new Object();
@@ -819,7 +821,7 @@ $(document).ready(function () {
 				contentType : "application/json; charset=UTF-8",       
 				data : jsonData,          		     		 
 				success: function() {
-					alert('수정이 완료되었습니다.');			
+					alert(getTranslate('수정이완료되었습니다'));			
 					self.close();
 					parent.opener.location.reload();
 				},
@@ -831,7 +833,7 @@ $(document).ready(function () {
 		}
 	});
 	$('.button_delete').click(function () {
-		if(confirm('정말 삭제하시겠습니까?')) {
+		if(confirm(getTranslate('정말삭제하시겠습니까'))) {
 			var jsonUrl = "/deleteUserInfo";
 			
 			var obj = new Object();
@@ -846,7 +848,7 @@ $(document).ready(function () {
 				contentType : "application/json;",       
 				data : jsonData,          		     		 
 				success: function() {
-					alert('삭제가 완료되었습니다.');			
+					alert(getTranslate('삭제가완료되었습니다'));			
 					self.close();
 					parent.opener.location.reload();
 				},
@@ -910,37 +912,37 @@ $(document).ready(function () {
 			<div class="tmpMargin"></div>
 			<div class="name_phone">
 				<div class="name">
-					<label class="name_title" for="name_text">Name</label>
+					<label class="name_title" for="name_text"><spring:message code="user.name" /></label>
 					<input type="text" id="name_text" class="text">
 				</div>
 				<div class="phone">
-					<label class="phone_title" for="phone_text">Phone</label>
+					<label class="phone_title" for="phone_text"><spring:message code="user.phone" /></label>
 					<input type="text" id="phone_text" class="text">
 				</div>
 			</div>
 			<div class="id_pwd">
 				<div class="id">
-					<label class="id_title" for="id_text">ID</label>
+					<label class="id_title" for="id_text"><spring:message code="user.id" /></label>
 					<div id="id_text"></div>
 				</div>
 				<div class="pwd">
-					<label class="pwd_title" for="pwd_text">Password</label>
+					<label class="pwd_title" for="pwd_text"><spring:message code="user.password" /></label>
 					<input type="password" id="pwd_text" class="text">
 				</div>
 			</div>
 			<div class="level_channel">
 				<div class="level">
-					<label class="level_title" for="level_text">설정 권한</label>
+					<label class="level_title" for="level_text"><spring:message code="user.setupAuthority" /></label>
 					<div id="level_text"></div>
 				</div>
 				<div class="channel">
-					<label class="channel_title" for="channel_text">라이브 권한</label>
+					<label class="channel_title" for="channel_text"><spring:message code="user.liveAuthority" /></label>
 					<div id="channel_text"></div>
 				</div>
 			</div>
 			<div class="email_tokken">
 				<div class="email">
-					<label class="email_title" for="email_text">Email</label>
+					<label class="email_title" for="email_text"><spring:message code="user.email" /></label>
 					<input type="text" id="email_text" class="text">
 				</div>
 				<!-- <div class="tokken">
@@ -955,10 +957,10 @@ $(document).ready(function () {
 		</div>
 		<div class="container" style="width:1110px;padding:0;max-width:1110px;margin-top:30px;">
 			<div style="width:50%; float:left; writing-mode:vertical-rl; padding-right:20px; margin-bottom:30px;">
-				<button class="button_modify"><span class="glyphicon glyphicon-edit modify" aria-hidden="true"></span>수정</button>
+				<button class="button_modify"><span class="glyphicon glyphicon-edit modify" aria-hidden="true"></span><spring:message code="common.modify" /></button>
 			</div>
 			<div style="width:50%; float:left; padding-left:20px; margin-bottom:30px;">
-				<button class="button_delete"><span class="glyphicon glyphicon-trash delete" aria-hidden="true"></span>삭제</button>
+				<button class="button_delete"><span class="glyphicon glyphicon-trash delete" aria-hidden="true"></span><spring:message code="common.delete" /></button>
 			</div>
 		</div>
 		<div class="container" style="width:1110px;padding:0;max-width:1110px;">

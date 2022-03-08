@@ -33,6 +33,7 @@
 <script src="./resources/js/jqwidgets/jqxwindow.js"></script>
 <script src="./resources/js/jqwidgets/jqxdata.export.js"></script> 
 <script src="./resources/js/jqwidgets/jqxgrid.export.js"></script>
+<script type="text/javascript" src="/resources/js/translate.js"></script>
 <style>
 body {
 	font-family: Lucida Sans, Arial, Helvetica, sans-serif;
@@ -157,9 +158,9 @@ $(document).ready(function () {
 		data : jsonData,          		     		 
 		success: function(data) {
 			var arr = new Array();
-			ascount = data.length;
 			for(var i = 0; i < data.length; i++) {
 				if (JSON.parse(get('userdata')).user_id == 'admin' || data[i].user_id == JSON.parse(get('userdata')).user_id) {
+					ascount = ascount + 1;
 					var month = data[i].user_joindate.monthValue;
 					var day = data[i].user_joindate.dayOfMonth;
 					
@@ -214,8 +215,9 @@ $(document).ready(function () {
 				}
 	    	}
 			
-	    	var SKEY_REQUEST = 'COUNT';
-	    	$('#as_count').text('USER ' + SKEY_REQUEST + ' : ' + ascount); 
+			if (ascount > 1) {
+		    	$('#as_count').text(getTranslate('user_count') + ' : ' + ascount);
+			} 
 	    	
 			var source = {
 				dataType : "json",
@@ -251,18 +253,18 @@ $(document).ready(function () {
 				ready: function () {  
 				},
 		        columns: [
-		            { text: 'User ID', datafield: 'user_id', width: '9%', editable: false,},
-		            { text: 'User Name', datafield: 'user_name', width: '9%', editable: false, },
-		            { text: 'Phone', datafield: 'user_phone', width: '9%', editable: false, },
-		            { text: 'LINE Token', datafield: 'user_tokken', width: '15%', editable: false, },
-		            { text: 'Email', datafield: 'user_email', width: '13%', editable: false, },
-		            { text: 'Login Date', datafield: 'user_logindate', width: '14%', editable: false, },
-		            { text: 'Join Date', datafield: 'user_joindate', width: '14%', editable: false, },
-		            { text: 'Status', datafield: 'user_isUse', width: '6%', editable: false, hidden:true},
-		            { text: 'Grade', datafield: 'user_isadmin', width: '7%', editable: false, },
-		            { text: 'Level', datafield: 'user_level', width: '4%', editable: false, hidden:true},
-		            { text: 'More', columntype: 'button', align: 'center', width: '10%', editable: false, sortable: false, filterable: false, cellsrenderer: function () {
-						return 'More';
+		            { text: getTranslate('user_id'), datafield: 'user_id', width: '9%', editable: false,},
+		            { text: getTranslate('user_name'), datafield: 'user_name', width: '9%', editable: false, },
+		            { text: getTranslate('user_phone'), datafield: 'user_phone', width: '9%', editable: false, },
+		            { text: getTranslate('user_tokken'), datafield: 'user_tokken', width: '15%', editable: false, },
+		            { text: getTranslate('user_email'), datafield: 'user_email', width: '13%', editable: false, },
+		            { text: getTranslate('user_logindate'), datafield: 'user_logindate', width: '14%', editable: false, },
+		            { text: getTranslate('user_joindate'), datafield: 'user_joindate', width: '14%', editable: false, },
+		            { text: getTranslate('user_isUse'), datafield: 'user_isUse', width: '6%', editable: false, hidden:true},
+		            { text: getTranslate('user_isadmin'), datafield: 'user_isadmin', width: '7%', editable: false, },
+		            { text: getTranslate('user_level'), datafield: 'user_level', width: '4%', editable: false, hidden:true},
+		            { text: getTranslate('more'), columntype: 'button', align: 'center', width: '10%', editable: false, sortable: false, filterable: false, cellsrenderer: function () {
+						return getTranslate('more');
 					}, 
 						buttonclick: function (row) {
 							if(popup_window[POPUP_MORE] && !popup_window[POPUP_MORE].closed)
@@ -280,7 +282,7 @@ $(document).ready(function () {
 		    var val = "'" + "user" + "'"
 		    
 			if (JSON.parse(get('userdata')).user_id == 'admin') {
-				$('.addButton').append('<button class="button_check" onclick="addInfo(' + val + ');"><span class="glyphicon glyphicon-plus check" aria-hidden="true"></span>추가</button>');
+				$('.addButton').append('<button class="button_check" onclick="addInfo(' + val + ');"><span class="glyphicon glyphicon-plus check" aria-hidden="true"></span>' + getTranslate('add') + '</button>');
 			}
 		},
 		error: function(errorThrown) {

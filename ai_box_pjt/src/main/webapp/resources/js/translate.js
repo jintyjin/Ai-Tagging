@@ -41,10 +41,10 @@ var lang = {
 		sunday : "일요일",
 		sun : "일",
 		
-		// 고정값
+		/**** 공통 ****/
 		event_source : "이벤트 소스",
 		device_title : "장치 이름",
-		device_ip : "장비 아이피",
+		device_ip : "IP/DDNS",
 		channel : "채널",
 		event_info : "이벤트 정보",
 		popup : "팝업",
@@ -57,7 +57,34 @@ var lang = {
 		display : "보기",
 		reject : "무시",
 		move : "이동",
-		noImage : "이미지가 없습니다."
+		noImage : "이미지가 없습니다.",
+		
+		user_id : "아이디",
+		user_name : "이름",
+		user_phone : "전화번호",
+		user_tokken : "라인 토큰",
+		user_email : "이메일",
+		user_logindate : "마지막 로그인 날짜",
+		user_joindate : "가입일",
+		user_isUse : "탈퇴 여부",
+		user_isadmin : "등급",
+		user_level : "레벨",
+		more : "더보기",
+		user_count : "유저 수",
+		add : "추가",
+		
+		idx : "번호",
+		device_type : "장치 종류",
+		device_channel : "채널",
+		device_model_name : "모델명",
+		device_web_port : "포트",
+		device_isconnect : "연결 상태",
+		device_login_id : "사용자",
+		
+		수정하시겠습니까 : "수정하시겠습니까?",
+		수정이완료되었습니다 : "수정이 완료되었습니다.",
+		정말삭제하시겠습니까 : "정말 삭제하시겠습니까?",
+		삭제가완료되었습니다 : "삭제가 완료되었습니다."
 	},
 	"en" : {
 		// Event
@@ -101,10 +128,10 @@ var lang = {
 		sunday : "Sunday",
 		sun : "Sun",
 
-		// 고정값
+		/**** Common ****/
 		event_source : "Event Source",
 		device_title : "Device Title",
-		device_ip : "Device IP",
+		device_ip : "IP/DDNS",
 		channel : "Channel",
 		event_info : "Event Info",
 		popup : "Popup",
@@ -117,7 +144,34 @@ var lang = {
 		display : "display",
 		reject : "reject",
 		move : "move",
-		noImage : "No image to display"
+		noImage : "No image to display",
+		
+		user_id : "User ID",
+		user_name : "User Name",
+		user_phone : "User Phone",
+		user_tokken : "Line Tokken",
+		user_email : "Email",
+		user_logindate : "Last Login",
+		user_joindate : "Join Date",
+		user_isUse : "Status",
+		user_isadmin : "Grade",
+		user_level : "Level",
+		more : "More",
+		user_count : "USER COUNT",
+		add : "Add",
+
+		idx : "No",
+		device_type : "Type",
+		device_channel : "Channel",
+		device_model_name : "Model Name",
+		device_web_port : "Port",
+		device_isconnect : "Connect",
+		device_login_id : "Login Id",
+
+		수정하시겠습니까 : "Do you want to modify?",
+		수정이완료되었습니다 : "The modification has been completed.",
+		정말삭제하시겠습니까 : "Do you really want to delete it?",
+		삭제가완료되었습니다 : "Delete has been completed."
 	}
 }
 function getLanguage() {
