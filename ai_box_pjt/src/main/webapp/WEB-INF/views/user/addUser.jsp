@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -36,6 +37,7 @@
 <script type="text/javascript" src="./resources/js/jqwidgets/jqxvalidator.js"></script>
 <script type="text/javascript" src="./resources/js/jqwidgets/jqxdata.export.js"></script> 
 <script type="text/javascript" src="./resources/js/jqwidgets/jqxgrid.export.js"></script>
+<script type="text/javascript" src="/resources/js/translate.js"></script>
 <style>
 button {
 	font-family: Lucida Sans, Arial, Helvetica, sans-serif;
@@ -581,13 +583,13 @@ $(document).ready(function () {
 	var categorySource = [];
 
 	var levelObj = new Object();
-	levelObj.text = '관리자';
+	levelObj.text = getTranslate('admin');
 	levelObj.value = 'A';
 	
 	categorySource.push(levelObj);
 	
 	levelObj = new Object();
-	levelObj.text = '사용자';
+	levelObj.text = getTranslate('user');
 	levelObj.value = 'U';
 
 	categorySource.push(levelObj);
@@ -608,37 +610,37 @@ $(document).ready(function () {
 		
 	$('.add').click(function () {
 		if($('#name_text').val() == '') {
-			alert("이름을 입력하세요.");
+			alert(getTranslate('enterName'));
 			$("#name_text").focus();
 			return;
 		}
 		if($('#phone_text').val() == '') {
-			alert("전화번호를 입력하세요.");
+			alert(getTranslate('enterPhone'));
 			$("#phone_text").focus();
 			return;
 		}
 		if($('#id_text').val() == '') {
-			alert("아이디를 입력하세요.");
+			alert(getTranslate('enterId'));
 			$("#id_text").focus();
 			return;
 		}
 		if($('#pwd_text').val() == '') {
-			alert("비밀번호를 입력하세요.");
+			alert(getTranslate('enterPassword'));
 			$("#pwd_text").focus();
 			return;
 		}
 		if($('#email_text').val() == '') {
-			alert("이메일을 입력하세요.");
+			alert(getTranslate('enterEmail'));
 			$("#email_text").focus();
 			return;
 		}
 
 		if(!isCheck) {
-			alert("아이디 중복체크를 해주세요");
+			alert(getTranslate('checkDuplicate'));
 			return;
 		} else {
 			if (checkId != $('#id_text').val()) {
-				alert('아이디 중복체크를 해주세요');
+				alert(getTranslate('checkDuplicate'));
 				return;
 			}
 		}
@@ -681,7 +683,7 @@ $(document).ready(function () {
 			contentType : "application/json; charset=UTF-8",       
 			data : jsonData,          		     		 
 			success: function() {
-				alert('등록이 완료되었습니다.');		
+				alert(getTranslate('completeResigtration'));		
 				self.close();		
 				parent.opener.location.reload();
 			},
@@ -698,7 +700,7 @@ $(document).ready(function () {
 		var jsonUrl = '/chkUserId';
 		
 		if($('#id_text').val() == '') {
-			alert("아이디를 입력하세요.");
+			alert(getTranslate('enterId'));
 			$("#id_text").focus();
 			return;
 		}
@@ -715,11 +717,11 @@ $(document).ready(function () {
 				if (data != '') {
 					isCheck = false;
 					checkId = data.user_id;
-					alert('사용 불가능');
+					alert(getTranslate('notAvailable'));
 				} else {
 					isCheck = true;
 					checkId = $('#id_text').val();
-					alert('사용 가능');					
+					alert(getTranslate('available'));					
 				}
 			},
 			error: function(errorThrown) {
@@ -746,15 +748,15 @@ $(document).ready(function () {
 					if (data == '{"status":200,"message":"ok"}') {
 						tokkenCheck = true;
 						checkTokken = $('#tokken_text').val();
-						alert('보내기 성공');
+						alert(getTranslate('success'));
 					} else if (data == "400") {
-						alert("토큰 오류 : Unauthorized request");					
+						alert(getTranslate('unauthorizedRequest'));					
 					} else if (data == "401") {
-						alert("토큰 오류 : Invalid access token");					
+						alert(getTranslate('invalidAccess'));					
 					} else if (data == "500") {
-						alert("토큰 오류 : Failure due to server error");					
+						alert(getTranslate('serverError'));					
 					} else {
-						alert("토큰 오류 : Processed over time or stopped");
+						alert(getTranslate('overTimeError'));
 					}		
 				},
 				error: function(errorThrown) {
@@ -763,7 +765,7 @@ $(document).ready(function () {
 				}
 			});
 		} else {
-			alert('토큰을 입력해주세요.');
+			alert(getTranslate('enterDuplicateCheck'));
 		}
 	});
 });
@@ -781,40 +783,40 @@ function closePopupChild() {
 			<div class="tmpMargin"></div>
 			<div class="name_phone">
 				<div class="name">
-					<label class="name_title" for="name_text">Name</label>
+					<label class="name_title" for="name_text"><spring:message code="user.name" /></label>
 					<input type="text" id="name_text">
 				</div>
 				<div class="phone">
-					<label class="phone_title">Phone</label>
+					<label class="phone_title"><spring:message code="user.phone" /></label>
 					<input type="text" id="phone_text">
 				</div>
 			</div>
 			<div class="id_pwd">
 				<div class="id">
-					<label class="id_title" for="id_text">ID</label>
+					<label class="id_title" for="id_text"><spring:message code="user.id" /></label>
 					<div class="idDiv">
 						<input type="text" id="id_text">
-						<button class="id_check">중복 체크</button>
+						<button class="id_check"><spring:message code="common.duplicateCheck" /></button>
 					</div>
 				</div>
 				<div class="pwd">
-					<label class="pwd_title">Password</label>
+					<label class="pwd_title"><spring:message code="user.password" /></label>
 					<input type="password" id="pwd_text">
 				</div>
 			</div>
 			<div class="level_channel">
 				<div class="level">
-					<label class="level_title" for="level_text">설정 권한</label>
+					<label class="level_title" for="level_text"><spring:message code="user.setupAuthority" /></label>
 					<div id="level_text"></div>
 				</div>
 				<div class="channel">
-					<label class="channel_title" for="channel_text">라이브 권한</label>
+					<label class="channel_title" for="channel_text"><spring:message code="user.liveAuthority" /></label>
 					<div id="channel_text"></div>
 				</div>
 			</div>
 			<div class="email_tokken">
 				<div class="email">
-					<label class="email_title" for="email_text">Email</label>
+					<label class="email_title" for="email_text"><spring:message code="user.email" /></label>
 					<input type="text" id="email_text" class="text">
 				</div>
 				<!-- <div class="tokken">
@@ -830,11 +832,11 @@ function closePopupChild() {
 		<div class="container" style="width:1110px;padding:0;max-width:1110px;margin-top:30px;margin-bottom:30px;">
 			<div style="width:50%; float:left; writing-mode:vertical-rl; padding-right:20px; margin-bottom:30px;">
 				<button class="add">
-				<span class="glyphicon glyphicon-plus check" aria-hidden="true"></span>추가</button>
+				<span class="glyphicon glyphicon-plus check" aria-hidden="true"></span><spring:message code="common.add" /></button>
 			</div>
 			
 			<div style="width:50%; float:left; padding-left:20px; margin-bottom:30px;">
-				<button class="cancel">닫기</button>
+				<button class="cancel"><spring:message code="common.close" /></button>
 			</div>
 		</div>
 	</div>

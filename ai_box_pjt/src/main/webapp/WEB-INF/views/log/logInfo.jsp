@@ -745,7 +745,7 @@ function change_text() {
 </script>
 </head>
 <body>
-<div class="container" style="overflow:auto;">
+<div class="container">
 	<div id = "Progress_Loading" align="center" ><!-- 로딩이미지 -->
 		<img src="/resources/image/124.gif" width="30%" style="margin-top:70px;" />
 	</div>

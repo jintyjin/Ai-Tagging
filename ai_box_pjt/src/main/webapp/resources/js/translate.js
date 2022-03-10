@@ -81,10 +81,33 @@ var lang = {
 		device_isconnect : "연결 상태",
 		device_login_id : "사용자",
 		
-		수정하시겠습니까 : "수정하시겠습니까?",
-		수정이완료되었습니다 : "수정이 완료되었습니다.",
-		정말삭제하시겠습니까 : "정말 삭제하시겠습니까?",
-		삭제가완료되었습니다 : "삭제가 완료되었습니다."
+		questionModification : "수정하시겠습니까?",
+		questionDelete : "정말 삭제하시겠습니까?",
+		completeModification : "수정이 완료되었습니다.",
+		completeDelete : "삭제가 완료되었습니다.",
+		completeResigtration : "등록이 완료되었습니다.",
+		
+		admin : "관리자",
+		user : "사용자",
+		
+		enterName : "이름을 입력하세요.",
+		enterPhone : "전화번호를 입력하세요.",
+		enterId : "아이디를 입력하세요.",
+		enterPassword : "비밀번호를 입력하세요.",
+		enterEmail : "이메일을 입력하세요.",
+		enterTokken : "토큰을 입력하세요.",
+		checkDuplicate : "중복체크를 해주세요.",
+		
+		success : "성공",
+		error : "오류",
+		
+		notAvailable : "사용 불가능",
+		available : "사용 가능",
+		
+		unauthorizedRequest : "인증되지 않은 요청",
+		invalidAccess : "잘못된 접근",
+		serverError : "서버 오류로 인한 실패",
+		overTimeError : "시간이 지남에 따라 처리되거나 중지됨"
 	},
 	"en" : {
 		// Event
@@ -168,10 +191,34 @@ var lang = {
 		device_isconnect : "Connect",
 		device_login_id : "Login Id",
 
-		수정하시겠습니까 : "Do you want to modify?",
-		수정이완료되었습니다 : "The modification has been completed.",
-		정말삭제하시겠습니까 : "Do you really want to delete it?",
-		삭제가완료되었습니다 : "Delete has been completed."
+		questionModification : "Do you want to modify?",
+		questionDelete : "The modification has been completed.",
+		completeModification : "Do you really want to delete it?",
+		completeDelete : "Delete has been completed.",
+		completeResigtration : "The registration has been completed",
+
+		admin : "Admin",
+		user : "User",
+
+		enterName : "Please enter name",
+		enterPhone : "Please enter phone number",
+		enterId : "Please enter ID",
+		enterPassword : "Please enter password",
+		enterEmail : "Please enter email",
+		enterTokken : "Please enter tokken",
+		enterDuplicateCheck : "Please duplicate check",
+
+		success : "Success",
+		error : "Error",
+		
+		notAvailable : "Not available",
+		available : "Available",
+
+		unauthorizedRequest : "Unauthorized request",
+		invalidAccess : "Invalid access token",
+		serverError : "Failure due to server error",
+		overTimeError : "Processed over time or stopped"
+			
 	}
 }
 function getLanguage() {

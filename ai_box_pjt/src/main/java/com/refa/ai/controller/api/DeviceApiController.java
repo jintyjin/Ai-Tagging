@@ -30,13 +30,7 @@ public class DeviceApiController {
 	
 	// 모든 장비 리스트를 가져옴
 	@PostMapping("/deviceList")
-	public List<Device> deviceList(Locale locale) {
-		System.out.println("===== locale start =====");
-
-		System.out.println(locale.getLanguage() + " : " + locale.getDisplayLanguage());
-		System.out.println("locale = " + locale);
-		
-		System.out.println("===== locale end =====");
+	public List<Device> deviceList() {
 		return deviceService.findAll();
 	}
 

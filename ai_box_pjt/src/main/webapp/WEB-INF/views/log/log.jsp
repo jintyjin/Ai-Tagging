@@ -723,7 +723,7 @@ $(document).ready(function () {
 	<div id="Progress_Loading" align="center" > <!-- 로딩이미지 -->
 		<img src="/resources/image/124.gif" width="30%" style="margin-top:70px;" />
 	</div>
-<div class="container" style="overflow:auto; margin-top:70px;">
+<div class="container" style="margin-top:70px;">
 		<div id="grid"></div>
 		<div align="right">
 			<table style="margin-top: 10px; width: 100%">

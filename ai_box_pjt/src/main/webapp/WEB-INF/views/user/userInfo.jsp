@@ -682,13 +682,13 @@ $(document).ready(function () {
 				var categorySource = [];
 
 				var levelObj = new Object();
-				levelObj.text = '관리자';
+				levelObj.text = getTranslate('admin');
 				levelObj.value = 'A';
 				
 				categorySource.push(levelObj);
 				
 				levelObj = new Object();
-				levelObj.text = '사용자';
+				levelObj.text = getTranslate('user');
 				levelObj.value = 'U';
 
 				categorySource.push(levelObj);
@@ -703,9 +703,9 @@ $(document).ready(function () {
 				$('.channel').show();
 			} else {
 				if (user_info.user_isAdmin == 'U') {
-					$('#level_text').text('사용자');
+					$('#level_text').text(getTranslate('user'));
 				} else {
-					$('#level_text').text('관리자');
+					$('#level_text').text(getTranslate('admin'));
 				}
 			}
 			
@@ -792,7 +792,7 @@ $(document).ready(function () {
 		popup_window[POPUP_MORE] = openWindow('./resources/Line%20Help.htm', 'LINE', 1400, 880);
 	});
 	$('.button_modify').click(function () {
-		if (confirm(getTranslate('수정하시겠습니까'))) {
+		if (confirm(getTranslate('questionModification'))) {
 			var jsonUrl = "/updateUserInfo";
 			
 			var obj = new Object();
@@ -821,7 +821,7 @@ $(document).ready(function () {
 				contentType : "application/json; charset=UTF-8",       
 				data : jsonData,          		     		 
 				success: function() {
-					alert(getTranslate('수정이완료되었습니다'));			
+					alert(getTranslate('completeModification'));			
 					self.close();
 					parent.opener.location.reload();
 				},
@@ -833,7 +833,7 @@ $(document).ready(function () {
 		}
 	});
 	$('.button_delete').click(function () {
-		if(confirm(getTranslate('정말삭제하시겠습니까'))) {
+		if(confirm(getTranslate('questionDelete'))) {
 			var jsonUrl = "/deleteUserInfo";
 			
 			var obj = new Object();
@@ -848,7 +848,7 @@ $(document).ready(function () {
 				contentType : "application/json;",       
 				data : jsonData,          		     		 
 				success: function() {
-					alert(getTranslate('삭제가완료되었습니다'));			
+					alert(getTranslate('completeDelete'));			
 					self.close();
 					parent.opener.location.reload();
 				},
@@ -883,15 +883,17 @@ $(document).ready(function () {
 				data : jsonData,          		     		 
 				success: function(data) {
 					if (data == '{"status":200,"message":"ok"}') {
-						alert('보내기 성공');
+						tokkenCheck = true;
+						checkTokken = $('#tokken_text').val();
+						alert(getTranslate('success'));
 					} else if (data == "400") {
-						alert("토큰 오류 : Unauthorized request");					
+						alert(getTranslate('unauthorizedRequest'));					
 					} else if (data == "401") {
-						alert("토큰 오류 : Invalid access token");					
+						alert(getTranslate('invalidAccess'));					
 					} else if (data == "500") {
-						alert("토큰 오류 : Failure due to server error");					
+						alert(getTranslate('serverError'));					
 					} else {
-						alert("토큰 오류 : Processed over time or stopped");
+						alert(getTranslate('overTimeError'));
 					}		
 				},
 				error: function(errorThrown) {
@@ -900,7 +902,7 @@ $(document).ready(function () {
 				}
 			}); 
 		} else {
-			alert('토큰을 입력해주세요.');
+			alert(getTranslate('enterDuplicateCheck'));
 		}
 	});
 });

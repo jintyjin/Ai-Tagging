@@ -306,7 +306,7 @@ function deleteRow(row) {
 </script>
 </head>
 <body style="background-color:#252525;">
-<div class="container" style="overflow:auto; margin-top:70px;">
+<div class="container" style="margin-top:70px;">
 		<div id="grid"></div>
 </div>
 </body>
