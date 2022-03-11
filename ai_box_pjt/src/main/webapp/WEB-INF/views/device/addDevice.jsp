@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -36,6 +37,8 @@
 <script type="text/javascript" src="./resources/js/jqwidgets/jqxvalidator.js"></script>
 <script type="text/javascript" src="./resources/js/jqwidgets/jqxdata.export.js"></script> 
 <script type="text/javascript" src="./resources/js/jqwidgets/jqxgrid.export.js"></script>
+<script type="text/javascript" src="/resources/js/translate.js"></script>
+<style>
 <style>
 button {
 	font-family: Lucida Sans, Arial, Helvetica, sans-serif;
@@ -612,27 +615,27 @@ $(document).ready(function () {
 			return false;
 		} */
 		if ($('#IP_text').val() == '') {
-			alert('장치 이름을 입력해주세요.');
+			alert(getTranslate('enterDeviceTitle'));
 			return false;
 		}
 		if ($('#name_text').val() == '') {
-			alert('IP/DDNS를 입력해주세요.');
+			alert(getTranslate('enterIPDDNS'));
 			return false;
 		}
 		if ($('#password_text').val() == '') {
-			alert('포트를 입력해주세요.');
+			alert(getTranslate('enterPort'));
 			return false;
 		}
 		if ($('#webport_text').val() == '') {
-			alert('아이디를 입력해주세요.');
+			alert(getTranslate('enterId'));
 			return false;
 		}
 		if ($('#pwd_text').val() == '') {
-			alert('비밀번호를 입력해주세요.');
+			alert(getTranslate('enterPassword'));
 			return false;
 		}
 		if (item == null) {
-			alert('RTSP를 선택해주세요.');
+			alert(getTranslate('enterRTSP'));
 			return false;
 		}
 
@@ -691,48 +694,48 @@ function closePopupChild() {
 			<div class="tmpMargin"></div>
 			<div class="id_pwd">
 				<div class="id">
-					<label class="id_title">채널</label>
+					<label class="id_title"><spring:message code="device.channel" /></label>
 					<div id="id_text"></div>
 				</div>
 			</div>
 			<div class="type_pwd">
 				<div class="type">
-					<label class="type_title">mac</label>
+					<label class="type_title"><spring:message code="device.mac" /></label>
 					<div id="type_text"></div>
 				</div>
 				<div class="IP">
-					<label class="IP_title" for="IP_text">장치 이름</label>
+					<label class="IP_title" for="IP_text"><spring:message code="device.title" /></label>
 					<!-- <div id="IP_text"></div> -->
 					<input type="text" id="IP_text">
 				</div>
 			</div>
 			<div class="name_password">
 				<div class="name">
-					<label class="name_title" for="name_text">IP/DDNS</label>
+					<label class="name_title" for="name_text"><spring:message code="device.ip" /></label>
 					<input type="text" id="name_text">
 				</div>
 				<div class="password">
-					<label class="password_title" for="password_text">포트</label>
+					<label class="password_title" for="password_text"><spring:message code="device.port" /></label>
 					<input type="text" id="password_text">
 				</div>
 			</div>
 			<div class="port_webport">
 				<div class="port">
-					<label class="port_title">ID/PW</label>
+					<label class="port_title"><spring:message code="device.idPassword" /></label>
 					<div id="port_text"></div>
 				</div>
 				<div class="webport">
-					<label class="webport_title" for="webport_text">아이디</label>
+					<label class="webport_title" for="webport_text"><spring:message code="device.id" /></label>
 					<input type="text" id="webport_text">
 				</div>
 			</div>
 			<div class="pwd_rtsp">
 				<div class="pwd">
-					<label class="pwd_title" for="pwd_text">비밀번호</label>
+					<label class="pwd_title" for="pwd_text"><spring:message code="device.password" /></label>
 					<input type="password" id="pwd_text">
 				</div>
 				<div class="rtsp">
-					<label class="rtsp_title">RTSP</label>
+					<label class="rtsp_title"><spring:message code="device.Rtsp" /></label>
 					<div id="rtsp_text"></div>
 				</div>
 			</div>
@@ -743,46 +746,46 @@ function closePopupChild() {
 			<div class="tmpMargin"></div>
 			<div class="id_pwd">
 				<div class="name">
-					<label class="name_title" for="falldown">쓰러짐</label>
+					<label class="name_title" for="falldown"><spring:message code="event.kwater_falldown_detection" /></label>
 					<input class="text-box" type="text" id="falldown">
 				</div>
 				<div class="password">
-					<label class="password_title" for="fire">화재</label>
+					<label class="password_title" for="fire"><spring:message code="event.kwater_fire_detection" /></label>
 					<input class="text-box" type="text" id="fire">
 				</div>
 				<div class="name">
-					<label class="name_title" for="flood">침수</label>
+					<label class="name_title" for="flood"><spring:message code="event.kwater_flood_detection" /></label>
 					<input class="text-box" type="text" id="flood">
 				</div>
 				<div class="password">
-					<label class="password_title" for="glove">장갑미착용</label>
+					<label class="password_title" for="glove"><spring:message code="event.kwater_glove_detection" /></label>
 					<input class="text-box" type="text" id="glove">
 				</div>
 				<div class="name">
-					<label class="name_title" for="invasion">침입</label>
+					<label class="name_title" for="invasion"><spring:message code="event.kwater_invasion_detection" /></label>
 					<input class="text-box" type="text" id="invasion">
 				</div>
 				<div class="password">
-					<label class="password_title" for="leak">누수</label>
+					<label class="password_title" for="leak"><spring:message code="event.kwater_leak_detection" /></label>
 					<input class="text-box" type="text" id="leak">
 				</div>
 				<div class="name">
-					<label class="name_title" for="loitering">배회</label>
+					<label class="name_title" for="loitering"><spring:message code="event.kwater_loitering_detection" /></label>
 					<input class="text-box" type="text" id="loitering">
 				</div>
 				<div class="password">
-					<label class="password_title" for="signal">수신호</label>
+					<label class="password_title" for="signal"><spring:message code="event.kwater_handaction_detection" /></label>
 					<input class="text-box" type="text" id="signal">
 				</div>
 				<div class="name">
-					<label class="name_title" for="spin">약품미투입</label>
+					<label class="name_title" for="spin"><spring:message code="event.kwater_spin_detection" /></label>
 					<input class="text-box" type="text" id="spin">
 				</div>
 			</div>
 		</div>
 		<div class="container" style="width:600px;padding:0;max-width:1110px;margin-top:30px;margin-bottom:30px;">
 			<div class="buttonDiv">
-				<button class="button_modify" id="joinDevice">등록</button>
+				<button class="button_modify" id="joinDevice"><spring:message code="common.registration" /></button>
 			</div>
 		</div>
 	</div>
@@ -791,15 +794,15 @@ function closePopupChild() {
 			<div class="tmpMargin"></div>
 			<div class="id_pwd">
 				<div class="password">
-					<label class="password_title" for="cmtank">약품탱크 누액</label>
+					<label class="password_title" for="cmtank"><spring:message code="event.kwater_cmtank_detection" /></label>
 					<input class="text-box" type="text" id="cmtank">
 				</div>
 				<div class="name">
-					<label class="name_title" for="outtank">옥외탱크 누액</label>
+					<label class="name_title" for="outtank"><spring:message code="event.kwater_outtank_detection" /></label>
 					<input class="text-box" type="text" id="outtank">
 				</div>
 				<div class="password">
-					<label class="password_title" for="overflow">배출수 월류</label>
+					<label class="password_title" for="overflow"><spring:message code="event.kwater_overflow_detection" /></label>
 					<input class="text-box" type="text" id="overflow">
 				</div>
 			</div>

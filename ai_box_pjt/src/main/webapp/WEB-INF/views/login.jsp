@@ -14,6 +14,7 @@
 <script type="text/javascript" src="./resources/js/jqwidgets/jqxcore.js"></script>
 <script type="text/javascript" src="./resources/js/jqwidgets/jqxinput.js"></script>
 <script type="text/javascript" src="./resources/js/jqwidgets/jqxbuttons.js"></script>
+<script type="text/javascript" src="/resources/js/translate.js"></script>
 <style>
 input:focus {
 	outline:0;
@@ -345,13 +346,13 @@ $(document).ready(function (){
 	
 	$(".btn").click(function () {
 		if($('.user_id').val() == '') {
-			alert("아이디를 입력하세요.");
+			alert(getTranslate('enterId'));
 			$(".user_id").focus();
 			return;
 		}
 
 		if($('.user_pwd').val() == '') {
-			alert("비밀번호를 입력하세요.");
+			alert(getTranslate('enterPassword'));
 			$(".user_pwd").focus();
 			return;
 		}
@@ -374,17 +375,17 @@ $(document).ready(function (){
 			data : jsonData,
 			success : function(data) {
 				if (data.return == "incorrect") {
-					alert("ID 또는 비밀번호가 틀립니다.");
+					alert(getTranslate('wrongIDorPassword'));
 				} else if (data.return == "null") {
-					alert("새로운 비밀번호를 지정해주십시오.");
+					alert(getTranslate('specifyNewPassword'));
 				} else if (data.return == "success") {
-					alert("환영합니다. " + data.user_id + " 님");
+					alert(getTranslate('welcome') + data.user_id + getTranslate('sir'));
 					setUserLogin(data.user_level, data);
 					$(window.parent.location).attr('href', './index.htm');
 				}
 			},
 			error : function(request, status, error) {
-				alert('로그인 에러');
+				alert(getTranslate('errorLogin'));
 			}
 		});
 	});

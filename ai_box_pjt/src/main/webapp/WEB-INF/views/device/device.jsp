@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -33,6 +34,7 @@
 <script src="./resources/js/jqwidgets/jqxwindow.js"></script>
 <script src="./resources/js/jqwidgets/jqxdata.export.js"></script> 
 <script src="./resources/js/jqwidgets/jqxgrid.export.js"></script>
+<script type="text/javascript" src="/resources/js/translate.js"></script>
 <style>
 body {
 	font-family: Lucida Sans, Arial, Helvetica, sans-serif;
@@ -201,15 +203,15 @@ $(document).ready(function () {
 				ready: function () {  
 				},
 		        columns: [
-		            { text: '번호', datafield: 'dev_idx', width: '10%', editable: false, hidden:true},
-		            { text: '장치 종류', datafield: 'dev_type', width: '10%', editable: false,},
-		            { text: '채널', datafield: 'dev_ch', width: '10%', editable: false, },
-		            { text: '장치 이름', datafield: 'dev_title', width: '20%', editable: false, },
-		            { text: '모델명', datafield: 'dev_model_name', width: '20%', editable: false, },
-		            { text: 'IP/DDNS', datafield: 'dev_ip', width: '20%', editable: false, },
-		            { text: '포트', datafield: 'dev_web_port', width: '12%', editable: false, },
-		            { text: '연결 상태', datafield: 'dev_isconnect', width: '8%', editable: false, },
-		            { text: '사용자', datafield: 'login_id', width: '10%', editable: false, hidden:true}
+		            { text: getTranslate('idx'), datafield: 'dev_idx', width: '10%', editable: false, hidden:true},
+		            { text: getTranslate('device_type'), datafield: 'dev_type', width: '10%', editable: false,},
+		            { text: getTranslate('device_channel'), datafield: 'dev_ch', width: '10%', editable: false, },
+		            { text: getTranslate('device_title'), datafield: 'dev_title', width: '20%', editable: false, },
+		            { text: getTranslate('device_model_name'), datafield: 'dev_model_name', width: '20%', editable: false, },
+		            { text: getTranslate('device_ip'), datafield: 'dev_ip', width: '20%', editable: false, },
+		            { text: getTranslate('device_web_port'), datafield: 'dev_web_port', width: '12%', editable: false, },
+		            { text: getTranslate('device_isconnect'), datafield: 'dev_isconnect', width: '8%', editable: false, },
+		            { text: getTranslate('device_login_id'), datafield: 'login_id', width: '10%', editable: false, hidden:true}
 		            /* { text: 'More', columntype: 'button', align: 'center', width: '12%', editable: false, sortable: false, filterable: false, cellsrenderer: function () {
 						return 'More';
 					}, 
@@ -268,7 +270,7 @@ $(document).ready(function () {
         var rowindex = $("#jqxgrid").jqxGrid('getselectedrowindex');
         var offset = $("#jqxgrid").offset();
         var dataRecord = $("#jqxgrid").jqxGrid('getrowdata', rowindex);
-        if ($.trim($(args).text()) == "수정") {
+        if ($.trim($(args).text()) == getTranslate('modify')) {
             //alert(dataRecord.dev_ch);
             var login_id = JSON.parse(get('userdata')).user_id;
             if (login_id == 'admin') {
@@ -330,8 +332,8 @@ function addInfo() {
 	</div>
 	<div id='Menu'>
 		<ul>
-			<li>수정</li>
-			<li>삭제</li>
+			<li><spring:message code="common.modify" /></li>
+			<li><spring:message code="common.delete" /></li>
 		</ul>
 	</div>
 </div>

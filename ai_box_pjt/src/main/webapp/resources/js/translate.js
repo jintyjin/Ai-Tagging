@@ -80,6 +80,9 @@ var lang = {
 		device_web_port : "포트",
 		device_isconnect : "연결 상태",
 		device_login_id : "사용자",
+		device_mac : "MAC 주소",
+		modify : "수정",
+		research : "재검색",
 		
 		questionModification : "수정하시겠습니까?",
 		questionDelete : "정말 삭제하시겠습니까?",
@@ -96,10 +99,22 @@ var lang = {
 		enterPassword : "비밀번호를 입력하세요.",
 		enterEmail : "이메일을 입력하세요.",
 		enterTokken : "토큰을 입력하세요.",
+		enterDeviceTitle : "장치 이름을 입력해주세요.",
+		enterIPDDNS : "IP/DDNS를 입력해주세요.",
+		enterPort : "포트를 입력해주세요.",
+		enterRTSP : "RTSP를 입력해주세요.",
+		
 		checkDuplicate : "중복체크를 해주세요.",
+		wrongIDorPassword : "ID 또는 비밀번호가 틀립니다.",
+		specifyNewPassword : "새로운 비밀번호를 지정해주십시오.",
+		
+		welcome : "환영합니다, ",
+		sir : " 님.",
 		
 		success : "성공",
 		error : "오류",
+		errorLogin : "로그인 에러",
+		errorCountExceeded : "ipc 갯수 초과",
 		
 		notAvailable : "사용 불가능",
 		available : "사용 가능",
@@ -190,6 +205,9 @@ var lang = {
 		device_web_port : "Port",
 		device_isconnect : "Connect",
 		device_login_id : "Login Id",
+		device_mac : "MAC",
+		modify : "Modify",
+		research : "Research",
 
 		questionModification : "Do you want to modify?",
 		questionDelete : "The modification has been completed.",
@@ -206,10 +224,22 @@ var lang = {
 		enterPassword : "Please enter password",
 		enterEmail : "Please enter email",
 		enterTokken : "Please enter tokken",
+		enterDeviceTitle : "Please enter device title",
+		enterIPDDNS : "Please enter IP/DDNS",
+		enterPort : "Please enter port",
+		enterRTSP : "Please enter RTSP",
+		
 		enterDuplicateCheck : "Please duplicate check",
+		wrongIDorPassword : "The ID or password is incorrect",
+		specifyNewPassword : "Please specify a new password",
+		
+		welcome : "welcome, ",
+		sir : "",
 
 		success : "Success",
 		error : "Error",
+		errorLogin : "Login Error",
+		errorCountExceeded : "Ipc count exceeded",
 		
 		notAvailable : "Not available",
 		available : "Available",
