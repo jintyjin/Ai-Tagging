@@ -920,7 +920,7 @@ public class EventController {
 		} else if (model_name.equals("누수")) {
 			map.put("actopm_leak", opt);
 			map.put("model_name", "actopm_leak");
-		} else if (model_name.equals("약품 미투입")) {
+		} else if (model_name.equals("약품 미투입".replaceAll(" ", ""))) {
 			map.put("action_spin", opt);
 			map.put("model_name", "action_spin");
 		} else if (model_name.equals("침입")) {

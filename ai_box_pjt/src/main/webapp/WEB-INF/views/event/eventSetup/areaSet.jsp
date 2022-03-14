@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=EUC-KR"
     pageEncoding="EUC-KR"%>
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -8,6 +9,7 @@
 <script src="./resources/js/jquery-3.3.1.min.js"></script>
 <script src="./resources/js/bootstrap.min.js"></script>
 <link rel="stylesheet" href="./resources/css/bootstrap.min.css" />
+<script type="text/javascript" src="/resources/js/translate.js"></script>
 <style>
 html, body {
 	width:100%;
@@ -264,7 +266,7 @@ $(document).ready(function () {
 			contentType : "application/json; charset=UTF-8",       
 			data : jsonData,          		     		 
 			success: function(data) {
-				alert('수정이 완료되었습니다.');			
+				alert(getTranslate('completeModification'));			
 				self.close();
 			},
 			error: function(errorThrown) {
@@ -283,10 +285,10 @@ function wait(sec) {
 </script>
 <body oncontextmenu="return false;">
 <div id="btnDiv">
-	<button class="button_modify" id="reload">이미지 새로고침</button>
-	<button class="button_modify" id="undo">뒤로가기</button>
-	<button class="button_modify" id="clear">전체 지우기</button>
-	<button class="button_modify" id="save">저장하기</button>
+	<button class="button_modify" id="reload"><spring:message code="area.imageRefresh" /></button>
+	<button class="button_modify" id="undo"><spring:message code="common.goBack" /></button>
+	<button class="button_modify" id="clear"><spring:message code="common.clearAll" /></button>
+	<button class="button_modify" id="save"><spring:message code="common.doSave" /></button>
 </div>
 <div id="imgDiv">
 	<canvas id="canvas"></canvas>

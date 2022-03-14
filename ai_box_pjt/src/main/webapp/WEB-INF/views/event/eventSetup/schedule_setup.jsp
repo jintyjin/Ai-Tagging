@@ -7,6 +7,7 @@
 <script src="./resources/js/jquery-3.3.1.min.js"></script>
 <script src="./resources/js/bootstrap.min.js"></script>
 <link rel="stylesheet" href="./resources/css/bootstrap.min.css" />
+<script type="text/javascript" src="/resources/js/translate.js"></script>
 <style>
 html, body {
 	width:100%;
@@ -130,7 +131,7 @@ $(document).ready(function() {
 				}
 				schedule_str += '</div>'
 			}
-			$('#btnDiv').append('<button class="button" id="save" onclick="saveAll();">저장</button><button class="button" id="select" onclick="selectAll();">전체 선택</button><button class="button" id="clear" onclick="clearAll();">전체 지우기</button>');
+			$('#btnDiv').append('<button class="button" id="save" onclick="saveAll();">' + getTranslate('save') + '</button><button class="button" id="select" onclick="selectAll();">' + getTranslate('selectAll') + '</button><button class="button" id="clear" onclick="clearAll();">' + getTranslate('clearAll') + '</button>');
 			$('#imgDiv').append(schedule_str);
 
 		},
@@ -166,9 +167,9 @@ function saveAll() {
 		data : jsonData,          		     		 
 		success: function(data) {
 			if (data == null || data.status == null || data.status != 'success') {
-				alert('저장이 실패했습니다.');
+				alert(getTranslate('failedSave'));
 			} else {
-				alert('저장되었습니다.');
+				alert(getTranslate('completeSave'));
 			}
 		},
 		error: function(errorThrown) {

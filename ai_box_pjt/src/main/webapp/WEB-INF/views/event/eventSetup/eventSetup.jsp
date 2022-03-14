@@ -42,6 +42,7 @@
 <script type="text/javascript" src="./resources/js/jqwidgets/jqxtree.js"></script>
 <script type="text/javascript" src="./resources/js/jqwidgets/jqxdropdownbutton.js"></script>
 <script src="./resources/js/bootstrap-slider.js"></script>
+<script type="text/javascript" src="/resources/js/translate.js"></script>
 <style>
 /* button {
 	font-family: Lucida Sans, Arial, Helvetica, sans-serif;
@@ -435,8 +436,8 @@ $(document).ready(function () {
             }
 
 			var dataArray = [
-				{ value: '0', label: '켜기'},
-				{ value: '1', label: '끄기'}
+				{ value: '0', label: getTranslate('on')},
+				{ value: '1', label: getTranslate('off')}
 			]
 
 			var dataSource =
@@ -475,7 +476,7 @@ $(document).ready(function () {
 			};
 
             var cellclass = function (row, columnfield, value) {
-            	if (value == '끄기') {
+            	if (value == getTranslate('off')) {
             		return 'off-disabled';
             	} else {
             		return 'on-abled';
@@ -494,34 +495,34 @@ $(document).ready(function () {
 				scrollbarsize: 20,
                 columns: [
                 	{ text: 'isExist', datafield: 'isExist', width: '10%', editable: false, hidden:true },
-                	{ text: '채널', datafield: 'dev_ch', width: '7%', editable: false },
-                	{ text: '채널 타이틀', datafield: 'dev_title', width: '12%', editable: false },
+                	{ text: getTranslate('device_channel'), datafield: 'dev_ch', width: '7%', editable: false },
+                	{ text: getTranslate('device_title'), datafield: 'dev_title', width: '12%', editable: false },
                     {
-                        text: '화재', datafield: 'action_fire', width: '9%', cellbeginedit: cellbeginedit, cellsrenderer: cellsrenderer, cellclassname: cellclass
+                        text: getTranslate('fire'), datafield: 'action_fire', width: '9%', cellbeginedit: cellbeginedit, cellsrenderer: cellsrenderer, cellclassname: cellclass
                     },
                     {
-                        text: '쓰러짐', datafield: 'action_falldown', width: '9%', cellbeginedit: cellbeginedit, cellsrenderer: cellsrenderer, cellclassname: cellclass
+                        text: getTranslate('falldown'), datafield: 'action_falldown', width: '9%', cellbeginedit: cellbeginedit, cellsrenderer: cellsrenderer, cellclassname: cellclass
                     },
                     {
-                        text: '침수', datafield: 'actopm_flood', width: '9%', cellbeginedit: cellbeginedit, cellsrenderer: cellsrenderer, cellclassname: cellclass
+                        text: getTranslate('flood'), datafield: 'actopm_flood', width: '9%', cellbeginedit: cellbeginedit, cellsrenderer: cellsrenderer, cellclassname: cellclass
                     },
                     {
-                        text: '장갑미착용', datafield: 'action_glove', width: '9%', cellbeginedit: cellbeginedit, cellsrenderer: cellsrenderer, cellclassname: cellclass
+                        text: getTranslate('glove'), datafield: 'action_glove', width: '9%', cellbeginedit: cellbeginedit, cellsrenderer: cellsrenderer, cellclassname: cellclass
                     },
                     {
-                        text: '침입', datafield: 'action_invasion', width: '9%', cellbeginedit: cellbeginedit, cellsrenderer: cellsrenderer, cellclassname: cellclass
+                        text: getTranslate('invasion'), datafield: 'action_invasion', width: '9%', cellbeginedit: cellbeginedit, cellsrenderer: cellsrenderer, cellclassname: cellclass
                     },
                     {
-                        text: '누수', datafield: 'actopm_leak', width: '9%', cellbeginedit: cellbeginedit, cellsrenderer: cellsrenderer, cellclassname: cellclass
+                        text: getTranslate('leak'), datafield: 'actopm_leak', width: '9%', cellbeginedit: cellbeginedit, cellsrenderer: cellsrenderer, cellclassname: cellclass
                     },
                     {
-                        text: '배회', datafield: 'action_loitering', width: '9%', cellbeginedit: cellbeginedit, cellsrenderer: cellsrenderer, cellclassname: cellclass
+                        text: getTranslate('loitering'), datafield: 'action_loitering', width: '9%', cellbeginedit: cellbeginedit, cellsrenderer: cellsrenderer, cellclassname: cellclass
                     },
                     {
-                        text: '수신호', datafield: 'action_handaction', width: '9%', cellbeginedit: cellbeginedit, cellsrenderer: cellsrenderer, cellclassname: cellclass
+                        text: getTranslate('handaction'), datafield: 'action_handaction', width: '9%', cellbeginedit: cellbeginedit, cellsrenderer: cellsrenderer, cellclassname: cellclass
                     },
                     {
-                        text: '약품미투입', datafield: 'action_spin', width: '9%', cellbeginedit: cellbeginedit, cellsrenderer: cellsrenderer, cellclassname: cellclass
+                        text: getTranslate('spin'), datafield: 'action_spin', width: '9%', cellbeginedit: cellbeginedit, cellsrenderer: cellsrenderer, cellclassname: cellclass
                     }
                 ]
 			});
@@ -552,7 +553,7 @@ $(document).ready(function () {
 			var model_name = dataField.split("_")[1];
 			var dev_title = data.dev_title;
 			
-			if (value == '켜기') {
+			if (value == getTranslate('on')) {
 				value = 0;
 			} else {
 				value = 1;
@@ -582,32 +583,7 @@ function openWindow(page, pageName, width, height) {
 	</div>
 	<div class="loading">
 	<div style="margin:auto; margin-top:80px; width:1400px; /* height:544px; */ border:1px solid #35353A;">
-		<!-- <div style="height:32px; overflow:hidden; display:block;">
-			<div style="height:100%; position:relative; visibility:inherit; margin-left:0px; background-color:#3E3E42;">
-				<div style="position:absolute; height:100%; width:150px; left:0px; line-height:32px; padding-left:4px; padding-right:2px; border-width:0px 1px 0px 0px; border-style:solid; border-color:#35353A;">채널</div>
-				<div style="position:absolute; height:100%; width:137.5px; left:150px; line-height:32px; padding-left:4px; padding-right:2px; border-width:0px 1px 0px 0px; border-style:solid; border-color:#35353A;">화재</div>
-				<div style="position:absolute; height:100%; width:137.5px; left:287.5px; line-height:32px; padding-left:4px; padding-right:2px; border-width:0px 1px 0px 0px; border-style:solid; border-color:#35353A;">쓰러짐</div>
-				<div style="position:absolute; height:100%; width:137.5px; left:425px; line-height:32px; padding-left:4px; padding-right:2px; border-width:0px 1px 0px 0px; border-style:solid; border-color:#35353A;">침수</div>
-				<div style="position:absolute; height:100%; width:137.5px; left:560.5px; line-height:32px; padding-left:4px; padding-right:2px; border-width:0px 1px 0px 0px; border-style:solid; border-color:#35353A;">장갑미착용</div>
-				<div style="position:absolute; height:100%; width:137.5px; left:698px; line-height:32px; padding-left:4px; padding-right:2px; border-width:0px 1px 0px 0px; border-style:solid; border-color:#35353A;">침입</div>
-				<div style="position:absolute; height:100%; width:137.5px; left:835.5px; line-height:32px; padding-left:4px; padding-right:2px; border-width:0px 1px 0px 0px; border-style:solid; border-color:#35353A;">누수</div>
-				<div style="position:absolute; height:100%; width:137.5px; left:973px; line-height:32px; padding-left:4px; padding-right:2px; border-width:0px 1px 0px 0px; border-style:solid; border-color:#35353A;">배회</div>
-				<div style="position:absolute; height:100%; width:137.5px; left:1110.5px; line-height:32px; padding-left:4px; padding-right:2px; border-width:0px 1px 0px 0px; border-style:solid; border-color:#35353A;">수신호</div>
-				<div style="position:absolute; height:100%; width:137.5px; left:1248px; line-height:32px; padding-left:4px; padding-right:2px; border-width:0px 1px 0px 0px; border-style:solid; border-color:#35353A;">약품미투입</div>
-			</div>
-		</div> -->
 		<div id="content">	<!--  style="width:1400px; overflow:auto; height:520px;" -->
-			<!-- <div style="position:relative; height:32px;">
-				<div style="position:absolute; width:150px; left:0px; line-height:31px; padding-left:4px; padding-right:2px; padding-left:4px; border-width:0px 1px 1px 0px; border-style:solid; border-color:#35353A;">CH 01</div>
-				<div id="ch1_fire" style="position:absolute; width:137.5px; left:150px; line-height:31px; padding-left:4px; padding-right:2px; padding-left:4px; border-width:0px 1px 1px 0px; border-style:solid; border-color:#35353A;">켜기</div>
-				<div id="ch1_water" style="position:absolute; width:137.5px; left:287.5px; line-height:31px; padding-left:4px; padding-right:2px; padding-left:4px; border-width:0px 1px 1px 0px; border-style:solid; border-color:#35353A;">끄기</div>
-				<div id="ch1_drug" style="position:absolute; width:137.5px; left:425px; line-height:31px; padding-left:4px; padding-right:2px; padding-left:4px; border-width:0px 1px 1px 0px; border-style:solid; border-color:#35353A;">켜기</div>
-				<div id="ch1_invade" style="position:absolute; width:137.5px; left:560.5px; line-height:31px; padding-left:4px; padding-right:2px; padding-left:4px; border-width:0px 1px 1px 0px; border-style:solid; border-color:#35353A;">끄기</div>
-				<div id="ch1_around" style="position:absolute; width:137.5px; left:698px; line-height:31px; padding-left:4px; padding-right:2px; padding-left:4px; border-width:0px 1px 1px 0px; border-style:solid; border-color:#35353A;">켜기</div>
-				<div id="ch1_down" style="position:absolute; width:137.5px; left:835.5px; line-height:31px; padding-left:4px; padding-right:2px; padding-left:4px; border-width:0px 1px 1px 0px; border-style:solid; border-color:#35353A;">끄기</div>
-				<div id="ch1_signal" style="position:absolute; width:137.5px; left:973px; line-height:31px; padding-left:4px; padding-right:2px; padding-left:4px; border-width:0px 1px 1px 0px; border-style:solid; border-color:#35353A;">켜기</div>
-				<div id="ch1_globe" style="position:absolute; width:137.5px; left:1110.5px; line-height:31px; padding-left:4px; padding-right:2px; padding-left:4px; border-width:0px 1px 1px 0px; border-style:solid; border-color:#35353A;">끄기</div>
-			</div> -->
 		</div>
 	</div>
 	</div>

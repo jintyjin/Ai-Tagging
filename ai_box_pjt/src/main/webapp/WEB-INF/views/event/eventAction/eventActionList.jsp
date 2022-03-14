@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -41,6 +42,7 @@
 <script type="text/javascript" src="./resources/js/jqwidgets/jqxtree.js"></script>
 <script type="text/javascript" src="./resources/js/jqwidgets/jqxdropdownbutton.js"></script>
 <script src="./resources/js/bootstrap-slider.js"></script>
+<script type="text/javascript" src="/resources/js/translate.js"></script>
 <style>
 /* button {
 	font-family: Lucida Sans, Arial, Helvetica, sans-serif;
@@ -592,11 +594,11 @@ $(document).ready(function () {
 	    	var actionSource = [];
 	    	if (itemArr.length > 0) { 
 	    		for (var i = 0; i < 1; i++) {
-	    			actionSource.push('알람');
-	    			actionSource.push('팝업');
-	    			actionSource.push('프리셋');
-	    			actionSource.push('SMS(SCADA)');
-	    			actionSource.push('스피커');
+	    			actionSource.push(getTranslate('alarm'));
+	    			actionSource.push(getTranslate('popUp'));
+	    			actionSource.push(getTranslate('preset'));
+	    			actionSource.push(getTranslate('sms'));
+	    			actionSource.push(getTranslate('speaker'));
 	    		}
 	    	}
 
@@ -614,45 +616,33 @@ $(document).ready(function () {
 	    	$('.action_content_network_content_2').jqxDropDownList({source:networkrSource, scrollBarSize:10, dropDownHeight: 200, width: 260, height: 30, theme: 'metrodark'});
 	    	
 			for (var i = 0; i < actionArr.length; i++) {
-				var action = '';
+				actionArr[i].action = getTranslate(actionArr[i].action_event.toLowerCase());
 				
-				if (actionArr[i].action_event.toLowerCase() == 'KWATER_Fire_Detection'.toLowerCase()) {
-					action = '화재';
+				if (actionArr[i].action_action.indexOf(', ') != -1) {
+					var action = '';
+					for (var j = 0; j < actionArr[i].action_action.split(', ').length; j++) {
+						if (j == 0) {
+							if (actionArr[i].action_action.indexOf('(') != -1) {
+								action = getTranslate(actionArr[i].action_action.substring(0, 3));
+							} else {
+								action = getTranslate(actionArr[i].action_action.split(', ')[j]);
+							}
+						} else {
+							if (actionArr[i].action_action.indexOf('(') != -1) {
+								action += ', ' + getTranslate(actionArr[i].action_action.substring(0, 3));
+							} else {
+								action += ', ' + getTranslate(actionArr[i].action_action.split(', ')[j]);
+							}
+						}
+					}
+					actionArr[i].action_action = action;
+				} else {
+					if (actionArr[i].action_action.indexOf('(') != -1) {
+						actionArr[i].action_action = getTranslate(actionArr[i].action_action.substring(0, 3));
+					} else {
+						actionArr[i].action_action = getTranslate(actionArr[i].action_action);
+					}
 				}
-				if (actionArr[i].action_event.toLowerCase() == 'KWATER_Falldown_Detection'.toLowerCase()) {
-					action = '쓰러짐';
-				}
-				if (actionArr[i].action_event.toLowerCase() == 'KWATER_Flood_Detection'.toLowerCase()) {
-					action = '침수';
-				}
-				if (actionArr[i].action_event.toLowerCase() == 'KWATER_Glove_Detection'.toLowerCase()) {
-					action = '장갑미착용';
-				}
-				if (actionArr[i].action_event.toLowerCase() == 'KWATER_Invasion_Detection'.toLowerCase()) {
-					action = '침입';
-				}
-				if (actionArr[i].action_event.toLowerCase() == 'KWATER_Leak_Detection'.toLowerCase()) {
-					action = '누수';
-				}
-				if (actionArr[i].action_event.toLowerCase() == 'KWATER_Loitering_Detection'.toLowerCase()) {
-					action = '배회';
-				}
-				if (actionArr[i].action_event.toLowerCase() == 'KWATER_HandAction_Detection'.toLowerCase()) {
-					action = '수신호';
-				}
-				if (actionArr[i].action_event.toLowerCase() == 'KWATER_Spin_Detection'.toLowerCase()) {
-					action = '약품미투입';
-				}
-				if (actionArr[i].action_event.toLowerCase() == 'KWATER_Cmtank_Leak'.toLowerCase()) {
-					action = '약품탱크누액';
-				}
-				if (actionArr[i].action_event.toLowerCase() == 'KWATER_Outtank_Leak'.toLowerCase()) {
-					action = '옥외탱크누액';
-				}
-				if (actionArr[i].action_event.toLowerCase() == 'KWATER_Overflow'.toLowerCase()) {
-					action = '배출수월류';
-				}		 
-				actionArr[i].action = action;
 			}	    	
 			
 			var source = {
@@ -705,8 +695,8 @@ $(document).ready(function () {
 					} 
 				},
 				columns: [
-					{ text: '번호', datafield: 'action_idx', width: '4%', hidden:true},
-					{ text: '활성', datafield: 'action_isuse', width: '4%', align: 'center', columntype: 'checkbox', hidden:true},
+					{ text: getTranslate('idx'), datafield: 'action_idx', width: '4%', hidden:true},
+					{ text: '', datafield: 'action_isuse', width: '4%', align: 'center', columntype: 'checkbox', hidden:true},
 					/* { text: '활성', datafield: 'action_isuse', width: '4%', align: 'center', columntype: 'checkbox', type:'bool' }, */
 					                {
                      text: '', menu: false, sortable: false,
@@ -751,7 +741,7 @@ $(document).ready(function () {
                      			contentType : "application/json; charset=UTF-8",       
                      			data : jsonData,          		     		 
                      			success: function(data) {
-                     				alert("변경되었습니다.");
+                     				alert(getTranslate('completeModification'));
                      				for (var c = 0; c < actionArr.length; c++) {
                          				actionArr[c].action_isuse = isuse;      
                      				}
@@ -767,16 +757,16 @@ $(document).ready(function () {
                          return true;
                      }
                  },
-					{ text: '장치 이름', datafield: 'dev_title', width: '17%', editable: false },
-					{ text: '소스', datafield: 'action_source', width: '15%'/* '216.41px' */, editable: false },
-					{ text: '이벤트2', datafield: 'action_event', width: '25%', editable: false, hidden:true },
-					{ text: '이벤트', datafield: 'action', width: '25%', editable: false },
-					{ text: 'IP', datafield: 'action_ip', width: '20%', editable: false },
-					{ text: '동작', datafield: 'action_action', width: '20%'/* '216.41px' */, editable: false },
-					{ text: '프리셋', datafield: 'pre_title', width: '30%'/* '216.41px' */, editable: false, hidden:true  },
-					{ text: '스피커', datafield: 'network_title', width: '30%'/* '216.41px' */, editable: false, hidden:true  },
-					{ text: '태그', datafield: 'scada_tag', width: '30%'/* '216.41px' */, editable: false, hidden:true  },
-					{ text: '키값', datafield: 'action_key', width: '30%'/* '216.41px' */, editable: false, hidden:true  }
+					{ text: getTranslate('device_title'), datafield: 'dev_title', width: '17%', editable: false },
+					{ text: getTranslate('event_source'), datafield: 'action_source', width: '15%'/* '216.41px' */, editable: false },
+					{ text: getTranslate('event_name'), datafield: 'action_event', width: '25%', editable: false, hidden:true },
+					{ text: getTranslate('event_name'), datafield: 'action', width: '25%', editable: false },
+					{ text: getTranslate('device_ip'), datafield: 'action_ip', width: '20%', editable: false },
+					{ text: getTranslate('action'), datafield: 'action_action', width: '20%'/* '216.41px' */, editable: false },
+					{ text: getTranslate('preset'), datafield: 'pre_title', width: '30%'/* '216.41px' */, editable: false, hidden:true  },
+					{ text: getTranslate('speaker'), datafield: 'network_title', width: '30%'/* '216.41px' */, editable: false, hidden:true  },
+					{ text: getTranslate('sms'), datafield: 'scada_tag', width: '30%'/* '216.41px' */, editable: false, hidden:true  },
+					{ text: getTranslate('key'), datafield: 'action_key', width: '30%'/* '216.41px' */, editable: false, hidden:true  }
 				]
 			});
 	    },
@@ -808,7 +798,7 @@ $(document).ready(function () {
 		
 		var actionList = data.action_action.split(', ');
 		
-		if (data.action_action.indexOf('스피커') != -1) {
+		if (data.action_action.indexOf(getTranslate('스피커')) != -1) {
 			selectNetworkSpeaker(data.dev_title, ".action_content_network_content", data.network_title);
 		}
 		
@@ -829,14 +819,14 @@ $(document).ready(function () {
 		
 		$('.action_content_manager').show();
 		
-		if (data.action_action.indexOf('프리셋') != -1) {
+		if (data.action_action.indexOf(getTranslate('프리셋')) != -1) {
 			selectPreset250(data.dev_title, ".action_content_manager_content", data.pre_title);
 			$('.action_content_manager').show();
 		} else {
 			$('.action_content_manager').hide();
 		}
 		
-		if (data.action_action.indexOf('스피커') != -1) {
+		if (data.action_action.indexOf(getTranslate('스피커')) != -1) {
 			$('.action_content_network').show();
 		} else {
 			$('.action_content_network').hide();
@@ -1307,6 +1297,7 @@ $(document).ready(function () {
 	});
 });
 function selectPreset250(label, content_class, preset) {
+	console.log(label, content_class, preset);
 	var jsonUrl = '/selectPreset250';
 	
 	var object = new Object;
@@ -1336,6 +1327,7 @@ function selectPreset250(label, content_class, preset) {
 			for (var i = 0; i < data.length; i++) {
 				managerSource.push(data[i].pre_title);
 				if (preset != null && preset == data[i].pre_title) {
+					console.log(preset != null && preset == data[i].pre_title);
 					idx = i;
 				}
 			}
@@ -1398,18 +1390,18 @@ function selectNetworkSpeaker(label, content_class, preset) {
 		<div class="detailed_setting">
 			<div class="detailed_title">
 				<div class="detailed_title_text">
-					<h4 class="detailed_title_h4">상세 설정</h4>
+					<h4 class="detailed_title_h4"><spring:message code="eventAction.detailedSettings" /></h4>
 				</div>
 			</div>
 			<div class="detailed_content">
 				<div class="detailed_content_count">
-					<div class="detailed_content_count_title">카운트</div>
+					<div class="detailed_content_count_title"><spring:message code="eventAction.count" /></div>
 					<div class="detailed_content_count_content">
 						<input type="text" class="detailed_content_count_content_text" />
 					</div>
 				</div>
 				<div class="detailed_content_accuracy">
-					<div class="detailed_content_accuracy_title">정확도</div>
+					<div class="detailed_content_accuracy_title"><spring:message code="eventAction.accuracy" /></div>
 					<div class="detailed_content_accuracy_content">
 						<input id="ex6" data-slider-id='ex6Slider' type="text" data-slider-handle="round" data-slider-min="0" data-slider-max="100" data-slider-step="1" data-slider-value="0"/>
   						<span id="ex6SliderVal">0</span>
@@ -1419,13 +1411,13 @@ function selectNetworkSpeaker(label, content_class, preset) {
 		</div>
 		<div class="btnDiv">
 			<button class="button_check">
-				<span class="glyphicon glyphicon-plus check" aria-hidden="true"></span>추가
+				<span class="glyphicon glyphicon-plus check" aria-hidden="true"></span><spring:message code="common.add" />
 			</button>
 			<button class="button_modify" id="modify">
-				<span class="glyphicon glyphicon-edit modify" aria-hidden="true"></span>수정
+				<span class="glyphicon glyphicon-edit modify" aria-hidden="true"></span><spring:message code="common.modify" />
 			</button>
 			<button class="button_delete">
-				<span class="glyphicon glyphicon-trash delete" aria-hidden="true"></span>삭제
+				<span class="glyphicon glyphicon-trash delete" aria-hidden="true"></span><spring:message code="common.delete" />
 			</button>
 		</div>
 		<div class="grid"></div>
@@ -1436,29 +1428,29 @@ function selectNetworkSpeaker(label, content_class, preset) {
 			<div class="tag_setting">
 				<div class="tag_title">
 					<div class="tag_title_text">
-						<h4 class="tag_title_h4">이벤트 설정</h4>
+						<h4 class="tag_title_h4"><spring:message code="eventAction.eventSetup" /></h4>
 					</div>
 				</div>
 				<div class="tag_content">
 					<div class="tag_content_device">
-						<div class="tag_content_device_title">장치 이름</div>
+						<div class="tag_content_device_title"><spring:message code="device.title" /></div>
 						<div class="tag_content_device_content"></div>
 					</div>
 					<div class="tag_content_channel">
-						<div class="tag_content_channel_title">이벤트 소스</div>
+						<div class="tag_content_channel_title"><spring:message code="eventAction.eventSource" /></div>
 						<div class="tag_content_channel_content">
 							<div>
 								<input type="radio" id="kwater" name="source" value="kwater" checked>
-								<label for="kwater">지능형안전관리시스템</label>
+								<label for="kwater"><spring:message code="tab.titleFirstName" /><spring:message code="tab.titleSecondName" /></label>
 							</div>
 							<div>
 								<input type="radio" id="scada" name="source" value="SCADA">
-								<label for="scada">SCADA</label>
+								<label for="scada"><spring:message code="common.scada" /></label>
 							</div>
 						</div>
 					</div>
 					<div class="tag_content_tag">
-						<div class="tag_content_tag_title">이벤트</div>
+						<div class="tag_content_tag_title"><spring:message code="eventAction.event" /></div>
 						<div class="tag_content_tag_content">
 							<!-- <div style="border:none;" id="jqxTree">
 								<ul class="category"></ul>
@@ -1471,20 +1463,20 @@ function selectNetworkSpeaker(label, content_class, preset) {
 			<div class="action_setting">
 				<div class="action_title">
 					<div class="action_title_text">
-						<h4 class="action_title_h4">동작 설정</h4>
+						<h4 class="action_title_h4"><spring:message code="eventAction.actionSettings" /></h4>
 					</div>
 				</div>
 				<div class="action_content">
 					<div class="action_content_action">
-						<div class="action_content_action_title">동작</div>
+						<div class="action_content_action_title"><spring:message code="eventAction.action" /></div>
 						<div class="action_content_action_content"></div>
 					</div>
 					<div class="action_content_manager">
-						<div class="action_content_manager_title">프리셋 명</div>
+						<div class="action_content_manager_title"><spring:message code="eventAction.presetName" /></div>
 						<div class="action_content_manager_content"></div>
 					</div>
 					<div class="action_content_network">
-						<div class="action_content_network_title">스피커 명</div>
+						<div class="action_content_network_title"><spring:message code="eventAction.speakerName" /></div>
 						<div class="action_content_network_content"></div>
 					</div>
 					<!-- <div class="action_content_scada">
@@ -1508,29 +1500,29 @@ function selectNetworkSpeaker(label, content_class, preset) {
 		<div class="tag_setting">
 			<div class="tag_title">
 				<div class="tag_title_text">
-					<h4 class="tag_title_h4">이벤트 설정</h4>
+					<h4 class="tag_title_h4"><spring:message code="eventAction.eventSetup" /></h4>
 				</div>
 			</div>
 			<div class="tag_content">
 				<div class="tag_content_device">
-					<div class="tag_content_device_title">장치 이름</div>
+					<div class="tag_content_device_title"><spring:message code="device.title" /></div>
 					<div class="tag_content_device_content_2"></div>
 				</div>
 				<div class="tag_content_channel">
-					<div class="tag_content_channel_title">이벤트 소스</div>
+					<div class="tag_content_channel_title"><spring:message code="eventAction.eventSource" /></div>
 					<div class="tag_content_channel_content_2">
 						<div>
 							<input type="radio" id="kwater_2" name="source_2" value="kwater_2" checked>
-							<label for="kwater_2">지능형안전관리시스템</label>
+							<label for="kwater_2"><spring:message code="tab.titleFirstName" /><spring:message code="tab.titleSecondName" /></label>
 						</div>								
 						<div>
 							<input type="radio" id="scada_2" name="source_2" value="scada_2">
-							<label for="scada_2">SCADA</label>						
+							<label for="scada_2"><spring:message code="common.scada" /></label>						
 						</div>
 					</div>
 				</div>
 				<div class="tag_content_tag">
-					<div class="tag_content_tag_title">이벤트</div>
+					<div class="tag_content_tag_title"><spring:message code="eventAction.event" /></div>
 					<div class="tag_content_tag_content_2">
 						<!-- <div style="border:none;" id="jqxTree_2">
 							<ul class="category_2"></ul>
@@ -1543,20 +1535,20 @@ function selectNetworkSpeaker(label, content_class, preset) {
 		<div class="action_setting">
 			<div class="action_title">
 				<div class="action_title_text">
-					<h4 class="action_title_h4">동작 설정</h4>
+					<h4 class="action_title_h4"><spring:message code="eventAction.actionSettings" /></h4>
 				</div>
 			</div>
 			<div class="action_content">
 				<div class="action_content_action">
-					<div class="action_content_action_title">동작</div>
+					<div class="action_content_action_title"><spring:message code="eventAction.action" /></div>
 					<div class="action_content_action_content_2"></div>
 				</div>
 				<div class="action_content_manager_2">
-					<div class="action_content_manager_title">프리셋 명</div>
+					<div class="action_content_manager_title"><spring:message code="eventAction.presetName" /></div>
 					<div class="action_content_manager_content_2"></div>
 				</div>
 				<div class="action_content_network_2">
-					<div class="action_content_network_title">스피커 명</div>
+					<div class="action_content_network_title"><spring:message code="eventAction.speakerName" /></div>
 					<div class="action_content_network_content_2"></div>
 				</div>
 				<!-- <div class="action_content_scada_2">
@@ -1567,10 +1559,10 @@ function selectNetworkSpeaker(label, content_class, preset) {
 		</div>
 		<div class="btnDiv">
 			<button class="button_check checkBtn">
-				<span class="glyphicon glyphicon-plus check" aria-hidden="true"></span>추가
+				<span class="glyphicon glyphicon-plus check" aria-hidden="true"></span><spring:message code="common.add" />
 			</button>
 			<button class="button_modify closeBtn">
-				취소
+				<spring:message code="common.cancel" />
 			</button>
 		</div>
 	</div>

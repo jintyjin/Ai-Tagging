@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -37,6 +38,7 @@
 <script type="text/javascript" src="./resources/js/jqwidgets/jqxvalidator.js"></script>
 <script type="text/javascript" src="./resources/js/jqwidgets/jqxdata.export.js"></script> 
 <script type="text/javascript" src="./resources/js/jqwidgets/jqxgrid.export.js"></script>
+<script type="text/javascript" src="/resources/js/translate.js"></script>
 <style>
 button {
 	font-family: Lucida Sans, Arial, Helvetica, sans-serif;
@@ -99,7 +101,6 @@ body {
 	margin-bottom:20px;
 }
 .name_title {
-	width:200px;
 	padding-top:5px;
 	padding-right:15px;
 	padding-left:15px;
@@ -123,7 +124,6 @@ body {
 	padding-right:5px;
 	padding-left:5px;
 	position:relative;
-	left:-86px;
 	color:white;
 	position:relative;
 	background-color:#505050;
@@ -146,7 +146,6 @@ body {
 	color:#fff;
 }
 .password_title {
-	width:200px;
 	padding-top:5px;
 	padding-right:15px;
 	padding-left:15px;
@@ -161,7 +160,6 @@ body {
 	padding-right:5px;
 	padding-left:5px;
 	position:relative;
-	left:-86px;
 	background-color:#505050;
 	width:188px;
 	/* background-color:#252525; */
@@ -235,7 +233,7 @@ body {
 	margin-bottom:20px;
 }
 .IP_title {
-	width:200px;
+	/* width:200px; */
 	padding-top:5px;
 	padding-right:15px;
 	padding-left:15px;
@@ -244,7 +242,7 @@ body {
 }
 #area_set {
 	position:relative;
-	left:-86px;
+	/* left:-86px; */
 	font-size:14px;
 	color:white;
 	background-color:#333;
@@ -583,25 +581,7 @@ $(document).ready(function () {
 	
 	$("input:radio[id='" + on_off + "']").prop("checked", true); 
 	
-	if (model_name == 'fire') {
-		model_name = '화재';
-	} else if (model_name == 'leak') {
-		model_name = '누수';
-	} else if (model_name == 'spin') {
-		model_name = '약품 미투입';
-	} else if (model_name == 'invasion') {
-		model_name = '침입';
-	} else if (model_name == 'loitering') {
-		model_name = '배회';
-	} else if (model_name == 'falldown') {
-		model_name = '쓰러짐';
-	} else if (model_name == 'handaction') {
-		model_name = '수신호';
-	} else if (model_name == 'glove') {
-		model_name = '장갑미착용';
-	} else if (model_name == 'flood') {
-		model_name = '침수';
-	} 
+	model_name = getTranslate(model_name);
 	
 	$('.event_textbox').text(model_name);
 	$('#ch').text(dev_title);
@@ -637,7 +617,6 @@ $(document).ready(function () {
 		data : jsonData,          		
 		async : false,
 		success: function(data) {
-			console.log(data);
 			for (i = 0; i < data.length; i++) {
 				var devObj = new Object();
 				devObj.value = data[i].dev_ch;
@@ -679,35 +658,35 @@ $(document).ready(function () {
 	});  
 	
 	$('#btn_save').click(function() { 
-		if (confirm("저장하시겠습니까")) {
+		if (confirm(getTranslate('questionSave'))) {
 			var jsonUrl = "/eventSetupInfo/";
 	 		
 	 		var obj = new Object();
 	 		//dev_channel 채널값
-	 		obj.model_name = model_name; //이벤트 내용
+	 		obj.model_name = getTranslate(model_name); //이벤트 내용
 	 		obj.dev_title = $("#dev_channel").val(); //채널 값
 	 		obj.dev_ch = dev_ch; //장치이름
 			obj.opt = $('input[name="onoff"]:checked').val();
 	 		obj.chk = $("input:checkbox[id='ch_check']").is(':checked');
 	 		
 	 		if ($("#name_textarea").val() == '') {
-	 			alert('민감도를 설정해주세요.');
+	 			alert(getTranslate('setSensitivity'));
 	 			return false;
 	 		}
 	 		obj.confidence = $("#name_textarea").val();
 	 		
 	 		if ($("#password_text").val() == '') {
-	 			alert('유지 시간을 설정해주세요.');
+	 			alert(getTranslate('setHoldingTime'));
 	 			return false;
 	 		}
 	 		obj.duration = $("#password_text").val();
 	 		
 	 		if (obj.chk && $("#dev_channel").val() == '') {
-	 			alert('채널을 선택해야합니다.');
+	 			alert(getTranslate('setChannel'));
 	 			return false;
 	 		}
 	 		
-	 		var jsonData = JSON.stringify(obj);
+			var jsonData = JSON.stringify(obj);
 	 		
 			$.ajax({
 	 			type : "POST",                        	 	     
@@ -717,7 +696,7 @@ $(document).ready(function () {
 	 			data : jsonData,          		
 	 			async : false,
 	 			success: function(data) {
-					alert('저장이 완료되었습니다.');
+					alert(getTranslate('completeSave'));
 					self.close();
 					parent.opener.location.reload();
 	 			},
@@ -744,243 +723,6 @@ $(document).ready(function () {
 		popup_window[POPUP_MORE] = openWindow('./schedule_setup.htm?event_name=' + "${model_name}" + "&dev_ch=" + dev_ch, 'areaSet', 1400, 880);
 		
 	});
-	/*
-	var IPCheck = false;
-	var checkTokken = "";
-
-	var jsonUrl = "/deviceModifyInfo";
-	
-	var obj = new Object();
-
-	obj.dev_name = 'AI-BOX';
-	var jsonData = JSON.stringify(obj);
-		
-
-	$.ajax({
-		type : "POST",                        	 	     
-		url : jsonUrl,                      		
-		dataType : "json",                        	  
-		contentType : "application/json; charset=UTF-8",       
-		data : jsonData,          		     		 
-		success: function(data) {
-			var dev_info = data;
-
-			/* $('#id_text').text(dev_info.dev_name);
-			
-	    	var channelSource = [];
-	    	channelSource.push('켜기');
-	    	channelSource.push('끄기');
-	    	
-	    	$('#id_text').jqxDropDownList({source:channelSource, scrollBarSize:10, autoDropDownHeight: true, width: 200, height: 25, theme: 'metrodark'});
-	    	
-	    	var area = [];
-	    	area.push('Empty');
-	    	
-			$('#IP_text').jqxDropDownList({source:area, scrollBarSize:10, autoDropDownHeight: true, width: 200, height: 25, theme: 'metrodark'});
-			
-	    	var sense = [];
-	    	sense.push('최고');
-	    	sense.push('고');
-	    	sense.push('중');
-	    	sense.push('저');
-	    	sense.push('최저');
-	    	
-			$('#name_text').jqxDropDownList({source:sense, scrollBarSize:10, autoDropDownHeight: true, width: 200, height: 25, theme: 'metrodark'});
-			
-			var remainTime = [];
-			remainTime.push("5 초");
-			remainTime.push("10 초");
-			remainTime.push("15 초");
-			remainTime.push("20 초");
-			
-			$('#password_text').jqxDropDownList({source:remainTime, scrollBarSize:10, autoDropDownHeight: true, width: 200, height: 25, theme: 'metrodark'});
-			
-		},
-		error: function(errorThrown) {
-			alert(errorThrown.statusText);
-			alert(JSON.stringify(data));
-		}
-	});
-
-	var scheduleStr = "";
-	var scheduleArr = [];
-	scheduleArr.push('시');
-	scheduleArr.push('일');
-	scheduleArr.push('월');
-	scheduleArr.push('화');
-	scheduleArr.push('수');
-	scheduleArr.push('목');
-	scheduleArr.push('금');
-	scheduleArr.push('토');
-	scheduleArr.push('휴일');
-	
-	for (var i = 0; i < 9; i++) {
-		scheduleStr += '<div class="schedule_row">';
-		for (var j = 0; j < 25; j++) {
-			var titleStr = "";
-			var dateBox = "";
-			if (i == 0 && j > 0) {
-				titleStr = j - 1;
-			}
-			
-			if (j == 0) {
-				titleStr = scheduleArr[i];
-			}
-			
-			if (i > 0 && j > 0) {
-				dateBox = 'dateBox';
-			}
-			
-			scheduleStr += '<div class="schedule_cell ' + dateBox + '">' + titleStr + '</div>';
-		}
-		scheduleStr += '</div>';
-	}
-	$(scheduleStr).appendTo("#schedule_picture");
-
-	/* $(".schedule_cell").click(function () {
-		if ($(this).hasClass('chkBox')) {
-			$(this).removeClass("chkBox");
-			$(this).addClass("dateBox");
-		} else if ($(this).hasClass('dateBox')) {
-			$(this).removeClass("dateBox");
-			$(this).addClass("chkBox");
-		}
-	});
-
-	var mode = false;
-	$(".schedule_cell").on("mousedown", function () {
-		mode = true;
-
-		if ($(this).hasClass('chkBox')) {
-			$(this).removeClass("chkBox");
-			$(this).addClass("dateBox");
-		} else if ($(this).hasClass('dateBox')) {
-			$(this).removeClass("dateBox");
-			$(this).addClass("chkBox");
-		}
-	}).on("mouseup", function () {
-		mode = false;
-	}).on("mouseover", function () {
-		if (!mode) {
-			return;
-		}
-		
-		if ($(this).hasClass('chkBox')) {
-			$(this).removeClass("chkBox");
-			$(this).addClass("dateBox");
-		} else if ($(this).hasClass('dateBox')) {
-			$(this).removeClass("dateBox");
-			$(this).addClass("chkBox");
-		}
-	});
-	
-	
-	
-	$('.button_modify').click(function () {
-		if (confirm('수정하시겠습니까?')) {
-			var jsonUrl = "/updateDeviceInfo";
-			
-			var obj = new Object();
-			obj.dev_name = $('#id_text').text();
-			obj.dev_private_ip = $('#IP_text').val();
-			obj.dev_public_ip = $('#IP_text').val();
-			obj.dev_id = $('#name_text').val();
-			obj.dev_pwd = "";
-			if ($('#password_text').val() != '****') {
-				obj.user_pw = SHA256($('#password_text').val());
-			}
-			
-			obj.dev_port = $('#port_text').val();
-			obj.dev_web_port = $('#webport_text').val();
-			
-			var jsonData = JSON.stringify(obj);
-			
-			$.ajax({
-				type : "POST",                        	 	     
-				url : jsonUrl,                      		
-				dataType : "text",                        	  
-				contentType : "application/json; charset=UTF-8",       
-				data : jsonData,          		     		 
-				success: function() {
-					alert('수정이 완료되었습니다.');			
-					self.close();
-					parent.opener.location.reload();
-				},
-				error: function(errorThrown) {
-					alert(errorThrown.statusText);
-					alert(JSON.stringify(data));
-				}
-			}); 
-		}
-	});
-
-	$('.button_delete').click(function () {
-		if(confirm('정말 삭제하시겠습니까?')) {
-			var jsonUrl = "/deleteDeviceInfo";
-			
-			var obj = new Object();
-			obj.dev_name = $('#id_text').text();
-			
-			var jsonData = JSON.stringify(obj);
-			
-			$.ajax({
-				type : "POST",                        	 	     
-				url : jsonUrl,                      		
-				dataType : "text",                        	  
-				contentType : "application/json;",       
-				data : jsonData,          		     		 
-				success: function() {
-					alert('삭제가 완료되었습니다.');			
-					self.close();
-					parent.opener.location.reload();
-				},
-				error: function(request, status, error) {
-					alert("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
-					//alert(errorThrown.statusText);
-				}
-			}); 
-		}
-	});
-	$('.IP_message').click(function () {
-		/* if ($('#tokken_text').val().length > 0) {
-			var jsonUrl = "/chkTokken";
-			
-			var obj = new Object();
-			obj.user_tokken = $('#tokken_text').val();
-			
-			var jsonData = JSON.stringify(obj);
-			
-			$.ajax({
-				type : "POST",                        	 	     
-				url : jsonUrl,                      		
-				dataType : "text",                        	  
-				contentType : "application/json; charset=UTF-8",       
-				data : jsonData,          		     		 
-				success: function(data) {
-					if (data == '{"status":200,"message":"ok"}') {
-						tokkenCheck = true;
-						checkTokken = $('#tokken_text').val();
-						alert('보내기 성공');
-					} else if (data == "400") {
-						alert("토큰 오류 : Unauthorized request");					
-					} else if (data == "401") {
-						alert("토큰 오류 : Invalid access token");					
-					} else if (data == "500") {
-						alert("토큰 오류 : Failure due to server error");					
-					} else {
-						alert("토큰 오류 : Processed over time or stopped");
-					}		
-				},
-				error: function(errorThrown) {
-					alert(errorThrown.statusText);
-					alert(JSON.stringify(data));
-				}
-			});
-		} else {
-			alert('토큰을 입력해주세요.');
-		} 
-	});
-	*/
 });
 
 function chkNum(obj) {
@@ -989,11 +731,6 @@ function chkNum(obj) {
 		alert("1 ~ 100을 입력하세요.");
 		$("#name_textarea").val('');
 	}
-	
-	/* if(!($("#name_textarea").val() > 0 || $("#name_textarea").val() < 100)) {
-		alert("민감도 설정은 1~100사이입니다.");
-		$("#name_textarea").val('');
-	} */		
 }
 
 function password_text_chk(obj) {
@@ -1025,61 +762,49 @@ function cancel() {
 			</div>
 			<div class="id_pwd">
 				<div class="id">
-					<!-- <label class="id_title">채널</label> -->
-						<div class="menu_title">장치이름</div>
+						<div class="menu_title"><spring:message code="device.title" /></div>
 						<div id="ch"></div>
-						<input type=checkbox id='ch_check' name='ch_list 'value="다른채널적용">
-							<div id="d_ch">다른채널적용</div>
-						</>
+						<input type=checkbox id='ch_check' name='ch_list 'value='<spring:message code="device.otherChannel" />' />
+							<div id="d_ch"><spring:message code="device.otherChannel" /></div>
 					<div id="id_text"></div>
 				</div>
 				<div class="channel">
-					<button id="ch_button" type="button">보기</button>
+					<button id="ch_button" type="button"><spring:message code="common.option" /></button>
 					<div id='dev_channel' name='dev_ch'></div>
 				</div>
 				<div class="activative">
-					<label class="active">활성화</label>
+					<label class="active"><spring:message code="common.activate" /></label>
 				</div>		
 				<div class="check">
 					<input type="radio" id="0" name="onoff" value="0"></input>
-					<label for="label-a">켜기</label>
+					<label for="label-a"><spring:message code="common.on" /></label>
 					<input type="radio" id="1" name="onoff" value="1"></input>
-					<label for="label-b">끄기</label>
+					<label for="label-b"><spring:message code="common.off" /></label>
 				</div>
 				<div class="IP">
-					<label class="IP_title">감지 영역</label>
-					<!-- <div id="IP_text"></div> -->
-					<button id="area_set" type="button">영역 설정</button>
+					<label class="IP_title"><spring:message code="device.detectionArea" /></label>
+					<button id="area_set" type="button"><spring:message code="device.areaSetting" /></button>
 				</div>
 				<div class="schedule">
-					<label class="schedule_title">스케줄</label>
-					<!-- <div id="IP_text"></div> -->
-					<button id="schedule_setup" type="button">영역 설정</button>
+					<label class="schedule_title"><spring:message code="device.schedule" /></label>
+					<button id="schedule_setup" type="button"><spring:message code="device.areaSetting" /></button>
 				</div>
 			</div>
 			<div class="name_password">
 				<div class="name">
-					<label class="name_title">민감도</label>
-					<input type="number" min = '1' max = '99' id="name_textarea" onkeyup="chkNum(this);" placeholder="민감도를 설정해주세요"></input>				
+					<label class="name_title"><spring:message code="device.responsiveness" /></label>
+					<input type="number" min = '1' max = '99' id="name_textarea" onkeyup="chkNum(this);" placeholder='<spring:message code="device.setupResponsiveness" />'></input>				
 				</div>
 				<div class="password">
-					<label class="password_title">유지 시간</label>
-					<!-- <div id="password_text"></div> -->
-					<input type="number" min = '1' max = '60' id="password_text" onkeyup="password_text_chk(this)" placeholder="유지시간을 설정해주세요"></input>
+					<label class="password_title"><spring:message code="device.holdingTime" /></label>
+					<input type="number" min = '1' max = '60' id="password_text" onkeyup="password_text_chk(this)" placeholder='<spring:message code="device.setupHoldingTime" />'></input>
 				</div>
 			</div>
-			<!-- <div class="schedule">
-				<div class="schedule_name">
-					<label class="schedule_name_title">일정</label>
-					<div id="schedule_picture">
-					</div>
-				</div>
-			</div> -->
 		</div>
 		<div class="container" style="width:950px;padding:0;margin-top:30px;margin-bottom:30px;">
 			<div class="buttonDiv">
-				<button class="button_modify" id="btn_save">저장</button>
-				<button class="button_modify" id="btn_cancel" onclick="cancel();">취소</button>	
+				<button class="button_modify" id="btn_save"><spring:message code="common.save" /></button>
+				<button class="button_modify" id="btn_cancel" onclick="cancel();"><spring:message code="common.cancel" /></button>	
 			</div>
 		</div>	
 	</div>
