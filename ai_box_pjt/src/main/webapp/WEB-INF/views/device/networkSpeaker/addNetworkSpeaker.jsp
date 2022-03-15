@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -36,6 +37,7 @@
 <script type="text/javascript" src="./resources/js/jqwidgets/jqxvalidator.js"></script>
 <script type="text/javascript" src="./resources/js/jqwidgets/jqxdata.export.js"></script> 
 <script type="text/javascript" src="./resources/js/jqwidgets/jqxgrid.export.js"></script>
+<script type="text/javascript" src="/resources/js/translate.js"></script>
 <style>
 button {
 	font-family: Lucida Sans, Arial, Helvetica, sans-serif;
@@ -798,23 +800,23 @@ $(document).ready(function () {
 	
 	$('#joinDevice').click(function () {
 		if ($('#IP_text').val() == '') {
-			alert('이름을 입력해주세요.');
+			alert(getTranslate('enterSpeakerName'));
 			return false;
 		}
 		if ($('#name_text').val() == '') {
-			alert('아이피를 입력해주세요.');
+			alert(getTranslate('enterSpeakerIP'));
 			return false;
 		}
 		if ($('#password_text').val() == '') {
-			alert('포트를 입력해주세요.');
+			alert(getTranslate('enterSpeakerPort'));
 			return false;
 		}
 		if ($('#webport_text').val() == '') {
-			alert('아이디를 입력해주세요.');
+			alert(getTranslate('enterSpeakerID'));
 			return false;
 		}
 		if ($('#pwd_text').val() == '') {
-			alert('비밀번호를 입력해주세요.');
+			alert(getTranslate('enterSpeakerPassword'));
 			return false;
 		}
 		
@@ -938,6 +940,19 @@ $(document).ready(function () {
 	});
 	
 	$('#getAudioBtn').click(function () {
+		if ($('#name_text').val() == '') {
+			alert(getTranslate('enterSpeakerName'));
+			return false;
+		}
+		if ($('#webport_text').val() == '') {
+			alert(getTranslate('enterSpeakerID'));
+			return false;
+		}
+		if ($('#pwd_text').val() == '') {
+			alert(getTranslate('enterSpeakerPassword'));
+			return false;
+		}
+		
 		var jsonUrl = "/getSpeakerList";
 
 		var ip = $('#name_text').val();
@@ -1057,18 +1072,18 @@ function openWindow(page, pageName, width, height) {
 					<div id="type_text"></div>
 				</div> -->
 				<div class="IP">
-					<label class="IP_title" for="IP_text">이름</label>
+					<label class="IP_title" for="IP_text"><spring:message code="speaker.name" /></label>
 					<!-- <div id="IP_text"></div> -->
 					<input type="text" id="IP_text">
 				</div>
 			</div>
 			<div class="name_password">
 				<div class="name">
-					<label class="name_title" for="name_text">아이피</label>
+					<label class="name_title" for="name_text"><spring:message code="speaker.IP" /></label>
 					<input type="text" id="name_text">
 				</div>
 				<div class="password">
-					<label class="password_title" for="password_text">포트</label>
+					<label class="password_title" for="password_text"><spring:message code="speaker.Port" /></label>
 					<input type="text" id="password_text">
 				</div>
 			</div>
@@ -1078,13 +1093,13 @@ function openWindow(page, pageName, width, height) {
 					<div id="port_text"></div>
 				</div> -->
 				<div class="webport">
-					<label class="webport_title" for="webport_text">아이디</label>
+					<label class="webport_title" for="webport_text"><spring:message code="speaker.ID" /></label>
 					<input type="text" id="webport_text">
 				</div>
 			</div>
 			<div class="pwd_rtsp">
 				<div class="pwd">
-					<label class="pwd_title" for="pwd_text">비밀번호</label>
+					<label class="pwd_title" for="pwd_text"><spring:message code="speaker.Password" /></label>
 					<input type="password" id="pwd_text">
 				</div>
 				<!-- <div class="rtsp">
@@ -1097,66 +1112,66 @@ function openWindow(page, pageName, width, height) {
 		<div class="container" style="padding:0;max-width:1000px;">
 			<div id="audio-left">
 				<div class="titleValue">
-					<div class="eventTitle">쓰러짐</div>
+					<div class="eventTitle"><spring:message code="event.kwater_falldown_detection" /></div>
 					<div class="eventValue event0" id="falldown"></div>
 				</div>
 				<div class="titleValue">
-					<div class="eventTitle">화재</div>
+					<div class="eventTitle"><spring:message code="event.kwater_fire_detection" /></div>
 					<div class="eventValue event1" id="fire"></div>
 				</div>
 				<div class="titleValue">
-					<div class="eventTitle">침수</div>
+					<div class="eventTitle"><spring:message code="event.kwater_flood_detection" /></div>
 					<div class="eventValue event2" id="flood"></div>
 				</div>
 				<div class="titleValue">
-					<div class="eventTitle">장갑미착용</div>
+					<div class="eventTitle"><spring:message code="event.kwater_glove_detection" /></div>
 					<div class="eventValue event3" id="glove"></div>
 				</div>
 				<div class="titleValue">
-					<div class="eventTitle">침입</div>
+					<div class="eventTitle"><spring:message code="event.kwater_invasion_detection" /></div>
 					<div class="eventValue event4" id="invasion"></div>
 				</div>
 				<div class="titleValue">
-					<div class="eventTitle">누수</div>
+					<div class="eventTitle"><spring:message code="event.kwater_leak_detection" /></div>
 					<div class="eventValue event5" id="leak"></div>
 				</div>
 				<div class="titleValue">
-					<div class="eventTitle">배회</div>
+					<div class="eventTitle"><spring:message code="event.kwater_loitering_detection" /></div>
 					<div class="eventValue event6" id="loitering"></div>
 				</div>
 				<div class="titleValue">
-					<div class="eventTitle">수신호</div>
+					<div class="eventTitle"><spring:message code="event.kwater_handaction_detection" /></div>
 					<div class="eventValue event7" id="handAction"></div>
 				</div>
 				<div class="titleValue">
-					<div class="eventTitle">약품미투입</div>
+					<div class="eventTitle"><spring:message code="event.kwater_spin_detection" /></div>
 					<div class="eventValue event8" id="spin"></div>
 				</div>
 				<div class="titleValue">
-					<div class="eventTitle">약품탱크 누액</div>
+					<div class="eventTitle"><spring:message code="event.kwater_cmtank_detection" /></div>
 					<div class="eventValue event9" id="cmtank"></div>
 				</div>
 				<div class="titleValue">
-					<div class="eventTitle">옥외탱크 누액</div>
+					<div class="eventTitle"><spring:message code="event.kwater_outtank_detection" /></div>
 					<div class="eventValue event10" id="outtank"></div>
 				</div>
 				<div class="titleValue">
-					<div class="eventTitle">배출수 월류</div>
+					<div class="eventTitle"><spring:message code="event.kwater_overflow_detection" /></div>
 					<div class="eventValue event11" id="overflow"></div>
 				</div>
 			</div>
 			<div id="audio-right">
 				<div>
-					<button id="getAudioBtn">오디오 리스트 가져오기</button>
-					<button id="setAudioBtn">오디오 등록하기</button>
+					<button id="getAudioBtn"><spring:message code="speaekr.getAudioList" /></button>
+					<button id="setAudioBtn"><spring:message code="speaekr.registAudio" /></button>
 				</div>
 				<div id="audioList"></div>
 			</div>
 		</div>
 		<div class="container" style="width:600px;padding:0;max-width:1110px;margin-top:30px;margin-bottom:30px;">
 			<div class="buttonDiv">
-				<button class="button_modify" id="joinDevice">등록</button>
-				<button class="button_modify" id="cancel">취소</button>
+				<button class="button_modify" id="joinDevice"><spring:message code="common.registration" /></button>
+				<button class="button_modify" id="cancel"><spring:message code="common.cancel" /></button>
 			</div>
 		</div>
 	</div>

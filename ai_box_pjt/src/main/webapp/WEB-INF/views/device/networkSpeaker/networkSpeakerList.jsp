@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -33,6 +34,7 @@
 <script src="./resources/js/jqwidgets/jqxwindow.js"></script>
 <script src="./resources/js/jqwidgets/jqxdata.export.js"></script> 
 <script src="./resources/js/jqwidgets/jqxgrid.export.js"></script>
+<script type="text/javascript" src="/resources/js/translate.js"></script>
 <style>
 body {
 	font-family: Lucida Sans, Arial, Helvetica, sans-serif;
@@ -224,16 +226,16 @@ $(document).ready(function () {
 				ready: function () {  
 				},
 		        columns: [
-		            { text: '번호', datafield: 'network_idx', width: '10%', editable: false, hidden:true},
-		            { text: '이름', datafield: 'network_title', width: '25%', editable: false,},
-		            { text: '아이피', datafield: 'network_ip', width: '25%', editable: false, },
-		            { text: '포트', datafield: 'network_port', width: '25%', editable: false, },
-		            { text: '아이디', datafield: 'network_id', width: '25%', editable: false, },
-		            { text: '패스워드', datafield: 'network_pwd', width: '10%', editable: false, hidden:true}
+		            { text: getTranslate('idx'), datafield: 'network_idx', width: '10%', editable: false, hidden:true},
+		            { text: getTranslate('speakerName'), datafield: 'network_title', width: '25%', editable: false,},
+		            { text: getTranslate('speakerIP'), datafield: 'network_ip', width: '25%', editable: false, },
+		            { text: getTranslate('speakerPort'), datafield: 'network_port', width: '25%', editable: false, },
+		            { text: getTranslate('speakerID'), datafield: 'network_id', width: '25%', editable: false, },
+		            { text: getTranslate('speakerPassword'), datafield: 'network_pwd', width: '10%', editable: false, hidden:true}
 		        ]
 		    });
 		    
-			$('.addButton').append('<button class="button_check" onclick="addInfo();"><span class="glyphicon glyphicon-plus check" aria-hidden="true"></span>추가</button>');
+			$('.addButton').append('<button class="button_check" onclick="addInfo();"><span class="glyphicon glyphicon-plus check" aria-hidden="true"></span>' + getTranslate('add') + '</button>');
 			
 			//$('#type').show();
 			$('#jqxgrid').show();
@@ -372,8 +374,8 @@ function chkType(type) {
 	</div>
 	<div id='Menu'>
 		<ul>
-			<li>수정</li>
-			<li>삭제</li>
+			<li><spring:message code="common.add" /></li>
+			<li><spring:message code="common.delete" /></li>
 		</ul>
 	</div>
 </div>

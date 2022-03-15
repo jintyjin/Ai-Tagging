@@ -621,18 +621,19 @@ $(document).ready(function () {
 				
 				if (actionArr[i].action_action.indexOf(', ') != -1) {
 					var action = '';
-					for (var j = 0; j < actionArr[i].action_action.split(', ').length; j++) {
+					var actionList = actionArr[i].action_action.split(', ');
+					for (var j = 0; j < actionList.length; j++) {
 						if (j == 0) {
-							if (actionArr[i].action_action.indexOf('(') != -1) {
-								action = getTranslate(actionArr[i].action_action.substring(0, 3));
+							if (actionList[j].indexOf('(') != -1) {
+								action = getTranslate(actionList[j].substring(0, 3));
 							} else {
-								action = getTranslate(actionArr[i].action_action.split(', ')[j]);
+								action = getTranslate(actionList[j]);
 							}
 						} else {
-							if (actionArr[i].action_action.indexOf('(') != -1) {
-								action += ', ' + getTranslate(actionArr[i].action_action.substring(0, 3));
+							if (actionList[j].indexOf('(') != -1) {
+								action += ', ' + getTranslate(actionList[j].substring(0, 3));
 							} else {
-								action += ', ' + getTranslate(actionArr[i].action_action.split(', ')[j]);
+								action += ', ' + getTranslate(actionList[j]);
 							}
 						}
 					}
@@ -1106,9 +1107,8 @@ $(document).ready(function () {
 		for (var il = 0; il < checkedactionArr.length; il++) {
 			//console.log('동작 = ' + checkedactionArr[il].label);
 			if (checkedactionArr[il].label.indexOf('(') != -1) {
-				chkActionArr.push(getTranslate(checkedactionArr[il].label.substring(0, 2)));
+				chkActionArr.push(getTranslate(checkedactionArr[il].label.substring(0, 3)));
 			} else {
-
 				chkActionArr.push(getTranslate(checkedactionArr[il].label));
 			}
 		}

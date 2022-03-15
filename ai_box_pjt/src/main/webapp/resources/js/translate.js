@@ -129,6 +129,11 @@ var lang = {
 		enterIPDDNS : "IP/DDNS를 입력해주세요.",
 		enterPort : "포트를 입력해주세요.",
 		enterRTSP : "RTSP를 입력해주세요.",
+		enterSpeakerName : "스피커 이름을 입력해주세요." ,
+		enterSpeakerIP : "스피커 IP를 입력해주세요.",
+		enterSpeakerPort : "스피커 Port를 입력해주세요.",
+		enterSpeakerID : "스피커 ID를 입력해주세요.",
+		enterSpeakerPassword : "스피커 비밀번호를 입력해주세요.",
 		
 		checkDuplicate : "중복체크를 해주세요.",
 		wrongIDorPassword : "ID 또는 비밀번호가 틀립니다.",
@@ -184,6 +189,11 @@ var lang = {
 		SMS : "SMS(SCADA)",
 		스피커 : "스피커",
 		
+		speakerName : "스피커 이름",
+		speakerIP : "스피커 IP",
+		speakerPort : "스피커 Port",
+		speakerID : "스피커 ID",
+		speakerPassword : "스피커 비밀번호",
 	},
 	"en" : {
 		// Event
@@ -315,6 +325,11 @@ var lang = {
 		enterIPDDNS : "Please enter IP/DDNS",
 		enterPort : "Please enter port",
 		enterRTSP : "Please enter RTSP",
+		enterSpeakerName : "Please enter speaker name" ,
+		enterSpeakerIP : "Please enter speaker IP",
+		enterSpeakerPort : "Please enter speaker port",
+		enterSpeakerID : "Please enter speaker ID",
+		enterSpeakerPassword : "Please enter speaker password",
 		
 		enterDuplicateCheck : "Please duplicate check",
 		wrongIDorPassword : "The ID or password is incorrect",
@@ -361,7 +376,7 @@ var lang = {
 		Alarm : "알람",
 		PopUp : "팝업",
 		Preset : "프리셋",
-		SMS : "SMS(SCADA)",
+		Sms : "SMS(SCADA)",
 		Speaker : "스피커",
 
 		알람 : "Alarm",
@@ -369,6 +384,12 @@ var lang = {
 		프리셋 : "Preset",
 		SMS : "SMS(SCADA)",
 		스피커 : "Speaker",
+
+		speakerName : "Speaker name",
+		speakerIP : "Speaker IP",
+		speakerPort : "Speaker port",
+		speakerID : "Speaker ID",
+		speakerPassword : "Speaker password",
 	}
 }
 function getLanguage() {
