@@ -1,5 +1,7 @@
 var lang = {
 	"ko" : {
+		webTitle : "지능형 영상 안전 관리 시스템", 
+		
 		// 이벤트
 		fire : "화재",
 		falldown : "쓰러짐",
@@ -196,6 +198,8 @@ var lang = {
 		speakerPassword : "스피커 비밀번호",
 	},
 	"en" : {
+		webTitle : "Intelligent Video Safety Management System", 
+		
 		// Event
 		fire : "Fire",
 		falldown : "Falldown",

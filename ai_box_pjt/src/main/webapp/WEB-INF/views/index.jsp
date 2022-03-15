@@ -15,6 +15,7 @@
 <link rel="stylesheet" href="./resources/css/bootstrap-theme.min.css">
 <script src="./resources/js/sockjs.min.js"></script> 
 <script src="./resources/js/stomp.min.js"></script>
+<script type="text/javascript" src="/resources/js/translate.js"></script>
 <link rel="icon" href="data:;base64,iVBORw0KGgo=">
 <style>
 html, body {
@@ -555,6 +556,16 @@ $(document).ready(function () {
 	$('#output_path').change(function (e) {
 		$('#formUploadDir').submit();
 	});
+	$('#logo').mouseover(function(e) {
+		var tag = $(this).attr('id');
+
+		$(this).append('<div id="tooltip" style="position:absolute;"><div class="tipBody">' + getTranslate('webTitle') + '</div></div>');
+	}).mousemove(function(e) {
+		$("#tooltip").css('top', e.pageY);
+		$("#tooltip").css('left', e.pageX + 30);
+	}).mouseout(function() {
+		$(this).children('div#tooltip').remove();
+	});
 });
 function menuClick(flag) {
 	$('#iframe').attr('src', flag);
@@ -641,8 +652,8 @@ function networkTest() {
 <tr><td id="tabMenu" style="width:13%; background:linear-gradient(-45deg, #252525, #424242)">
 <div style="padding-top:12px; height:100%; min-width:245px;">
 	<div id="logo">
-		<img src="/resources/image/Police/logo_RECON.ico" alt="logo" />
-		<span style="position:absolute; top:18px;">&nbsp;&nbsp;<spring:message code="tab.titleFirstName" /><br />&nbsp;&nbsp;<spring:message code="tab.titleSecondName" /></span>
+		<div style="float:left;"><img src="/resources/image/Police/logo_RECON.ico" alt="logo" /></div>
+		<span id="webTitle">&nbsp;&nbsp;<spring:message code="tab.titleFirstName" /><br />&nbsp;&nbsp;<spring:message code="tab.titleSecondName" /></span>	<!-- style="position:absolute; top:18px;" -->
 	</div>
 	<div id="menu">
 		<ul>
