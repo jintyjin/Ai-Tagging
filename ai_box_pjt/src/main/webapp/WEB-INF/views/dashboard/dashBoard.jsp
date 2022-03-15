@@ -87,16 +87,16 @@ html, body {
 	height:65%;
 }
 #left, #center, #right {
-	height:840px;
+	height:700px;
 	float:left;
 }
 #left {
 	width:10%;
 }
 .leftEvent {
-	height:60px;
+	height:50px;
 	text-align:center;
-	line-height:60px;
+	line-height:50px;
 	font-size:16px;
 	border:1px solid white;
 	background-color:#3E3E42;
@@ -107,15 +107,16 @@ html, body {
 	
 }
 #centerLeft, #centerRight {
-	height:840px;
+	height:700px;
 	float:left;
 }
 #centerLeft {
 	width:1152px;
+	border:1px solid white;
 	/* width:1512px; */
 }
 #centerLeftContent {
-	height:840px;
+	height:720px;
 	/* border:1px solid white; */
 }
 #centerTable {
@@ -127,7 +128,7 @@ html, body {
 	overflow-x:auto;
 	overflow-y:hidden;
 	text-align:center;
-	border:1px solid white;
+	/* border:1px solid white; */
 	border-collapse:collapse;
 }
 #centerTable tbody {
@@ -141,8 +142,8 @@ html, body {
 	display:block;
 	border:1px solid white;
 	width:144px;
-	height:60px;
-	line-height:60px;
+	height:50px;
+	line-height:50px;
 }
 .dateTd {
 	background-color:#3E3E42;
@@ -158,9 +159,9 @@ html, body {
 	width:144px;
 }
 .rightEvent {
-	height:60px;
+	height:50px;
 	text-align:center;
-	line-height:60px;
+	line-height:50px;
 	font-size:16px;
 	border:1px solid white;
 	background-color:#3E3E42;

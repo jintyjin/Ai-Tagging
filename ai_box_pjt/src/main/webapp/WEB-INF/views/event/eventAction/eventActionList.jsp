@@ -515,41 +515,41 @@ $(document).ready(function(){
 	$('.Progress_Loading').show();
 })
 var categorySource = [{
-		text : "쓰러짐",
+		text : getTranslate('falldown'),
 		value : "KWATER_Falldown_Detection"
 	}, {
-	 	text : "화재",
+	 	text : getTranslate('fire'),
 		value : "KWATER_Fire_Detection"
 	}, {
-	 	text : "침수",
+	 	text : getTranslate('flood'),
 		value : "KWATER_Flood_Detection" 
 	}, {
-		text : "장갑미착용",
+		text : getTranslate('glove'),
 		value : "KWATER_Glove_Detection"
 	}, {
-	 	text : "침입",
+	 	text : getTranslate('invasion'),
 		value : "KWATER_Invasion_Detection"
 	}, {
-	 	text : "누수",
+	 	text : getTranslate('leak'),
 		value : "KWATER_Leak_Detection" 
 	}, {
-		text : "배회",
+		text : getTranslate('loitering'),
 		value : "KWATER_Loitering_Detection"
 	}, {
-	 	text : "수신호",
+	 	text : getTranslate('handaction'),
 		value : "KWATER_HandAction_Detection"
 	}, {
-		text : "약품미투입",
+		text : getTranslate('spin'),
 		value : "KWATER_Spin_Detection"
 }]; 
 var categorySource1 = [{	
-		text : "약품탱크누액",
+		text : getTranslate('cmtank'),
 		value : "KWATER_Cmtank_Leak"
 	}, {
-	 	text : "옥외탱크누액",
+	 	text : getTranslate('outtank'),
 		value : "KWATER_Outtank_Leak"
 	}, {
-	 	text : "배출수월류",
+	 	text : getTranslate('overflow'),
 		value : "KWATER_Overflow" 
 }];
 
@@ -617,6 +617,7 @@ $(document).ready(function () {
 	    	
 			for (var i = 0; i < actionArr.length; i++) {
 				actionArr[i].action = getTranslate(actionArr[i].action_event.toLowerCase());
+				actionArr[i].action_source = getTranslate(actionArr[i].action_source);
 				
 				if (actionArr[i].action_action.indexOf(', ') != -1) {
 					var action = '';
@@ -882,7 +883,7 @@ $(document).ready(function () {
 			data : jsonData,          		     		 
 			success: function(data) {
 				$(".grid").jqxGrid('setcellvalue', event.args.rowindex, "action_isuse", isuse);
-				alert("변경되었습니다.");
+				alert(getTranslate('completeModification'));
 			},
 			error: function(errorThrown) {
 				alert(errorThrown.statusText);
@@ -892,7 +893,7 @@ $(document).ready(function () {
 	});
 	
 	$('#modify').click(function () { 
-		if (confirm("수정하시겠습니까?")) {
+		if (confirm(getTranslate('questionModification'))) {
 			var selectedrowindex = $(".grid").jqxGrid('getselectedrowindex');
 			if (selectedrowindex > -1) {
 		        var rows = $(".grid").jqxGrid('getrowdata', selectedrowindex);
@@ -906,11 +907,11 @@ $(document).ready(function () {
 				var isPreset = false; 
 				var isNetwork = false; 
 				for (var p = 0; p < checkedactionArr.length; p++) {
-					if (checkedactionArr[p].label == '프리셋') {
+					if (checkedactionArr[p].label == getTranslate('preset')) {
 						isPreset = true;
-					} else if (checkedactionArr[p].label == 'SMS(SCADA)') {
+					} else if (checkedactionArr[p].label == getTranslate('sms')) {
 						isScada = true;
-					} else if (checkedactionArr[p].label == '스피커') {
+					} else if (checkedactionArr[p].label == getTranslate('speaker')) {
 						isNetwork = true;
 					}
 					chkActionArr.push(checkedactionArr[p].label);
@@ -919,7 +920,7 @@ $(document).ready(function () {
 				var checkedtargetArr = $('.action_content_manager_content').jqxDropDownList('getSelectedItem');
 				if (isPreset) {
 					if (checkedtargetArr == null) {
-						alert("프리셋 명을 선택해주세요.");
+						alert(getTranslate('setPreset'));
 						return;				
 					} else {
 						checkedtargetArr = checkedtargetArr.label;
@@ -929,7 +930,7 @@ $(document).ready(function () {
 				var checkedNetworkArr = $('.action_content_network_content').jqxDropDownList('getSelectedItem');
 				if (isNetwork) {
 					if (checkedNetworkArr == null) {
-						alert("스피커 명을 선택해주세요.");
+						alert(getTranslate('setSpeaker'));
 						return;				
 					} else {
 						checkedNetworkArr = checkedNetworkArr.label;
@@ -959,7 +960,7 @@ $(document).ready(function () {
 					contentType : "application/json; charset=UTF-8",       
 					data : jsonData,          		     		 
 					success: function(data) {
-						alert("변경되었습니다.");
+						alert(getTranslate('completeModification'));
 						location.reload();
 					},
 					error: function(errorThrown) {
@@ -973,7 +974,7 @@ $(document).ready(function () {
 	});
 	
 	$('.button_delete').click(function () {
-		if (confirm("정말 삭제하시겠습니까?")) {
+		if (confirm(getTranslate('questionDelete'))) {
 			var selectedrowindex = $(".grid").jqxGrid('getselectedrowindex');
 			if (selectedrowindex > -1) {
 		        var rows = $(".grid").jqxGrid('getrowdata', selectedrowindex);
@@ -993,7 +994,7 @@ $(document).ready(function () {
 					contentType : "application/json; charset=UTF-8",       
 					data : jsonData,          		     		 
 					success: function(data) {
-						alert('삭제가 완료되었습니다.');
+						alert(getTranslate('completeDelete'));
 						location.reload();
 					},
 					error: function(errorThrown) {
@@ -1022,7 +1023,7 @@ $(document).ready(function () {
 		
 		var checkeddeviceArr = $('.tag_content_device_content_2').jqxDropDownList('getSelectedItem');
 		if (checkeddeviceArr == null) {
-			alert("장치 이름을 선택해주세요.");
+			alert(getTranslate('setDeviceTitle'));
 			return;
 		} else {
 			checkeddeviceArr = checkeddeviceArr.label;
@@ -1034,14 +1035,14 @@ $(document).ready(function () {
 		});
 		
 		if (checkedeventArr.length == 0) {
-			alert("받으실 이벤트를 설정해주세요");
+			alert(getTranslate('setEvent'));
 			return;
 		}
 			
 		var checkedactionArr = $('.action_content_action_content_2').jqxDropDownList('getCheckedItems');
 		
 		if (checkedactionArr.length == 0) {
-			alert("동작을 선택해주세요.");
+			alert(getTranslate('setEventAction'));
 			return;
 		}
 
@@ -1049,11 +1050,11 @@ $(document).ready(function () {
 		var isScada = false;
 		var isNetwork = false; 
 		for (var p = 0; p < checkedactionArr.length; p++) {
-			if (checkedactionArr[p].label == '프리셋') {
+			if (checkedactionArr[p].label == getTranslate('preset')) {
 				isPreset = true;
-			} else if (checkedactionArr[p].label == 'SMS(SCADA)') {
+			} else if (checkedactionArr[p].label == getTranslate('sms')) {
 				isScada = true;
-			} else if (checkedactionArr[p].label == '스피커') {
+			} else if (checkedactionArr[p].label == getTranslate('speaker')) {
 				isNetwork = true;
 			}
 		}
@@ -1061,7 +1062,7 @@ $(document).ready(function () {
 		var checkedtargetArr = $('.action_content_manager_content_2').jqxDropDownList('getSelectedItem');
 		if (isPreset) {
 			if (checkedtargetArr == null) {
-				alert("프리셋 명을 선택해주세요.");
+				alert(getTranslate('setPreset'));
 				return;				
 			} else {
 				checkedtargetArr = checkedtargetArr.label;
@@ -1071,7 +1072,7 @@ $(document).ready(function () {
 		var checkedNetworkArr = $('.action_content_network_content_2').jqxDropDownList('getSelectedItem');
 		if (isNetwork) {
 			if (checkedNetworkArr == null) {
-				alert("스피커 명을 선택해주세요.");
+				alert(getTranslate('setSpeaker'));
 				return;				
 			} else {
 				checkedNetworkArr = checkedNetworkArr.label;
@@ -1104,7 +1105,12 @@ $(document).ready(function () {
 		
 		for (var il = 0; il < checkedactionArr.length; il++) {
 			//console.log('동작 = ' + checkedactionArr[il].label);
-			chkActionArr.push(checkedactionArr[il].label);
+			if (checkedactionArr[il].label.indexOf('(') != -1) {
+				chkActionArr.push(getTranslate(checkedactionArr[il].label.substring(0, 2)));
+			} else {
+
+				chkActionArr.push(getTranslate(checkedactionArr[il].label));
+			}
 		}
 
 		obj.dev_title = checkeddeviceArr;
@@ -1130,7 +1136,7 @@ $(document).ready(function () {
 			contentType : "application/json; charset=UTF-8",       
 			data : jsonData,          		     		 
 			success: function(data) {
-				alert('저장 완료');
+				alert(getTranslate('completeSave'));
 				location.reload();
 			},
 			error: function(errorThrown) {
@@ -1221,7 +1227,7 @@ $(document).ready(function () {
 		    var label = item.label;
 		    var checked = item.checked;
 		    
-		    if (label == '프리셋') {
+		    if (label == getTranslate('preset')) {
 		    	if (args.checked) {
 		    		$('.action_content_manager_2').show();
 		    	} else {
@@ -1229,7 +1235,7 @@ $(document).ready(function () {
 		    	}
 		    }
 
-		    if (label == '스피커') {
+		    if (label == getTranslate('speaker')) {
 		    	if (args.checked) {
 		    		selectNetworkSpeaker(null, ".action_content_network_content_2", null);
 		    		$('.action_content_network_2').show();
@@ -1269,7 +1275,7 @@ $(document).ready(function () {
 		    var label = item.label;
 		    var checked = item.checked;
 		   
-		    if (label == '프리셋') {
+		    if (label == getTranslate('preset')) {
 		    	if (args.checked) {
 					selectPreset250($(".tag_content_device_content").jqxDropDownList('getSelectedItem').label, ".action_content_manager_content", null);
 		    		$('.action_content_manager').show();
@@ -1278,7 +1284,7 @@ $(document).ready(function () {
 		    	}
 		    }
 
-		    if (label == '스피커') {
+		    if (label == getTranslate('speaker')) {
 		    	if (args.checked) {
 		    		selectNetworkSpeaker(null, ".action_content_network_content", null);
 		    		$('.action_content_network').show();
@@ -1441,7 +1447,7 @@ function selectNetworkSpeaker(label, content_class, preset) {
 						<div class="tag_content_channel_content">
 							<div>
 								<input type="radio" id="kwater" name="source" value="kwater" checked>
-								<label for="kwater"><spring:message code="tab.titleFirstName" /><spring:message code="tab.titleSecondName" /></label>
+								<label for="kwater"><spring:message code="common.kwater" /></label>
 							</div>
 							<div>
 								<input type="radio" id="scada" name="source" value="SCADA">
@@ -1513,7 +1519,7 @@ function selectNetworkSpeaker(label, content_class, preset) {
 					<div class="tag_content_channel_content_2">
 						<div>
 							<input type="radio" id="kwater_2" name="source_2" value="kwater_2" checked>
-							<label for="kwater_2"><spring:message code="tab.titleFirstName" /><spring:message code="tab.titleSecondName" /></label>
+							<label for="kwater_2"><spring:message code="common.kwater" /></label>
 						</div>								
 						<div>
 							<input type="radio" id="scada_2" name="source_2" value="scada_2">

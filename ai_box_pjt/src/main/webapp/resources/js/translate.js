@@ -136,7 +136,12 @@ var lang = {
 		setSensitivity : "민감도를 설정해주세요.",
 		setHoldingTime : "유지 시간을 설정해주세요.",
 		setChannel : "채널을 선택해야 합니다.",
+		setDeviceTitle : "장치 이름을 선택해주세요.",
+		setEvent : "받으실 이벤트를 설정해주세요.",
+		setEventAction : "동작을 선택해주세요.",
 		
+		setPreset : "프리셋을 선택해주세요.",
+		setSpeaker : "스피커를 선택해주세요.",
 		
 		welcome : "환영합니다, ",
 		sir : " 님.",
@@ -317,6 +322,12 @@ var lang = {
 		setSensitivity : "Please set the sensitivity",
 		setHoldingTime : "Please set the holding time",
 		setChannel : "You must select a channel",
+		setDeviceTitle : "You must select a device title",
+		setEvent : "You must select a event",
+		setEventAction : "You must select a event action",
+
+		setPreset : "You must select a preset",
+		setSpeaker : "You must select a speaker",
 		
 		welcome : "welcome, ",
 		sir : "",
