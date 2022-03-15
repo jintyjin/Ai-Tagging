@@ -543,6 +543,7 @@ public class ResponseEventsRepositoryImpl implements ResponseEventsRepository {
 	}
 
 	private void logThread(Map metadata, ArrayList ml_result) throws ParseException {
+		System.out.println("logThread()");
 		if (ml_result.size() > 0) {
 			boolean isResult = false;
 
@@ -626,7 +627,7 @@ public class ResponseEventsRepositoryImpl implements ResponseEventsRepository {
 	}
 
 	private void checkShowPopUp(Map metadata, ArrayList ml_result) throws Exception { // 팝업 보여줄 지 확인하는 로직
-//		System.out.println("checkShowPopUp()");
+		System.out.println("checkShowPopUp()");
 
 		if (ml_result.size() > 0) {
 			boolean isResult = false;
@@ -982,7 +983,7 @@ public class ResponseEventsRepositoryImpl implements ResponseEventsRepository {
 	}
 
 	private void sendWebsocket(Map responseMap) throws Exception {
-		// System.out.println("sendWebsocket()");
+		 System.out.println("sendWebsocket()");
 
 		Map metadata = (Map) responseMap.get("metadata");
 
