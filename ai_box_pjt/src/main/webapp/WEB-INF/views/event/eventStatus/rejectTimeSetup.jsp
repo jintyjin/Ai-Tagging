@@ -1,12 +1,14 @@
 <%@ page language="java" contentType="text/html; charset=EUC-KR"
     pageEncoding="EUC-KR"%>
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="EUC-KR">
-<title>알림</title>
+<title><spring:message code="common.registration" /></title>
 <script src="./resources/js/jquery-3.3.1.min.js"></script>
 <link rel="stylesheet" href="./resources/css/bootstrap.min.css" />
+<script type="text/javascript" src="/resources/js/translate.js"></script>
 <style>
 html, body {
 	width:100%;
@@ -38,7 +40,7 @@ div {
 #bottom {
 	margin-top:20px;
 	text-align-last:justify;
-	width:120px;
+	width:130px;
 }
 #dev_ch {
 	display:none;
@@ -60,7 +62,7 @@ window.onload = function () {
 	
 	console.log(row);
 	
-	$('#title').text(dev_title + " / " + model_name);
+	$('#title').text(dev_title + " / " + getTranslate(model_name.split('_')[1].toLowerCase()));
 	$('#time').text(event_time);
 	$('#dev_ch').text(dev_ch);
 }
@@ -117,12 +119,12 @@ function cancel() {
 	<div id="title"></div>
 	<div id="time"></div>
 	<div id="top">
-		<input type="text" id="datetime" onKeyup="this.value=this.value.replace(/[^0-9]/g,'');" /> 시간 (1 ~ 24)
+		<input type="text" id="datetime" onKeyup="this.value=this.value.replace(/[^0-9]/g,'');" /> <spring:message code="common.hours" /> (1 ~ 24)
 	</div>
 	<!-- <div id="warning"></div> -->
 	<div id="bottom">
-		<input type="button" id="check" value="확인" onclick="submit();"/>
-		<input type="button" id="cancel" value="취소" onclick="cancel();" />
+		<input type="button" id="check" value='<spring:message code="common.confirm"/>' onclick="submit();"/>
+		<input type="button" id="cancel" value='<spring:message code="common.cancel"/>' onclick="cancel();" />
 	</div>
 	<div id="dev_ch"></div>
 </body>

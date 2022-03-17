@@ -106,8 +106,9 @@ $(document).ready(function () {
 		contentType : "application/json; charset=UTF-8",         
 	    success: function(data) {
 	    	for (var i = 0; i < data.length; i++) {
-				data[i].action_source = getTranslate(data[i].action_source);
+				data[i].action_source2 = getTranslate(data[i].action_source);
 				data[i].action = getTranslate(data[i].model_name.toLowerCase().split('_')[1]);
+				data[i].event_action2 = getTranslate(data[i].event_action);
 	    	}
 	    	
 			var source = {
@@ -115,7 +116,9 @@ $(document).ready(function () {
 				localdata: data,
 				datafields: [
 		        	{ name: 'action_source', type: 'string'},
+		        	{ name: 'action_source2', type: 'string'},
 		        	{ name: 'event_action', type: 'string'},
+		        	{ name: 'event_action2', type: 'string'},
 		        	{ name: 'dev_ch', type: 'string'},
 		        	{ name: 'dev_title', type: 'string'},
 		        	{ name: 'model_name', type: 'string'},
@@ -147,12 +150,14 @@ $(document).ready(function () {
                 autoshowfiltericon: true,
 				editable: true,
 				columns: [
-					{ text: getTranslate('event_source'), datafield: 'action_source', width: '15%', editable: false },
+					{ text: getTranslate('event_source'), datafield: 'action_source', width: '15%', editable: false, hidden:true },
+					{ text: getTranslate('event_source'), datafield: 'action_source2', width: '15%', editable: false },
 					{ text: getTranslate('device_title'), datafield: 'dev_title', width: '15%', editable: false },
 					{ text: getTranslate('device_ip'), datafield: 'dev_ip', width: '8%', editable: false, hidden:true },
 					{ text: getTranslate('event_name'), datafield: 'model_name', width: '18%', editable: false, hidden:true },
 					{ text: getTranslate('event_name'), datafield: 'action', width: '16%', editable: false },
-					{ text: getTranslate('action'), datafield: 'event_action', width: '10%', editable: false },
+					{ text: getTranslate('action'), datafield: 'event_action', width: '10%', editable: false, hidden:true },
+					{ text: getTranslate('action'), datafield: 'event_action2', width: '10%', editable: false },
 					{ text: getTranslate('event_time'), datafield: 'event_time', width: '28%', editable: false },
 					{ datafield: 'dev_ch', editable: false, hidden:true },
 					{ datafield: 'dev_id', editable: false, hidden:true },

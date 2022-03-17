@@ -190,6 +190,7 @@ var lang = {
 		프리셋 : "프리셋",
 		SMS : "SMS(SCADA)",
 		스피커 : "스피커",
+		무시 : "무시",
 		
 		speakerName : "스피커 이름",
 		speakerIP : "스피커 IP",
@@ -277,8 +278,8 @@ var lang = {
 		run : "Run",
 		cancel : "Cancel",
 		delete_data : "Delete",
-		display : "display",
-		reject : "reject",
+		display : "Display",
+		reject : "Reject",
 		move : "move",
 		noImage : "No image to display",
 		
@@ -388,6 +389,7 @@ var lang = {
 		프리셋 : "Preset",
 		SMS : "SMS(SCADA)",
 		스피커 : "Speaker",
+		무시 : "Reject",
 
 		speakerName : "Speaker name",
 		speakerIP : "Speaker IP",
