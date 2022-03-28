@@ -53,24 +53,6 @@ button {
 button:focus {
 	outline:none;
 }
-.button_check {
-	width:100px;
-	height:30px;
-	background-color: transparent;
-	margin:0; margin-right:20px;
-	padding:0;
-	border:1px solid #35353A;
-}
-.check {
-	width:14px;
-	height:14px;
-	font-size:14px;
-	font-weight: bold;
-	margin-right:8px;
-}
-.button_check:hover {
-	color:#1c97ea;
-}
 .excelExport {
 	width:110px;
 	height:30px;
@@ -120,6 +102,74 @@ button:focus {
 .active {
 	font-weight:bolder;
 	text-decoration:underline;
+}
+.btnDiv {
+	width:1112px;
+	margin-right:auto;
+	margin-left:auto;
+	text-align:right;
+	padding-right:15px;
+}
+.button_check {
+	width:100px;
+	height:30px;
+	background-color: transparent;
+	margin:0; margin-right:20px;
+	padding:0;
+	border:1px solid #35353A;
+}
+.check {
+	width:14px;
+	height:14px;
+	font-size:14px;
+	font-weight: bold;
+	margin-right:8px;
+}
+.button_check:hover {
+	color:#1c97ea;
+}
+.button_modify {
+	width:100px;
+	height:30px;
+	background-color: transparent;
+	margin:0;
+	padding:0;
+	border:1px solid #35353A;
+	margin-right:20px;
+}
+.modify {
+	width:12px;
+	height:14px;
+	font-size:14px;
+	font-weight:bold;
+	margin-right:8px;
+}
+.button_modify:hover {
+	color:#1c97ea;
+}
+.modify:active {
+	box-shadow: 0 #666;
+}
+.button_delete {
+	width:100px;
+	height:30px;
+	background-color: transparent;
+	margin:0;
+	padding:0;
+	border:1px solid #35353A;
+}
+.delete {
+	width:12px;
+	height:14px;
+	font-size:14px;
+	font-weight:bold;
+	margin-right:8px;
+}
+.button_delete:hover {
+	color:#1c97ea;
+}
+.delete:active {
+	box-shadow: 0 #666;
 }
 </style>
 <script>
@@ -245,29 +295,25 @@ $(document).ready(function () {
 			alert(JSON.stringify(data));
 		}
 	});
-	var contextMenu = $("#Menu").jqxMenu({ width: 100, autoOpenPopup: false, mode: 'popup'});
-    $("#jqxgrid").on('contextmenu', function () {
-        return false;
-    });
-	$("#jqxgrid").on('rowclick', function (event) {
-        if (event.args.rightclick) {
-            $("#jqxgrid").jqxGrid('selectrow', event.args.rowindex);
-            var scrollTop = $(window).scrollTop();
-            var scrollLeft = $(window).scrollLeft();
-            contextMenu.jqxMenu('open', parseInt(event.args.originalEvent.clientX) + 5 + scrollLeft, parseInt(event.args.originalEvent.clientY) + 5 + scrollTop);
-            return false;
-        }
-    });
 	
-    $("#Menu").on('itemclick', function (event) {
+	$('#modify').click(function() {
         var args = event.args;
         var rowindex = $("#jqxgrid").jqxGrid('getselectedrowindex');
-        var offset = $("#jqxgrid").offset();
-        var dataRecord = $("#jqxgrid").jqxGrid('getrowdata', rowindex);
-        if ($.trim($(args).text()) == "수정") {
+
+        if (rowindex != -1) {
+            var offset = $("#jqxgrid").offset();
+            var dataRecord = $("#jqxgrid").jqxGrid('getrowdata', rowindex);
             var speakerIdx = dataRecord.network_idx;
             popup_window[POPUP_MORE] = openWindow('./addNetworkSpeaker.htm?status=modify&speakerIdx=' + speakerIdx, 'addNetworkSpeaker', 1400, 1200);
-        } else {
+        }
+	});
+	
+	$('#delete').click(function() {
+        var args = event.args;
+        var rowindex = $("#jqxgrid").jqxGrid('getselectedrowindex');
+        if (rowindex != -1) {
+            var offset = $("#jqxgrid").offset();
+            var dataRecord = $("#jqxgrid").jqxGrid('getrowdata', rowindex);
             var speakerIdx = dataRecord.network_idx;
             
         	var jsonUrl = "/deleteNetworkSpeaker";
@@ -290,7 +336,7 @@ $(document).ready(function () {
         		}
         	});
         }
-    }); 
+	});
 });
 function closePopupChild() {
 	for(var i = 0; i < popup_window.length; i++) {
@@ -355,29 +401,24 @@ function chkType(type) {
 	<div id="Progress_Loading" style="text-align:-webkit-center;"> <!-- 로딩이미지 -->
 		<img src="/resources/image/124.gif" style="width:30%; margin-top:70px;" alt="loading"/>
 	</div>
-<div class="container" style="overflow:auto;margin-top:70px;">
+<div class="container" style="overflow:auto;margin-top:70px;margin-bottom:10px;">
 	<div id="type">
 		<span id="ipc" class="type active" onclick="chkType('ipc');">ipc</span>
 		/
 		<span id="nvr" class="type" onclick="chkType('nvr');">nvr</span>
 	</div>
 	<div id="jqxgrid"></div>
-	<div>
-		<table style="margin-top: 10px; width: 1112px">
-			<tr>
-				<td style="padding-left: 10px; text-align:right;" class="addButton">
-				<td style="padding-left: 10px; text-align:right; display:none;">
-					<button class="excelExport" id="excelExport">Export to Csv</button>
-				</td>
-			</tr>
-		</table>
-	</div>
-	<div id='Menu'>
-		<ul>
-			<li><spring:message code="common.add" /></li>
-			<li><spring:message code="common.delete" /></li>
-		</ul>
-	</div>
+</div>
+<div class="btnDiv">
+	<button class="button_check" onclick="addInfo();">
+		<span class="glyphicon glyphicon-plus check" aria-hidden="true"></span><spring:message code="common.add" />
+	</button>
+	<button class="button_modify" id="modify">
+		<span class="glyphicon glyphicon-edit modify" aria-hidden="true"></span><spring:message code="common.modify" />
+	</button>
+	<button class="button_delete" id="delete">
+		<span class="glyphicon glyphicon-trash delete" aria-hidden="true"></span><spring:message code="common.delete" />
+	</button>
 </div>
 </body>
 </html>

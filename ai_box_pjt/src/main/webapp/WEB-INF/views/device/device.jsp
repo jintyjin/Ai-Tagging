@@ -53,24 +53,6 @@ button {
 button:focus {
 	outline:none;
 }
-.button_check {
-	width:100px;
-	height:30px;
-	background-color: transparent;
-	margin:0;
-	padding:0;
-	border:1px solid #35353A;
-}
-.check {
-	width:14px;
-	height:14px;
-	font-size:14px;
-	font-weight: bold;
-	margin-right:8px;
-}
-.button_check:hover {
-	color:#1c97ea;
-}
 .excelExport {
 	width:110px;
 	height:30px;
@@ -105,6 +87,56 @@ button:focus {
 	text-overflow: ellipsis; 
 	text-align: center; 
 	line-height: 32px;
+}
+.btnDiv {
+	width:1112px;
+	margin-right:auto;
+	margin-left:auto;
+	text-align:right;
+	padding-right:15px;
+}
+.button_modify {
+	width:100px;
+	height:30px;
+	background-color: transparent;
+	margin:0;
+	padding:0;
+	border:1px solid #35353A;
+	margin-right:20px;
+}
+.modify {
+	width:12px;
+	height:14px;
+	font-size:14px;
+	font-weight:bold;
+	margin-right:8px;
+}
+.button_modify:hover {
+	color:#1c97ea;
+}
+.modify:active {
+	box-shadow: 0 #666;
+}
+.button_delete {
+	width:100px;
+	height:30px;
+	background-color: transparent;
+	margin:0;
+	padding:0;
+	border:1px solid #35353A;
+}
+.delete {
+	width:12px;
+	height:14px;
+	font-size:14px;
+	font-weight:bold;
+	margin-right:8px;
+}
+.button_delete:hover {
+	color:#1c97ea;
+}
+.delete:active {
+	box-shadow: 0 #666;
 }
 </style>
 <script>
@@ -244,7 +276,7 @@ $(document).ready(function () {
     $("#jqxgrid").on('contextmenu', function () {
         return false;
     });
-	$("#jqxgrid").on('rowclick', function (event) {
+	/* $("#jqxgrid").on('rowclick', function (event) {
         if (event.args.rightclick) {
             $("#jqxgrid").jqxGrid('selectrow', event.args.rowindex);
             var scrollTop = $(window).scrollTop();
@@ -252,7 +284,7 @@ $(document).ready(function () {
             contextMenu.jqxMenu('open', parseInt(event.args.originalEvent.clientX) + 5 + scrollLeft, parseInt(event.args.originalEvent.clientY) + 5 + scrollTop);
             return false;
         }
-    });
+    }); */
 	var webSocket = new WebSocket("ws://" + "${address}");
 
 	webSocket.onmessage = function(message) {
@@ -265,12 +297,15 @@ $(document).ready(function () {
 		}
 	};
 	
-    $("#Menu").on('itemclick', function (event) {
-        var args = event.args;
+	
+	$('#modify').click(function() {
         var rowindex = $("#jqxgrid").jqxGrid('getselectedrowindex');
-        var offset = $("#jqxgrid").offset();
-        var dataRecord = $("#jqxgrid").jqxGrid('getrowdata', rowindex);
-        if ($.trim($(args).text()) == getTranslate('modify')) {
+        
+        if (rowindex != -1) {
+            var offset = $("#jqxgrid").offset();
+            var dataRecord = $("#jqxgrid").jqxGrid('getrowdata', rowindex);
+
+    		
             //alert(dataRecord.dev_ch);
             var login_id = JSON.parse(get('userdata')).user_id;
             if (login_id == 'admin') {
@@ -278,25 +313,31 @@ $(document).ready(function () {
             }
             var dev_ch = dataRecord.dev_ch;
             popup_window[POPUP_MORE] = openWindow('./addDevice.htm?dev_ch=' + dev_ch + '&login_id=' + login_id, 'deviceModify', 1948, 880);
-        } else {
-    		var msg = {
-   				command: 'RF_REQ_IPCAMERA_DELETE',
-   				web_user: JSON.parse(get('userdata')).user_id,
-   				sender: 'web',
-   				dev_ch: dataRecord.dev_ch,
-   				dev_title: dataRecord.dev_title
-   			};
-
-   			// Send the msg object as a JSON-formatted string.
-   			webSocket.send(JSON.stringify(msg));
-
-   			location.reload();
-   			
-            /* var rowid = $("#jqxgrid").jqxGrid('getrowid', rowindex);
-            $("#jqxgrid").jqxGrid('deleterow', rowid); */
-            
         }
-    }); 
+	});
+	
+	$('#delete').click(function() {
+        var rowindex = $("#jqxgrid").jqxGrid('getselectedrowindex');
+        
+        if (rowindex != -1) {
+            var offset = $("#jqxgrid").offset();
+            var dataRecord = $("#jqxgrid").jqxGrid('getrowdata', rowindex);
+
+       		var msg = {
+    			command: 'RF_REQ_IPCAMERA_DELETE',
+    			web_user: JSON.parse(get('userdata')).user_id,
+    			sender: 'web',
+    			dev_ch: dataRecord.dev_ch,
+    			dev_title: dataRecord.dev_title
+    		};
+
+    		// Send the msg object as a JSON-formatted string.
+    		webSocket.send(JSON.stringify(msg));
+
+    		location.reload();
+        }
+        
+	});
 });
 function closePopupChild() {
 	for(var i = 0; i < popup_window.length; i++) {
@@ -336,6 +377,14 @@ function addInfo() {
 			<li><spring:message code="common.delete" /></li>
 		</ul>
 	</div>
+</div>
+<div class="btnDiv">
+	<button class="button_modify" id="modify">
+		<span class="glyphicon glyphicon-edit modify" aria-hidden="true"></span><spring:message code="common.modify" />
+	</button>
+	<button class="button_delete" id="delete">
+		<span class="glyphicon glyphicon-trash delete" aria-hidden="true"></span><spring:message code="common.delete" />
+	</button>
 </div>
 </body>
 </html>

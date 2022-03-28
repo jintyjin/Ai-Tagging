@@ -245,7 +245,7 @@ public class ResponseEventsRepositoryImpl implements ResponseEventsRepository {
 									((Map) ((List) ml_result_map.get(boxList.get(model_name))).get(0))
 											.get("confidence").toString());
 					boolean isTrue6 = durationService.chkDuration(dev_ip, dev_ch, model_name, event_time);
-
+					
 					if (isTrue && isTrue1 && isTrue2 && (isTrue3 || isTrue4 || isTrue5) && isTrue6) {
 						isDuration = true;
 						durationRepository.save(dev_ip + "_" + dev_ch + "_" + model_name, event_time);

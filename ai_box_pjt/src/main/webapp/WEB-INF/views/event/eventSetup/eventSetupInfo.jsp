@@ -5,6 +5,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Insert title here</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="./resources/js/jqwidgets/styles/jqx.base.css" type="text/css" />
@@ -101,9 +102,8 @@ body {
 	margin-bottom:20px;
 }
 .name_title {
-	padding-top:5px;
-	padding-right:15px;
-	padding-left:15px;
+	width:450px;
+	padding-left:50px;
 	/* background-color:#3e3e42; */
 	color:#fff;
 }
@@ -146,9 +146,8 @@ body {
 	color:#fff;
 }
 .password_title {
-	padding-top:5px;
-	padding-right:15px;
-	padding-left:15px;
+	width:450px;
+	padding-left:50px;
 	/* background-color:#3e3e42; */
 	color:#fff;
 }
@@ -166,9 +165,9 @@ body {
 	color:#fff;
 }
 .event_textbox {
+    color: #007ACC;
 	width:450px;
-	padding-right:19px;
-	padding-left:30px;
+	padding-left:50px;
 	margin-bottom:20px;
 }
 .textbox {
@@ -206,23 +205,16 @@ body {
 	color:#fff;
 }
 .activative {
-	width:200px;
-	padding-top:5px;
-	padding-right:15px;
-	padding-left:15px;
+	width:450px;
+	padding-left:50px;
 	/* background-color:#3e3e42; */
 	color:#fff;
 }
 .check {
-	position:relative;
 	top:-25.5px;
 	left:130px;
 }
 .active {
-	width:200px;
-	padding-top:5px;
-	padding-right:15px;
-	padding-left:15px;
 	/* background-color:#3e3e42; */
 	color:#fff;
 }
@@ -234,20 +226,20 @@ body {
 }
 .IP_title {
 	/* width:200px; */
-	padding-top:5px;
-	padding-right:15px;
-	padding-left:15px;
+	width:450px;
+	padding-left:50px;
 	/* background-color:#3e3e42; */
 	color:#fff;
 }
 #area_set {
-	position:relative;
 	/* left:-86px; */
 	font-size:14px;
 	color:white;
 	background-color:#333;
 	font-weight:bold;
 	line-height:1.5;
+	text-align:center;
+	width:100px;
 }
 .schedule {
 	width:450px;
@@ -256,21 +248,19 @@ body {
 	margin-bottom:20px;
 }
 .schedule_title {
-	width:200px;
-	padding-top:5px;
-	padding-right:15px;
-	padding-left:15px;
+	width:450px;
+	padding-left:50px;
 	/* background-color:#3e3e42; */
 	color:#fff;
 }
 #schedule_setup {
-	position:relative;
-	left:-86px;
 	font-size:14px;
 	color:white;
 	background-color:#333;
 	font-weight:bold;
 	line-height:1.5;
+	text-align:center;
+	width:100px;
 }
 #IP_text {
 	/* width:365px; */
@@ -288,7 +278,7 @@ body {
 	width:100px;
 	height:30px;
 	background-color: transparent;
-	margin:0;
+	margin-left:20px;
 	padding:0;
 	border:1px solid #35353A;
 }
@@ -327,7 +317,6 @@ body {
 }
 .buttonDiv {
     text-align:end;
-    margin-right:20px;
 }
 .pwd {
 	width:800px;
@@ -381,10 +370,8 @@ body {
 	opacity:0.5;
 }
 .menu_title {
-	width:200px;
-	padding-top:5px;
-	padding-right:15px;
-	padding-left:15px;
+	width:450px;
+	padding-left:50px;
 	/* background-color:#3e3e42; */
 	color:#fff;
 }
@@ -395,35 +382,28 @@ body {
 	display:none;
 } 
 #ch {
-	width:450px;
-	padding-right:19px;
-	padding-left:30px;
-	margin-bottom:20px;
-}
-#ch {
-	width:200px;
-	left:115px;
-	position:relative;
-	top:-20px;	
-	/* background-color:#505050; */
 	color:white;
 }
 #ch_check {
-	position: relative;
-    left: 315px;
-    bottom: 60px;
-    margin-left:10px;
 }
 #d_ch {
-	position:relative;
 	left: 330px;
     bottom: 81px;
     margin-left:10px;
+	display:inline-block;
 }
 #dev_channel {
-	left:132px; 
-	bottom:15px; 
-	position:relative; 
+	bottom:15px;
+	position:relative;
+}
+.row {
+      margin-bottom: 10px;
+}
+[class|="col"] {
+  height: 50px;
+  text-align: left;
+  color: white;
+  font-weight: 700;
 }
 </style>
 <script>
@@ -755,52 +735,83 @@ function cancel() {
 </head>
 <body onunload="closePopupChild();">
 	<div class="divBody">
-		<div class="container status" style="width:950px;padding:0;">
-			<div class="tmpMargin"></div>
-			<div class="event_textbox">
-				<label class="textbox"></label>
+		<div class="container" style="width:950px; padding:0; border:1px solid #35353A;">
+			<div class="row">
+				<div class="col-md-12">
+					<div class="tmpMargin"></div>
+				</div>
+			</div>	
+			<div class="row">
+				<div class="col-md-4">
+					<div class="event_textbox">
+						<label class="textbox"></label>
+					</div>
+				</div>
 			</div>
-			<div class="id_pwd">
-				<div class="id">
-						<div class="menu_title"><spring:message code="device.title" /></div>
-						<div id="ch"></div>
-						<input type=checkbox id='ch_check' name='ch_list 'value='<spring:message code="device.otherChannel" />' />
-							<div id="d_ch"><spring:message code="device.otherChannel" /></div>
-					<div id="id_text"></div>
+			<div class="row">
+				<div class="col-md-4">
+					<div class="menu_title"><spring:message code="device.title" /></div>
 				</div>
-				<div class="channel">
-					<button id="ch_button" type="button"><spring:message code="common.option" /></button>
+				<div class="col-md-4">
+					<div id="ch"></div>
+						<button id="ch_button" type="button"><spring:message code="common.option" /></button>
 					<div id='dev_channel' name='dev_ch'></div>
-				</div>
-				<div class="activative">
-					<label class="active"><spring:message code="common.activate" /></label>
 				</div>		
-				<div class="check">
-					<input type="radio" id="0" name="onoff" value="0"></input>
-					<label for="label-a"><spring:message code="common.on" /></label>
-					<input type="radio" id="1" name="onoff" value="1"></input>
-					<label for="label-b"><spring:message code="common.off" /></label>
+				<div class="col-md-4">	
+					<input type=checkbox id='ch_check' name='ch_list 'value='<spring:message code="device.otherChannel" />' />
+					<div id="d_ch"><spring:message code="device.otherChannel" /></div>
+				</div>		
+				<div id="id_text"></div>
+			</div>		
+			<div class="row">
+				<div class="col-md-4">
+					<div class="activative">
+						<label class="active"><spring:message code="common.activate" /></label>
+					</div>	
+				</div>	
+				<div class="col-md-4"> 
+					<div class="check">
+						<input type="radio" id="0" name="onoff" value="0"></input>
+						<label for="label-a"><spring:message code="common.on" /></label>
+						<input type="radio" id="1" name="onoff" value="1" style="margin-left:10px;"></input>
+						<label for="label-b"><spring:message code="common.off" /></label>
+					</div>
 				</div>
-				<div class="IP">
+			</div>		
+			<div class="row">
+				<div class="col-md-4">
 					<label class="IP_title"><spring:message code="device.detectionArea" /></label>
+				</div>
+				<div class="col-md-4">
 					<button id="area_set" type="button"><spring:message code="device.areaSetting" /></button>
 				</div>
-				<div class="schedule">
+			</div>			
+			<div class="row">
+				<div class="col-md-4">
 					<label class="schedule_title"><spring:message code="device.schedule" /></label>
+				</div>
+				<div class="col-md-4">
 					<button id="schedule_setup" type="button"><spring:message code="device.areaSetting" /></button>
 				</div>
-			</div>
-			<div class="name_password">
-				<div class="name">
+			</div>	
+			<div class="row">	
+				<div class="col-md-4">
 					<label class="name_title"><spring:message code="device.responsiveness" /></label>
-					<input type="number" min = '1' max = '99' id="name_textarea" onkeyup="chkNum(this);" placeholder='<spring:message code="device.setupResponsiveness" />'></input>				
 				</div>
-				<div class="password">
-					<label class="password_title"><spring:message code="device.holdingTime" /></label>
-					<input type="number" min = '1' max = '60' id="password_text" onkeyup="password_text_chk(this)" placeholder='<spring:message code="device.setupHoldingTime" />'></input>
+				<div class="col-md-4">
+					<input type="number" min = '1' max = '99' id="name_textarea" onkeyup="chkNum(this);" placeholder='<spring:message code="device.setupResponsiveness" />' />	 (1 ~ 99)		
 				</div>
 			</div>
+			<div class="row">		
+				<div class="col-md-4">
+					<label class="password_title"><spring:message code="device.holdingTime" /></label>
+				</div>		
+				<div class="col-md-4">
+					<input type="number" min = '1' max = '60' id="password_text" onkeyup="password_text_chk(this)" placeholder='<spring:message code="device.setupHoldingTime" />' />	 (1 ~ 60)
+				</div>
+			</div>	
 		</div>
+		
 		<div class="container" style="width:950px;padding:0;margin-top:30px;margin-bottom:30px;">
 			<div class="buttonDiv">
 				<button class="button_modify" id="btn_save"><spring:message code="common.save" /></button>

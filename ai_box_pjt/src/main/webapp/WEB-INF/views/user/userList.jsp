@@ -325,13 +325,13 @@ function addInfo(val) {
 <div class="container" style="overflow:auto;margin-top:70px;">
 	<div id="jqxgrid"></div>
 	<div>
-		<table style="margin-top: 10px; width: 100%">
+		<table style="margin-top: 10px; width:1112px;">
 			<tr>
 				<td id="as_count" style="width:80%"></td>
-				<td style="padding-left:10px;" class="addButton">
-				<td style="padding-left:10px; text-align:right;">
+				<td style="text-align:right;" class="addButton">
+				<!-- <td style="padding-left:10px; text-align:right;">
 					<button class="excelExport" id="excelExport">Export to Csv</button>
-				</td>
+				</td> -->
 			</tr>
 		</table>
 	</div>

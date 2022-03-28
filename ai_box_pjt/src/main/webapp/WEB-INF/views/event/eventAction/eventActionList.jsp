@@ -253,14 +253,14 @@ input:focus {
 	line-height:17px;
 }
 .btnDiv {
-	width:1250px;
-	padding-left:15px;
-	padding-right:15px;
-	padding-top:20px;
-	padding-bottom:20px;
-	display:inline-flex;
-	justify-content:center;
-	align-items:center;
+    width:1250px;
+    padding-left:15px;
+    padding-right:15px;
+    padding-top:20px;
+    padding-bottom:20px;
+    display:inline-flex;
+    justify-content:center;
+    align-items:center;
 }
 .button_check {
 	width:100px;

@@ -513,9 +513,8 @@ input[type="text"], input[type="password"] {
 	float:left;
 }
 .btnDiv {
-	width:900px;
+	width:902px;
 	padding-left:15px;
-	padding-right:15px;
 	padding-top:20px;
 	padding-bottom:20px;
 	display:inline-flex;
@@ -529,7 +528,7 @@ input[type="text"], input[type="password"] {
 	margin:0;
 	padding:0;
 	border:1px solid #35353A;
-	margin-right:20px;
+	/* margin-right:20px; */
 }
 .check {
 	width:12px;
