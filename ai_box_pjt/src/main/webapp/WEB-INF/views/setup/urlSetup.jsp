@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=EUC-KR"
     pageEncoding="EUC-KR"%>
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -7,6 +8,7 @@
 <title>Insert title here</title>
 <script src="./resources/js/jquery-3.3.1.min.js"></script>
 <link rel="stylesheet" href="./resources/css/bootstrap.min.css" />
+<script type="text/javascript" src="/resources/js/translate.js"></script>
 <style>
 body {
 	font-family: Lucida Sans, Arial, Helvetica, sans-serif;
@@ -66,7 +68,7 @@ function changeUrl() {
 		contentType : "application/json; charset=UTF-8",       
 		data : jsonData,          		     		 
 		success: function(data) {
-			alert('설정되었습니다.');
+			alert(getTranslate('completeSave'));
 		},
 		error: function(errorThrown) {
 		}
@@ -76,15 +78,15 @@ function changeUrl() {
 <body>
 	<div class="container">
 		<div class="content">
-			<div class="title">웹서버 url</div>
+			<div class="title"><spring:message code="UrlSetup.webServerURL" /></div>
 			<input type="text" id="web_url" />
 		</div>
 		<div class="content">
-			<div class="title">분석 서버 url</div>
+			<div class="title"><spring:message code="UrlSetup.analysisServerURL" /></div>
 			<input type="text" id="analyze_url" />
 		</div>
 		<div class="content">
-			<input type="button" id="subimt" value="변경" onclick="changeUrl();" />
+			<input type="button" id="subimt" value='<spring:message code="common.change" />' onclick="changeUrl();" />
 		</div>
 	</div>
 </body>

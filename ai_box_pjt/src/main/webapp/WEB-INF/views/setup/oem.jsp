@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -27,6 +28,7 @@
 <script src="./resources/js/jqwidgets/jqxlistbox.js"></script>
 <script src="./resources/js/canvas/recent_canvasjs.min.js"></script>
 <script src="./resources/js/tether.min.js"></script>
+<script type="text/javascript" src="/resources/js/translate.js"></script>
 <style>
 body {
 	width:100%;
@@ -59,8 +61,8 @@ body {
 	<div class="container">
 		<div class="col-md-5" style="float:none;margin-left:auto; margin-right:auto;border: 1px solid #35353A;">
 			<div class="div_100">
-				<div class="div_35">버전 정보</div>
-				<div class="div_65">1.01</div>
+				<div class="div_35"><spring:message code="common.versionInfo" /></div>
+				<div class="div_65"><spring:message code="common.version" /></div>
 			</div>
 			<!-- <div class="div_100">
 				<div class="div_35">회사명</div>

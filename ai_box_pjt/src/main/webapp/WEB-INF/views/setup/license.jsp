@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -29,6 +30,7 @@
 <script src="./resources/js/tether.min.js"></script>
 <script src="./resources/js/sockjs.min.js"></script> 
 <script src="./resources/js/stomp.min.js"></script>
+<script type="text/javascript" src="/resources/js/translate.js"></script>
 <style>
 body {
 	width:100%;
@@ -136,10 +138,10 @@ $(document).ready(function () {
 	    	$('#version_text').text(version);
 	    	$('#group_text').text(JSON.parse(get('userdata')).user_id);
 	    	$('#end_text').text(end_date);
-	    	$('#remain_text').text(remain_date + '일');
+	    	$('#remain_text').text(remain_date + getTranslate('day'));
 	    },
 		error: function(errorThrown) {
-			alert('오류가 발생하였습니다.');
+			//alert('오류가 발생하였습니다.');
 			//alert(errorThrown.statusText);
 			//alert(jsonUrl2);
 		}
@@ -176,7 +178,7 @@ $(document).ready(function () {
 	    	$('#version_text').text(version);
 	    	$('#group_text').text(JSON.parse(get('userdata')).user_id);
 	    	$('#end_text').text(end_date);
-	    	$('#remain_text').text(remain_date + '일');
+	    	$('#remain_text').text(remain_date + getTranslate('day'));
 		});
 	});
 		
@@ -190,7 +192,7 @@ function sendFile(files) {
 			var file = files[i];
 			
 			if (file.name.substring(file.name.lastIndexOf('.') + 1) != 'txt') {
-				alert('텍스트 파일을 선택해주세요');
+				alert(getTranslate('setTextFile'));
 			} else {
 				var reader = new FileReader();
 
@@ -207,10 +209,10 @@ function sendFile(files) {
             			data : jsonData,          		     		 
             			success: function(data) {
             				$("#update_file").val("");
-            				alert('등록이 완료되었습니다.');		
+            				alert(getTranslate('completeResigtration'));		
             			},
             			error: function(errorThrown) {
-            				alert('오류가 발생하였습니다.');
+            				alert(getTranslate('serverError'));
             				//alert(errorThrown.statusText);
             				//alert(JSON.stringify(data));
             			}
@@ -222,7 +224,7 @@ function sendFile(files) {
 		}
 	} else {
 		$("#update_file").val("");
-		alert('텍스트 파일을 선택해주세요.');
+		alert(getTranslate('setTextFile'));
 	}
 }
 </script>
@@ -231,19 +233,19 @@ function sendFile(files) {
 	<div class="container">
 		<div class="col-md-5" style="float:none;margin-left:auto; margin-right:auto;border: 1px solid #35353A;">
 			<div class="div_100">
-				<div class="div_35">버전 정보</div>
+				<div class="div_35"><spring:message code="common.versionInfo" /></div>
 				<div class="div_65" id="version_text"></div>
 			</div>
 			<div class="div_100">
-				<div class="div_35">그룹명</div>
+				<div class="div_35"><spring:message code="license.groupName" /></div>
 				<div class="div_65" id="group_text"></div>
 			</div>
 			<div class="div_100">
-				<div class="div_35">만료일</div>
+				<div class="div_35"><spring:message code="license.expirationDate" /></div>
 				<div class="div_65" id="end_text"></div>
 			</div>
 			<div class="div_100">
-				<div class="div_35">남은 기간</div>
+				<div class="div_35"><spring:message code="license.remainingPeriod" /></div>
 				<div class="div_65" id="remain_text"></div>
 			</div>
 			<!-- <div class="div_100">
@@ -256,9 +258,9 @@ function sendFile(files) {
 		<div class="col-md-12">
 			<div class="col-md-6" style="float:none; margin-right:auto; margin-left:auto; text-align:center;">
 				<label for="update_file"></label>
-				<button id="update_info"><span class="glyphicon glyphicon-send update" aria-hidden="true"></span>갱신</button>
+				<button id="update_info"><span class="glyphicon glyphicon-send update" aria-hidden="true"></span><spring:message code="license.renewal" /></button>
 				<input type="file" accept=".txt" id="update_file" onchange="sendFile(this.files);" />
-				<button id="get_info"><span class="glyphicon glyphicon-floppy-save get" aria-hidden="true""></span>분석 서버 정보 획득</button>
+				<button id="get_info"><span class="glyphicon glyphicon-floppy-save get" aria-hidden="true""></span><spring:message code="license.obtainAnalysisServerInformation" /></button>
 			</div>
 		</div>
 	</div>

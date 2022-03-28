@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -27,6 +28,7 @@
 <script  src="./resources/js/jqwidgets/jqxlistbox.js"></script>
 <script src="./resources/js/canvas/recent_canvasjs.min.js"></script>
 <script src="./resources/js/tether.min.js"></script>
+<script type="text/javascript" src="/resources/js/translate.js"></script>
 <style>
 select, input:focus {
 	outline:0;
@@ -141,7 +143,7 @@ $(document).ready(function () {
 			    		animationEnabled: true,
 			    		backgroundColor: "#2a2a2c",
 			    		title:{
-			    			text: eval("driveName" + l) + " Drive 용량 (F/T) : " + eval("sizeArr" + l + '[0].y') + 'GB/' + eval("driveSize" + l) + 'GB',
+			    			text: eval("driveName" + l) + getTranslate('driveCapacity') + " : " + eval("sizeArr" + l + '[0].y') + 'GB/' + eval("driveSize" + l) + 'GB',
 			    			horizontalAlign: "left",
 			    			fontColor: "#fff",
 			    	        fontFamily: "Lucida Sans",
@@ -165,7 +167,7 @@ $(document).ready(function () {
 			    		animationEnabled: true,
 			    		backgroundColor: "#2a2a2c",
 			    		title:{
-			    			text: eval("driveName" + l) + " Drive 용량 (F/T) : " + eval("sizeArr" + l + '[0].y') + 'GB/' + eval("driveSize" + l) + 'GB',
+			    			text: eval("driveName" + l) + getTranslate('driveCapacity') + " : " + eval("sizeArr" + l + '[0].y') + 'GB/' + eval("driveSize" + l) + 'GB',
 			    			horizontalAlign: "left",
 			    	        fontFamily: "Lucida Sans",
 			    			fontSize: 14,
@@ -188,7 +190,7 @@ $(document).ready(function () {
 			}
 	    },
 		error: function(errorThrown) {
-			alert('오류가 발생하였습니다.');
+			//alert('오류가 발생하였습니다.');
 			//alert(errorThrown.statusText);
 			//alert(jsonUrl2);
 		}
@@ -246,13 +248,13 @@ $(document).ready(function () {
 		<div class="col-md-12" style="float:none;">
 			<div class="col-md-6 checkbox" style="margin-left:auto; margin-right:auto; float:none; text-align:center;">
 				<label style="margin:0;">
-					<input type="checkbox" checked> HDD 덮어쓰기
+					<input type="checkbox" checked> <spring:message code="storage.HDDOverwrite" />
 				</label>
 			</div>
 		</div>
 		<div class="col-md-12" style="margin-top:15px;">
 			<div class="col-md-6" style="margin-left:auto; margin-right:auto; float:none; text-align:center;">
-				<button id="save_info"><span class="glyphicon glyphicon-edit modify" aria-hidden="true"></span>저장</button>
+				<button id="save_info"><span class="glyphicon glyphicon-edit modify" aria-hidden="true"></span><spring:message code="common.save" /> </button>
 			</div>
 		</div>
 	</div>

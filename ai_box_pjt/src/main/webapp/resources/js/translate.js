@@ -150,6 +150,8 @@ var lang = {
 		setPreset : "프리셋을 선택해주세요.",
 		setSpeaker : "스피커를 선택해주세요.",
 		
+		setTextFile: "텍스트 파일을 선택해주세요",
+		
 		welcome : "환영합니다, ",
 		sir : " 님.",
 		
@@ -197,6 +199,8 @@ var lang = {
 		speakerPort : "스피커 Port",
 		speakerID : "스피커 ID",
 		speakerPassword : "스피커 비밀번호",
+		
+		driveCapacity : " 드라이브 용량 (F/T)",
 	},
 	"en" : {
 		webTitle : "Intelligent Video Safety Management System", 
@@ -348,6 +352,8 @@ var lang = {
 
 		setPreset : "You must select a preset",
 		setSpeaker : "You must select a speaker",
+
+		setTextFile: "You must select a text file",
 		
 		welcome : "welcome, ",
 		sir : "",
@@ -396,6 +402,8 @@ var lang = {
 		speakerPort : "Speaker port",
 		speakerID : "Speaker ID",
 		speakerPassword : "Speaker password",
+
+		driveCapacity : " Drive capacity (F/T)",
 	}
 }
 function getLanguage() {
