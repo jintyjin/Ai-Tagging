@@ -45,7 +45,7 @@ public class DeleteImageDay extends TimerTask {
 			EventDao eventDao = new EventDao();
 	        //원본 파일경로
 	        //String oriFilePath = "D:/web_server/testuser/AIBOX_OFFICE/20200811/";
-			ImageTableDto imageTableDto = eventDao.selectRecentImage(null);
+			ImageTableDto imageTableDto = eventDao.selectRecentImage(new ImageTableDto());
 			
 			String image_path = imageTableDto.getImage_name().substring(0, imageTableDto.getThumb_name().lastIndexOf("/") + 1);
 			
