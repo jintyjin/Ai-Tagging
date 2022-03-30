@@ -91,12 +91,8 @@ public class ImageUtil {
 			 File[] files = dir.listFiles();
 	   
 			 // 파일 배열을 파일 리스트로 변화함
-			 try {
-				 if (files != null) {
-					 dirFileList = Arrays.asList(files);
-				 }
-			 } catch(Exception e) {
-				 System.out.println("파일 리스트 읽기 불가");
+			 if (files != null) {
+				 dirFileList = Arrays.asList(files);
 			 }
 		 }
 	  

@@ -746,7 +746,7 @@ public class EventController {
 				System.out.println("response is error : " + response.getStatusLine().getStatusCode());
 			}
 			response.close();
-		} catch (Exception e) {
+		} catch (IOException ie) {
 			System.out.println("getSpeakerList Error");
 		}
 
@@ -809,7 +809,7 @@ public class EventController {
 				System.out.println("response is error : " + response.getStatusLine().getStatusCode());
 			}
 			response.close();
-		} catch (Exception e) {
+		} catch (IOException ie) {
 			System.out.println("sendSpeakerNumber Error");
 		}
 
@@ -983,11 +983,7 @@ public class EventController {
 		File folder = new File(path);
 
 		if (!folder.exists()) {
-			try {
-				folder.mkdir();
-			} catch (Exception e) {
-				System.out.println("areaSet 폴더 생성 Error");
-			}
+			folder.mkdir();
 		}
 
 		folder = new File(path + dev_ch + ".jpg");
@@ -1163,22 +1159,14 @@ public class EventController {
 		File folder = new File(uploadPath);
 
 		if (!folder.exists()) {
-			try {
-				folder.mkdir();
-			} catch (Exception e) {
-				System.out.println("get_license_request_code 폴더 생성 Error");
-			}
+			folder.mkdir();
 		}
 
 		uploadPath += "text" + "/";
 		folder = new File(uploadPath);
 
 		if (!folder.exists()) {
-			try {
-				folder.mkdir();
-			} catch (Exception e) {
-				System.out.println("get_license_request_code 폴더 생성 Error");
-			}
+			folder.mkdir();
 		}
 
 		// File file = new File("C:/home/mjs/test/text.txt");
@@ -1243,7 +1231,7 @@ public class EventController {
 				// System.out.println("response is error : " +
 				// response1.getStatusLine().getStatusCode());
 			}
-		} catch (Exception e) {
+		} catch (IOException ie) {
 			System.out.println("set_license_code Error");
 		}
 
@@ -2185,12 +2173,7 @@ public class EventController {
 			File folder = new File(tempPath);
 
 			if (!folder.exists()) {
-				try {
-					// System.out.println("폴더 생성");
-					folder.mkdir();
-				} catch (Exception e) {
-					System.out.println("downloadZipGroup 폴더 생성 Error");
-				}
+				folder.mkdir();
 			} else {
 				// System.out.println("폴더가 이미 존재합니다.");
 			}
@@ -2200,12 +2183,7 @@ public class EventController {
 			folder = new File(tempPath);
 
 			if (!folder.exists()) {
-				try {
-					// System.out.println("폴더 생성");
-					folder.mkdir();
-				} catch (Exception e) {
-					System.out.println("downloadZipGroup 폴더 생성 Error");
-				}
+				folder.mkdir();
 			} else {
 				// System.out.println("폴더가 이미 존재합니다.");
 			}
@@ -2317,12 +2295,7 @@ public class EventController {
 			File folder = new File(tempPath);
 
 			if (!folder.exists()) {
-				try {
-					// System.out.println("폴더 생성");
-					folder.mkdir();
-				} catch (Exception e) {
-					System.out.println("downloadZip 폴더 생성 Error");
-				}
+				folder.mkdir();
 			} else {
 				// System.out.println("폴더가 이미 존재합니다.");
 			}
@@ -2439,8 +2412,8 @@ public class EventController {
 				System.out.println("response is error : " + response.getStatusLine().getStatusCode());
 				body = response.getStatusLine().getStatusCode() + "";
 			}
-		} catch (Exception e) {
-			System.err.println(e.toString());
+		} catch (IOException ie) {
+			System.out.println("tokenTest Error");
 		}
 
 		return body;
@@ -2643,21 +2616,7 @@ public class EventController {
 				File folder = new File(uploadPath);
 
 				if (!folder.exists()) {
-					try {
-						folder.mkdir();
-					} catch (Exception e) {
-						String errorMsg = null;
-						StringWriter error = new StringWriter();
-						System.out.println("드라이브 web_server폴더 생성 시 오류");
-						errorMsg = error.toString();
-						ErrorLogDto errorLogDto = new ErrorLogDto();
-						errorLogDto.setLog_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
-						errorLogDto.setLog_place(versionMemoryRepository.findPartDriveName() + "드라이브 web_server폴더 생성 시 오류");
-						errorLogDto.setLog_content(errorMsg);
-						eventDao.insertErrorLog(errorLogDto);
-						deleteImageDay2(null);
-						errorWebsocket(errorLogDto);
-					}
+					folder.mkdir();
 				}
 
 				int dateCount = 181;
@@ -2844,21 +2803,7 @@ public class EventController {
 					File folder = new File(uploadPath);
 
 					if (!folder.exists()) {
-						try {
-							folder.mkdir();
-						} catch (Exception e) {
-							String errorMsg = null;
-							StringWriter error = new StringWriter();
-							System.out.println("드라이브 폴더 생성 오류");
-							errorMsg = error.toString();
-							ErrorLogDto errorLogDto = new ErrorLogDto();
-							errorLogDto.setLog_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
-							errorLogDto.setLog_place(versionMemoryRepository.findMasterDriveName() + "드라이브 web_server폴더 생성 오류");
-							errorLogDto.setLog_content(errorMsg);
-							eventDao.insertErrorLog(errorLogDto);
-							deleteImageDay(null);
-							errorWebsocket(errorLogDto);
-						}
+						folder.mkdir();
 					}
 
 					int dateCount = 8;
@@ -2920,22 +2865,7 @@ public class EventController {
 											folder = new File(deleteUploadPath);
 
 											if (!folder.exists()) {
-												try {
-													folder.mkdir();
-												} catch (Exception e) {
-													StringWriter error = new StringWriter();
-													System.out.println("드라이브 이미지 백업 폴더 생성 오류");
-													errorMsg = error.toString();
-													ErrorLogDto errorLogDto = new ErrorLogDto();
-													errorLogDto.setLog_time(
-															new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
-													errorLogDto.setLog_place(
-															"오늘자 " + versionMemoryRepository.findMasterDriveName() + "드라이브 이미지 백업 폴더 생성 오류");
-													errorLogDto.setLog_content(errorMsg);
-													eventDao.insertErrorLog(errorLogDto);
-													deleteImageDay(null);
-													errorWebsocket(errorLogDto);
-												}
+												folder.mkdir();
 											}
 
 											if (fileList != null) {
@@ -3111,21 +3041,7 @@ public class EventController {
 					File folder = new File(uploadPath);
 
 					if (!folder.exists()) {
-						try {
-							folder.mkdir();
-						} catch (Exception e) {
-							String errorMsg = null;
-							StringWriter error = new StringWriter();
-							System.out.println("드라이브 web_server폴더 생성 오류");
-							errorMsg = error.toString();
-							ErrorLogDto errorLogDto = new ErrorLogDto();
-							errorLogDto.setLog_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
-							errorLogDto.setLog_place(versionMemoryRepository.findMasterDriveName() + "드라이브 web_server폴더 생성 오류");
-							errorLogDto.setLog_content(errorMsg);
-							eventDao.insertErrorLog(errorLogDto);
-							deleteImageDay(null);
-							errorWebsocket(errorLogDto);
-						}
+						folder.mkdir();
 					}
 
 					int dateCount = 8;
@@ -3303,21 +3219,7 @@ public class EventController {
 					File folder = new File(uploadPath);
 
 					if (!folder.exists()) {
-						try {
-							folder.mkdir();
-						} catch (Exception e) {
-							String errorMsg = null;
-							StringWriter error = new StringWriter();
-							System.out.println("데일리 백업 web_server폴더 생성 시 오류");
-							errorMsg = error.toString();
-							ErrorLogDto errorLogDto = new ErrorLogDto();
-							errorLogDto.setLog_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
-							errorLogDto.setLog_place("데일리 백업 web_server폴더 생성 시 오류");
-							errorLogDto.setLog_content(errorMsg);
-							eventDao.insertErrorLog(errorLogDto);
-							backupImageDay(null);
-							errorWebsocket(errorLogDto);
-						}
+						folder.mkdir();
 					}
 					// 원본 파일경로
 					// String oriFilePath = "D:/web_server/testuser/AIBOX_OFFICE/20200811/";
@@ -3726,12 +3628,7 @@ public class EventController {
 		File folder = new File(uploadPath);
 
 		if (!folder.exists()) {
-			try {
-				folder.mkdir();
-				// System.out.println("폴더 생성");
-			} catch (Exception e) {
-				System.out.println("saveTestImage Error");
-			}
+			folder.mkdir();
 		} else {
 			// System.out.println("폴더가 이미 존재합니다.");
 		}
@@ -3741,12 +3638,7 @@ public class EventController {
 		File[] fileLength = folder.listFiles();
 
 		if (!folder.exists()) {
-			try {
-				folder.mkdir();
-				// System.out.println("폴더 생성");
-			} catch (Exception e) {
-				System.out.println("saveTestImage 폴더 생성 Error");
-			}
+			folder.mkdir();
 		} else {
 			// System.out.println("폴더가 이미 존재합니다.");
 		}
@@ -3760,12 +3652,7 @@ public class EventController {
 		folder = new File(uploadPath);
 
 		if (!folder.exists()) {
-			try {
-				folder.mkdir();
-				// System.out.println("폴더 생성");
-			} catch (Exception e) {
-				System.out.println("saveTestImage 폴더 생성 Error");
-			}
+			folder.mkdir();
 		} else {
 			// System.out.println("폴더가 이미 존재합니다.");
 		}
@@ -3820,11 +3707,7 @@ public class EventController {
 		File folder = new File(uploadPath);
 
 		if (!folder.exists()) {
-			try {
-				folder.mkdir();
-			} catch (Exception e) {
-				System.out.println("sendMonitor 폴더 생성 Error");
-			}
+			folder.mkdir();
 		}
 
 		String data = map.get("img_data").toString();
@@ -3877,7 +3760,7 @@ public class EventController {
 				// System.out.println("response is error : " +
 				// response1.getStatusLine().getStatusCode());
 			}
-		} catch (Exception e) {
+		} catch (IOException ie) {
 			System.out.println("testTokken Error");
 		}
 

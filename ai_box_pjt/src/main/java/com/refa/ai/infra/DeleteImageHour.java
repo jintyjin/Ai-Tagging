@@ -45,48 +45,49 @@ public class DeleteImageHour extends TimerTask {
 			EventDao eventDao = new EventDao();
 	        //원본 파일경로
 	        //String oriFilePath = "D:/web_server/testuser/AIBOX_OFFICE/20200811/";
-			ImageTableDto imageTableDto = eventDao.selectRecentImage(null);
+			ImageTableDto imageTableDto = eventDao.selectRecentImage(new ImageTableDto());
 			
 			String image_path = imageTableDto.getImage_name().substring(0, imageTableDto.getThumb_name().lastIndexOf("/") + 1);
 			
-	        String oriFilePath = "D:" + image_path;
-	        //복사될 파일경로
-	        String copyFilePath = "C:" + image_path;
+			if (image_path != null) {
+		        String oriFilePath = "D:" + image_path;
+		        //복사될 파일경로
+		        String copyFilePath = "C:" + image_path;
 
-	        File path = new File(oriFilePath);
-	        
-	        String fileList[] = path.list();
-	        
-	        try {
-		        if (fileList != null && fileList.length > 0) {
-		        	System.out.println("이미지 갯수 = " + fileList.length);
-		        	
-		    		long end1 = System.currentTimeMillis();
-		        	System.out.println("image_path = " + image_path);
+		        File path = new File(oriFilePath);
+		        
+		        String fileList[] = path.list();
+		        
+		        try {
+			        if (fileList != null && fileList.length > 0) {
+			        	System.out.println("이미지 갯수 = " + fileList.length);
+			        	
+			    		long end1 = System.currentTimeMillis();
+			        	System.out.println("image_path = " + image_path);
 
-		        	// 폴더 자체를 옮김
-		            //FileUtils.moveDirectory(path, path2);	// 조건에 맞게 디렉토리를 옮길 수도 있고 삭제할 수도 있음
+			        	// 폴더 자체를 옮김
+			            //FileUtils.moveDirectory(path, path2);	// 조건에 맞게 디렉토리를 옮길 수도 있고 삭제할 수도 있음
 
-		        	// 폴더 자체를 지움
-		        	try {
-						FileUtils.deleteDirectory(path);
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-			        	System.out.println("폴더 삭제 오류");
-					}
-		        	
-		            // imageTable 데이터 삭제, 모니터 테이블 데이터 삭제
-		    		eventDao.deleteBackupImage(image_path);
-		    		eventDao.deleteBackupMonitoring(image_path);
-		    		
-		    		long now1 = System.currentTimeMillis();
-		    		
-		            System.out.println("모든 이미지 시간 = " + (now1 - end1)/1000.0 + "초");
+			        	// 폴더 자체를 지움
+			        	try {
+							FileUtils.deleteDirectory(path);
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+				        	System.out.println("폴더 삭제 오류");
+						}
+			        	
+			            // imageTable 데이터 삭제, 모니터 테이블 데이터 삭제
+			    		eventDao.deleteBackupImage(image_path);
+			    		eventDao.deleteBackupMonitoring(image_path);
+			    		
+			    		long now1 = System.currentTimeMillis();
+			    		
+			            System.out.println("모든 이미지 시간 = " + (now1 - end1)/1000.0 + "초");
+			        }
+		        } catch(Exception e) {
+		        	System.out.println("이미지 삭제 오류");
 		        }
-	        } catch(Exception e) {
-	        	System.out.println("이미지 삭제 오류");
-	        }
-	        
+			}
 		}
 	}
 }

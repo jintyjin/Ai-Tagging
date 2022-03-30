@@ -976,7 +976,7 @@ public class ResponseEventsRepositoryImpl implements ResponseEventsRepository {
 					System.out.println("response is error : " + response.getStatusLine().getStatusCode());
 				}
 				response.close();
-			} catch (Exception e) {
+			} catch(IOException ie) {
 				System.out.println("playNetworkSpeaker Error");
 			}
 		}

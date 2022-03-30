@@ -101,11 +101,7 @@ public class InsertImagesRepositoryImpl implements InsertImagesRepository {
 										File folder = new File(uploadPath);
 
 										if (!folder.exists()) {
-											try {
-												folder.mkdir();
-											} catch (Exception e) {
-												System.out.println("폴더 생성 오류");
-											}
+											folder.mkdir();
 										}
 
 										uploadPath += dev_ch + ".jpg";
@@ -136,11 +132,7 @@ public class InsertImagesRepositoryImpl implements InsertImagesRepository {
 									File folder = new File(uploadPath);
 
 									if (!folder.exists()) {
-										try {
-											folder.mkdir();
-										} catch (Exception e) {
-											System.out.println("폴더 생성 오류");
-										}
+										folder.mkdir();
 									}
 
 									uploadPath += dev_ch + ".jpg";

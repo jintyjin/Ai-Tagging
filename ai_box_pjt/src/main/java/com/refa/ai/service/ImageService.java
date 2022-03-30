@@ -54,33 +54,21 @@ public class ImageService {
 		File folder = new File(uploadPath);
 
 		if (!folder.exists()) {
-			try {
-				folder.mkdir();
-			} catch (Exception e) {
-				e.getStackTrace();
-			}
+			folder.mkdir();
 		}
 
 		uploadPath += login_id + "/";
 		folder = new File(uploadPath);
 
 		if (!folder.exists()) {
-			try {
-				folder.mkdir();
-			} catch (Exception e) {
-				e.getStackTrace();
-			}
+			folder.mkdir();
 		}
 
 		uploadPath += item_name + "/";
 		folder = new File(uploadPath);
 
 		if (!folder.exists()) {
-			try {
-				folder.mkdir();
-			} catch (Exception e) {
-				e.getStackTrace();
-			}
+			folder.mkdir();
 		}
 
 		uploadPath += event_time.split(" ")[0].split("-")[0] + event_time.split(" ")[0].split("-")[1]
@@ -88,11 +76,7 @@ public class ImageService {
 		folder = new File(uploadPath);
 
 		if (!folder.exists()) {
-			try {
-				folder.mkdir();
-			} catch (Exception e) {
-				e.getStackTrace();
-			}
+			folder.mkdir();
 		}
 
 		String data = img_data;
@@ -205,33 +189,21 @@ public class ImageService {
 		File folder = new File(path);
 
 		if (!folder.exists()) {
-			try {
-				folder.mkdir();
-			} catch (Exception e) {
-				e.getStackTrace();
-			}
+			folder.mkdir();
 		}
 
 		path += loginId + "/";
 		folder = new File(path);
 
 		if (!folder.exists()) {
-			try {
-				folder.mkdir();
-			} catch (Exception e) {
-				e.getStackTrace();
-			}
+			folder.mkdir();
 		}
 
 		path += itemName + "/";
 		folder = new File(path);
 
 		if (!folder.exists()) {
-			try {
-				folder.mkdir();
-			} catch (Exception e) {
-				e.getStackTrace();
-			}
+			folder.mkdir();
 		}
 
 		path += eventTime.split(" ")[0].split("-")[0] + eventTime.split(" ")[0].split("-")[1]
@@ -239,11 +211,7 @@ public class ImageService {
 		folder = new File(path);
 
 		if (!folder.exists()) {
-			try {
-				folder.mkdir();
-			} catch (Exception e) {
-				e.getStackTrace();
-			}
+			folder.mkdir();
 		}
 		
 		return path;
