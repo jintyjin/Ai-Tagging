@@ -357,7 +357,14 @@ $(document).ready(function (){
 			return;
 		}
 		
-		var obj = new Object();
+		var user_id = $('.user_id').val();
+		var user_pw = SHA256($('.user_pwd').val());
+		
+		console.log(window.parent);
+		
+		window.parent.loginUser(user_id, user_pw);
+		
+		/* var obj = new Object();
 		obj.command = "RINFRA_LOGIN";
 		obj.user_id = $('.user_id').val();
 		obj.user_pw = SHA256($('.user_pwd').val());
@@ -387,7 +394,7 @@ $(document).ready(function (){
 			error : function(request, status, error) {
 				alert(getTranslate('errorLogin'));
 			}
-		});
+		}); */
 	});
 });
 </script>

@@ -36,4 +36,8 @@ public class UserRepository {
 		return sqlSessionTemplate.selectOne("user.findRecentOne");
 	}
 	
+	public User login(User user) {
+		return sqlSessionTemplate.selectOne("user.login", user);
+	}
+	
 }

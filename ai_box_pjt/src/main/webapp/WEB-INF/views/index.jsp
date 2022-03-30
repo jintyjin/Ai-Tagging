@@ -1,3 +1,4 @@
+<%@ page import="com.refa.ai.entity.User" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
@@ -275,6 +276,33 @@ $(document).ready(function () {
 		$(this).removeClass("active");
 		$(this).addClass("active");
 	});
+	
+	<% User user = (User)request.getAttribute("user"); %>;
+	var user_id = '<%= user.getUser_id() %>';
+	
+	if (user_id != null && user_id != '') {
+		$('span').css('display', '');
+		$('#tab1').css('display', '');
+		$('#tab2').css('display', '');
+		$('#tab3').css('display', '');
+		//$('#tab4').css('display', '');	// 모니터링
+		$('#tab5').css('display', '');
+		$('#tab6').css('display', '');
+		$('#tab7').css('display', '');
+		$('#tab8').css('display', '');
+		$('#tab12').css('display', '');
+		if (user_id == 'admin') {
+			$('#tab9').css('display', '');
+			$('#tab10').css('display', '');
+			$('#tab11').css('display', '');
+			$('#tab15').css('display', '');
+		}
+		$('#tab13').css('display', '');
+		$('#tab14').css('display', '');
+		$('#newMenu').css('display', '');
+		$('#iframe').attr('src', './dashBoard.htm');
+	}
+	
 	if (isEmpty(get('userdata'))) {
 	} else {
 		$('span').css('display', '');
@@ -644,6 +672,30 @@ function networkTest() {
 			alert(JSON.stringify(data));
 		}
 	});
+}
+function loginUser(user_id, user_pw) {
+	var form = document.createElement("form");
+    form.setAttribute("charset", "UTF-8");
+    form.setAttribute("method", "Post");  //Post 방식
+    form.setAttribute("action", "login"); //요청 보낼 주소
+
+    var hiddenField = document.createElement("input");
+    hiddenField.setAttribute("type", "text");
+    hiddenField.setAttribute("name", "user_id");
+    hiddenField.setAttribute("value", user_id);
+
+    form.appendChild(hiddenField);
+    
+    hiddenField = document.createElement("input");
+    hiddenField.setAttribute("type", "password");
+    hiddenField.setAttribute("name", "user_pw");
+    hiddenField.setAttribute("value", user_pw);
+    
+    form.appendChild(hiddenField);
+    
+    document.body.appendChild(form);
+
+    form.submit();
 }
 </script>
 </head>

@@ -2,20 +2,52 @@ package com.refa.ai.controller;
 
 import java.util.Locale;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.SessionAttribute;
+
+import com.refa.ai.dto.user.UserLoginDto;
+import com.refa.ai.entity.User;
+import com.refa.ai.infra.SessionConst;
+import com.refa.ai.repository.UserRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Controller
+@RequiredArgsConstructor
 public class HomeController {
 
+	private final UserRepository userRepository;
+	
 	@GetMapping("/login")
 	public String login(Model model) {
 		return "login";
 	}
+	
+	@PostMapping("/login")
+	public String login(@ModelAttribute UserLoginDto userLoginDto, HttpServletRequest request) {
+		User user = userRepository.login(new User(userLoginDto.getUser_id(), userLoginDto.getUser_pw()));
+		
+		if (user == null) {
+			return "index";
+		}
+		
+		HttpSession session = request.getSession();
+		session.setAttribute(SessionConst.LOGIN_MEMBER, user);
+		
+		return "redirect:/index";
+	}
 
 	@GetMapping("/index")
-	public String index(Model model) {
+	public String index(@SessionAttribute(name = SessionConst.LOGIN_MEMBER, required = false) User user, Model model) {
+		model.addAttribute("user", user);
+		
 		return "index";
 	}
 

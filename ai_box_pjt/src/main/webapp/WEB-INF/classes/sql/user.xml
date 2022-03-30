@@ -36,4 +36,10 @@
 		order by user_idx desc
 		limit 1;
 	</select>
+	
+	<select id="login" parameterType="com.refa.ai.dto.user.UserLoginDto" resultType="com.refa.ai.entity.User">
+		select *
+		from data.userinfo
+		where user_id = #{user_id} and user_pw = #{user_pw};
+	</select>
 </mapper>
