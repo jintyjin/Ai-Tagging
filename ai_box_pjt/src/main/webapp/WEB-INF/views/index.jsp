@@ -277,10 +277,9 @@ $(document).ready(function () {
 		$(this).addClass("active");
 	});
 	
-	<% User user = (User)request.getAttribute("user"); %>;
-	var user_id = '<%= user.getUser_id() %>';
-	
-	if (user_id != null && user_id != '') {
+	<% if (request.getAttribute("user") != null) { %>
+		<% User user = (User)request.getAttribute("user"); %>;
+		var user_id = '<%= user.getUser_id() %>';
 		$('span').css('display', '');
 		$('#tab1').css('display', '');
 		$('#tab2').css('display', '');
@@ -301,9 +300,9 @@ $(document).ready(function () {
 		$('#tab14').css('display', '');
 		$('#newMenu').css('display', '');
 		$('#iframe').attr('src', './dashBoard.htm');
-	}
+	<% }%>
 	
-	if (isEmpty(get('userdata'))) {
+	/* if (isEmpty(get('userdata'))) {
 	} else {
 		$('span').css('display', '');
 		$('#tab1').css('display', '');
@@ -325,10 +324,20 @@ $(document).ready(function () {
 		$('#tab14').css('display', '');
 		$('#newMenu').css('display', '');
 		$('#iframe').attr('src', './dashBoard.htm');
-	}
+	} */
+	
 	$('#logoutButton').on('click', function () {
-		del();
-		$(window.parent.location).attr('href', './index.htm');
+		var form = document.createElement("form");
+	    form.setAttribute("charset", "UTF-8");
+	    form.setAttribute("method", "Post");  //Post 방식
+	    form.setAttribute("action", "logout"); //요청 보낼 주소
+	    
+	    document.body.appendChild(form);
+
+	    form.submit();
+	    
+//		del();
+//		$(window.parent.location).attr('href', './index.htm');
 	});
 	
 	$('#downloadButton').on('click', function () {

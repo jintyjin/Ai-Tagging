@@ -44,6 +44,16 @@ public class HomeController {
 		return "redirect:/index";
 	}
 
+	@PostMapping("/logout")
+	public String logout(HttpServletRequest request) {
+		HttpSession session = request.getSession(false);
+		if (session != null) {
+			session.invalidate();
+		}
+		
+		return "redirect:/index";
+	}
+	
 	@GetMapping("/index")
 	public String index(@SessionAttribute(name = SessionConst.LOGIN_MEMBER, required = false) User user, Model model) {
 		model.addAttribute("user", user);
