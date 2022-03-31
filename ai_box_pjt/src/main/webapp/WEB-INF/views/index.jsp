@@ -269,6 +269,7 @@ var POPUP_MORE = 0;
 var popup_window = new Array();
 var popup_width = 1280;
 var popup_height = 720;
+var userId;
 $(document).ready(function () {
 	$('.tabMenu').click(function () {
 		$('#menu').find('.active').addClass('tabMenu');
@@ -279,6 +280,7 @@ $(document).ready(function () {
 	
 	<% if (request.getAttribute("user") != null) { %>
 		<% User user = (User)request.getAttribute("user"); %>;
+		userId = '<%= user.getUser_id() %>';
 		var user_id = '<%= user.getUser_id() %>';
 		$('span').css('display', '');
 		$('#tab1').css('display', '');
@@ -391,7 +393,7 @@ $(document).ready(function () {
 			
 			var obj = new Object();
 			
-			obj.login_id = JSON.parse(get('userdata')).user_id;
+			obj.login_id = userId;
 			obj.downloadTag = downloadTag;
 			obj.fileName = fileName;
 			obj.event_name = $("#iframe").contents().find('#event_name').text();
@@ -475,7 +477,7 @@ $(document).ready(function () {
 			
 			var obj = new Object();
 			
-			obj.login_id = JSON.parse(get('userdata')).user_id;
+			obj.login_id = userId;
 			obj.idxArr = idxArr;
 			obj.fileName = fileName;
 
@@ -540,8 +542,7 @@ $(document).ready(function () {
 			var event_name = json.event_name;
 			var dev_ip = json.dev_ip;
 			var login_id = json.login_id;
-			console.log(get('userdata') != null);
-			if (get('userdata') != null) {
+			<% if (request.getAttribute("user") != null) { %>
 				if (width < 1280 || height < 720) {
 				} else {
 					width = 1280;
@@ -565,7 +566,8 @@ $(document).ready(function () {
 				//alert("height = " + popup_window[POPUP_MORE].document.body.offsetHeight);
 				
 				//popup_window[POPUP_MORE].resizeTo(width, height);
-			}
+
+			<% } %>
 		});
 		/* stompClient.subscribe('/playAlarm', function (message) {
 			var json = JSON.parse(message.body);

@@ -338,6 +338,9 @@ function get(key) {
 	return sessionStorage.getItem(key);
 }
 $(document).ready(function (){
+	if (typeof window.parent.loginUser != 'function') {
+		location.replace('index');
+	}
 	$(".user_id").focus();
 	
 	$('input').keyup(function(e) {
@@ -359,8 +362,6 @@ $(document).ready(function (){
 		
 		var user_id = $('.user_id').val();
 		var user_pw = SHA256($('.user_pwd').val());
-		
-		console.log(window.parent);
 		
 		window.parent.loginUser(user_id, user_pw);
 		

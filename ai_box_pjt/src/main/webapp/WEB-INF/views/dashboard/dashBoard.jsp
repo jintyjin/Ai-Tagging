@@ -331,6 +331,10 @@ var week = new Array('일', '월', '화', '수', '목', '금', '토');
 var day2 = new Date();
 var year2 = day2.getFullYear();
 $(document).ready(function () {
+	if (typeof window.parent.loginUser != 'function') {
+		location.replace('index');
+	}
+	
 	function getStartFormatDate(date){
 		date.setDate(date.getDate() - 7);
 		var year = date.getFullYear();              //yyyy

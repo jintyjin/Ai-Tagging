@@ -1,3 +1,4 @@
+<%@ page import="com.refa.ai.entity.User" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
@@ -859,6 +860,18 @@ var year2 = day2.getFullYear();
 var isDateStr = "";
 var isShow = false;
 $(document).ready(function () {
+	if (typeof window.parent.loginUser != 'function') {
+		location.replace('index');
+	}
+	
+	<% if (request.getAttribute("user") == null) { %>
+		window.parent.location.replace('index');
+	<% } %>
+	
+	<% User user = (User)request.getAttribute("user"); %>
+	
+	var userId = '<%= user.getUser_id() %>';
+	
 	var obj = new Object();
 	//obj.login_id = JSON.parse(get('userdata')).user_id;
 	//obj.tag = get('tagImage').substring(get('tagImage').indexOf('_') + 1);
@@ -880,7 +893,7 @@ $(document).ready(function () {
 		async:false,
 		data : jsonData,          		   
 	    success: function(data) {
-	    	if(JSON.parse(get('userdata')) != null) {
+	    	<% if (request.getAttribute("user") != null) { %>
 				var dataLength = data.length;
 				
 		    	var day = new Date();
@@ -945,7 +958,9 @@ $(document).ready(function () {
   	    		if (scroll == 'Y') {
   	    			showDateImage("${event_time}");
   	    		}
-	    	}
+			<% } else { %>
+				window.parent.location.replace('index');
+			<% } %>
 	    }, error: function(errorThrown) {
 			alert(errorThrown.statusText);
 			alert(jsonUrl);
@@ -1001,11 +1016,11 @@ $(document).ready(function () {
 	    		sec = '0' + sec;
 	    	}
 		
-			var fileName = JSON.parse(get('userdata')).user_id + '_' + year + month + date + '_' + hour + min + sec + '.zip';
+			var fileName = userId + '_' + year + month + date + '_' + hour + min + sec + '.zip';
 			
 			var obj = new Object();
 			
-			obj.login_id = JSON.parse(get('userdata')).user_id;
+			obj.login_id = userId;
 			obj.downloadTag = downloadTag;
 			obj.fileName = fileName;
 
@@ -1019,7 +1034,7 @@ $(document).ready(function () {
 				contentType : "application/json; charset=UTF-8",       
 				data : jsonData,          		     		 
 				success: function(data) {
-					location.href = '/web_server/' + JSON.parse(get('userdata')).user_id + '/download/' + fileName;
+					location.href = '/web_server/' + userId + '/download/' + fileName;
 					//$('.downloadButton').attr('disabled', false);
 					//$('.downloadButton').css('opacity', '1');
 					isDownload = true;

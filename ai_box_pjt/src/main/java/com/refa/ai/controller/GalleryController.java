@@ -4,8 +4,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.SessionAttribute;
 
 import com.refa.ai.dto.gallery.GalleryDeviceDto;
+import com.refa.ai.entity.User;
+import com.refa.ai.infra.SessionConst;
 import com.refa.ai.service.GalleryService;
 
 import lombok.RequiredArgsConstructor;
@@ -28,7 +31,8 @@ public class GalleryController {
 	}
 
 	@GetMapping("/tagImage")
-	public String tagImage(Model model, String event_name, String scroll, String event_time) {
+	public String tagImage(@SessionAttribute(name = SessionConst.LOGIN_MEMBER, required = false) User user, Model model, String event_name, String scroll, String event_time) {
+		model.addAttribute("user", user);
 		model.addAttribute("event_name", event_name);
 		model.addAttribute("scroll", scroll);
 		model.addAttribute("event_time", event_time);
