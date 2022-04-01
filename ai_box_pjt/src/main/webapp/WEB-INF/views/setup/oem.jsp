@@ -6,28 +6,28 @@
 <head>
 <meta charset="UTF-8">
 <title>Insert title here</title>
-<script src="./resources/js/jquery-3.3.1.min.js"></script>
-<link rel="stylesheet" href="./resources/js/jqwidgets/styles/jqx.base.css" type="text/css" />
-<link rel="stylesheet" href="./resources/js/jqwidgets/styles/jqx.metro.css" type="text/css" />
-<link rel="stylesheet" href="./resources/js/jqwidgets/styles/jqx.arctic.css" type="text/css" />
+<script src="/resources/js/jquery-3.3.1.min.js"></script>
+<link rel="stylesheet" href="/resources/js/jqwidgets/styles/jqx.base.css" type="text/css" />
+<link rel="stylesheet" href="/resources/js/jqwidgets/styles/jqx.metro.css" type="text/css" />
+<link rel="stylesheet" href="/resources/js/jqwidgets/styles/jqx.arctic.css" type="text/css" />
 <link rel="stylesheet" href="/resources/js/jqwidgets/styles/jqx.metrodark.css" type="text/css" />
 <script src="./resources/js/bootstrap.min.js"></script>
-<link rel="stylesheet" href="./resources/css/bootstrap.min.css" />
-<link rel="stylesheet" href="./resources/css/bootstrap4-alpha3.min.css" />
-<script src="./resources/js/jqwidgets/jqxcore.js"></script>
-<script src="./resources/js/jqwidgets/jqxdata.js"></script>
-<script src="./resources/js/jqwidgets/jqxbuttons.js"></script>
-<script src="./resources/js/jqwidgets/jqxscrollbar.js"></script>
-<script src="./resources/js/jqwidgets/jqxscrollbar.js"></script>
-<script src="./resources/js/jqwidgets/jqxmenu.js"></script>
-<script src="./resources/js/jqwidgets/jqxlistbox.js"></script>
-<script src="./resources/js/jqwidgets/jqxdropdownlist.js"></script>
-<script src="./resources/js/jqwidgets/jqxdatetimeinput.js"></script>
-<script src="./resources/js/jqwidgets/jqxcalendar.js"></script>
-<script src="./resources/js/jqwidgets/jqxcheckbox.js"></script>
-<script src="./resources/js/jqwidgets/jqxlistbox.js"></script>
-<script src="./resources/js/canvas/recent_canvasjs.min.js"></script>
-<script src="./resources/js/tether.min.js"></script>
+<link rel="stylesheet" href="/resources/css/bootstrap.min.css" />
+<link rel="stylesheet" href="/resources/css/bootstrap4-alpha3.min.css" />
+<script src="/resources/js/jqwidgets/jqxcore.js"></script>
+<script src="/resources/js/jqwidgets/jqxdata.js"></script>
+<script src="/resources/js/jqwidgets/jqxbuttons.js"></script>
+<script src="/resources/js/jqwidgets/jqxscrollbar.js"></script>
+<script src="/resources/js/jqwidgets/jqxscrollbar.js"></script>
+<script src="/resources/js/jqwidgets/jqxmenu.js"></script>
+<script src="/resources/js/jqwidgets/jqxlistbox.js"></script>
+<script src="/resources/js/jqwidgets/jqxdropdownlist.js"></script>
+<script src="/resources/js/jqwidgets/jqxdatetimeinput.js"></script>
+<script src="/resources/js/jqwidgets/jqxcalendar.js"></script>
+<script src="/resources/js/jqwidgets/jqxcheckbox.js"></script>
+<script src="/resources/js/jqwidgets/jqxlistbox.js"></script>
+<script src="/resources/js/canvas/recent_canvasjs.min.js"></script>
+<script src="/resources/js/tether.min.js"></script>
 <script type="text/javascript" src="/resources/js/translate.js"></script>
 <style>
 body {
@@ -56,6 +56,16 @@ body {
 	text-align:center;
 }
 </style>
+<script>
+$(document).ready(function () {
+	if (window.parent.userId == null) {
+		location.replace('/index');
+	}
+	if (typeof window.parent.loginUser != 'function') {
+		location.replace('/index/oem');
+	}
+});
+</script>
 </head>
 <body>
 	<div class="container">

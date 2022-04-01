@@ -902,6 +902,12 @@ $(document).ready(function(){
 }); 
 
 $(document).ready(function () {
+	if (window.parent.userId == null) {
+		location.replace('/index');
+	}
+	if (typeof window.parent.loginUser != 'function') {
+		location.replace('/index/deviceSearch');
+	}
 	var actionArr = new Array();
 	var source = {
 		dataType : "json",
@@ -981,7 +987,7 @@ $(document).ready(function () {
 		var data = JSON.parse(message.data);
 		var command = data.command;
 		var web_user = data.web_user;
-		if (command == 'RF_RES_DISCOVERY_ONVIF' && web_user == JSON.parse(get('userdata')).user_id) {
+		if (command == 'RF_RES_DISCOVERY_ONVIF' && web_user == window.parent.userId) {
 			var rows = $(".grid").jqxGrid('getrows');
 			var isEqual = false;
 			for (var i = 0; i < rows.length; i++) {
@@ -1029,7 +1035,7 @@ $(document).ready(function () {
 		$(this).text(getTranslate('research'));
 		var msg = {
 			command: 'RF_REQ_DISCOVERY_ONVIF',
-			web_user: JSON.parse(get('userdata')).user_id,
+			web_user: window.parent.userId,
 			sender: 'web'
 		};
 
@@ -1148,7 +1154,7 @@ $(document).ready(function () {
 		var msg = {
 			command:"RF_REQ_IPCAMERA_INFO",
 			sender:"web",
-			web_user:JSON.parse(get('userdata')).user_id,
+			web_user:window.parent.userId,
 			ip:$('#name_text').val(),
 			id:$('#webport_text').val(),
 			pw:$('#pwd_text').val(),
@@ -1205,7 +1211,7 @@ function chkChannelByType(label, row) {
 	var jsonUrl = "/chkChannelByType";
 	
 	var obj = new Object();
-	obj.login_id = JSON.parse(get('userdata')).user_id;
+	obj.login_id = window.parent.userId;
 	obj.dev_type = label;
 	
 	var jsonData = JSON.stringify(obj);

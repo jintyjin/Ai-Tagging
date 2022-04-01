@@ -182,6 +182,12 @@ var POPUP_MORE = 0;
 var popup_window = new Array();
 var tmp = [];
 $(document).ready(function () {
+	if (window.parent.userId == null) {
+		location.replace('/index');
+	}
+	if (typeof window.parent.loginUser != 'function') {
+		location.replace('/index/device');
+	}
 	$('.type').click(function () {
 		$('#type').find('.active').removeClass('active');
 		$(this).removeClass("active");
@@ -260,7 +266,7 @@ $(document).ready(function () {
 		        ]
 		    });
 		    
-			if (JSON.parse(get('userdata')).user_id != 'admin') {
+			if (window.parent.userId != 'admin') {
 				$('.addButton').append('<button class="button_check" onclick="addInfo();"><span class="glyphicon glyphicon-plus check" aria-hidden="true"></span>추가</button>');
 			}
 			
@@ -307,7 +313,7 @@ $(document).ready(function () {
 
     		
             //alert(dataRecord.dev_ch);
-            var login_id = JSON.parse(get('userdata')).user_id;
+            var login_id = window.parent.userId;
             if (login_id == 'admin') {
             	login_id = dataRecord.login_id;
             }
@@ -325,7 +331,7 @@ $(document).ready(function () {
 
        		var msg = {
     			command: 'RF_REQ_IPCAMERA_DELETE',
-    			web_user: JSON.parse(get('userdata')).user_id,
+    			web_user: window.parent.userId,
     			sender: 'web',
     			dev_ch: dataRecord.dev_ch,
     			dev_title: dataRecord.dev_title
@@ -351,7 +357,7 @@ function addInfo() {
 	if(popup_window[POPUP_MORE] && !popup_window[POPUP_MORE].closed)
 		popup_window[POPUP_MORE].close();
 
-	popup_window[POPUP_MORE] = openWindow('./' + url + '.htm?login_id=' + JSON.parse(get('userdata')).user_id, url, 1400, 880);
+	popup_window[POPUP_MORE] = openWindow('./' + url + '.htm?login_id=' + window.parent.userId, url, 1400, 880);
 }
 </script>
 </head>

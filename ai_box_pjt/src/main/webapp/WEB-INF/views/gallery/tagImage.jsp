@@ -860,20 +860,18 @@ var year2 = day2.getFullYear();
 var isDateStr = "";
 var isShow = false;
 $(document).ready(function () {
+	if (window.parent.userId == null) {
+		location.replace('/index');
+	}
 	if (typeof window.parent.loginUser != 'function') {
 		location.replace('index');
 	}
-	
-	<% if (request.getAttribute("user") == null) { %>
-		window.parent.location.replace('index');
-	<% } %>
-	
 	<% User user = (User)request.getAttribute("user"); %>
 	
 	var userId = '<%= user.getUser_id() %>';
 	
 	var obj = new Object();
-	//obj.login_id = JSON.parse(get('userdata')).user_id;
+	//obj.login_id = window.parent.userId;
 	//obj.tag = get('tagImage').substring(get('tagImage').indexOf('_') + 1);
 	//obj.event_name = "${event_name}"
 	

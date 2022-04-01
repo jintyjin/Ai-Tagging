@@ -97,6 +97,12 @@ var POPUP_MORE = 0;
 
 var popup_window = new Array();
 $(document).ready(function () {
+	if (window.parent.userId == null) {
+		location.replace('/index');
+	}
+	if (typeof window.parent.loginUser != 'function') {
+		location.replace('/index/eventStatusSetup');
+	}
 	var jsonUrl = "/eventStatusSetup";
 
 	$.ajax({
@@ -203,7 +209,7 @@ $(document).ready(function () {
 								}
 							});
 						} else {
-							if (get('userdata') != null) {
+							if (window.parent.userId != null) {
 								if(popup_window[POPUP_MORE] && !popup_window[POPUP_MORE].closed) {
 									popup_window[POPUP_MORE].close();
 								}

@@ -640,6 +640,14 @@ var POPUP_MORE = 0;
 
 var popup_window = new Array();
 $(document).ready(function () {
+	if (parent.opener.window.parent.userId == null) {
+		self.close();
+		parent.opener.location.replace('/index');
+	}
+	if (typeof parent.opener.window.parent.loginUser != 'function') {
+		self.close();
+		parent.opener.location.replace('/index/userList');
+	}
 	var jsonUrl = "/userInfo";
 	
 	var jsonData = get('rowid');
@@ -678,7 +686,7 @@ $(document).ready(function () {
 				$("#channel_text").jqxDropDownList('checkItem', chArr[i]); 
 			}
 			
-			if (JSON.parse(get('userdata')).user_id == 'admin') {
+			if (parent.opener.window.parent.userId == 'admin') {
 				var categorySource = [];
 
 				var levelObj = new Object();
@@ -807,7 +815,7 @@ $(document).ready(function () {
 			obj.user_email = $('#email_text').val();
 			obj.user_tokken = $('#tokken_text').val();
 			
-			if (JSON.parse(get('userdata')).user_id == 'admin') {
+			if (parent.opener.window.parent.userId == 'admin') {
 				obj.user_isAdmin = $("#level_text").jqxDropDownList('getSelectedItem').value;
 				obj.user_channel = $("#channel_text").val();
 			} 

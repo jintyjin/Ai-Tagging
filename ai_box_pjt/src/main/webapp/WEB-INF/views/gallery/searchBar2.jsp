@@ -473,6 +473,12 @@ var changeTopWidth;
 var changeLeft;
 var leftVal;
 $(document).ready(function () {
+	if (window.parent.userId == null) {
+		location.replace('/index');
+	}
+	if (typeof window.parent.loginUser != 'function') {
+		location.replace('/searchBar.htm?status=first&keyword=');
+	}
 	//alert(get('ModalInfoArr'));
 	$('#theModal').css("padding", '0');
 

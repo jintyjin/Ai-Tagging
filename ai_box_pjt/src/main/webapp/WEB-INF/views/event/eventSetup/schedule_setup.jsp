@@ -78,6 +78,16 @@ scheduleArr.push('≈‰');
 /* scheduleArr.push('»ﬁ¿œ'); */
 
 $(document).ready(function() {
+	if (parent.opener.parent.opener.window.parent.userId == null) {
+		self.close();
+		parent.opener.close();
+		parent.opener.parent.opener.window.parent.location.replace('/index');
+	}
+	if (typeof parent.opener.parent.opener.window.parent.loginUser != 'function') {
+		self.close();
+		parent.opener.close();
+		parent.opener.parent.opener.window.parent.location.replace('/index/eventSetup');
+	}
 	$('#imgDiv').width(1280);
 	$('#imgDiv').height(720);
 

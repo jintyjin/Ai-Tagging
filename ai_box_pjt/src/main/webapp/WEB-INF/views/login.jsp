@@ -323,23 +323,12 @@ var Base64 = {
 	    return output;
 	}
 }
-/* function setUserLogin(level, userdata, deviceid) {
-	sessionStorage.setItem('userlevel', level);
-	if(userdata != null)
-		sessionStorage.setItem('userdata', JSON.stringify(userdata));
-	sessionStorage.setItem('deviceid', deviceid);
-} */
-function setUserLogin(level, userdata) {
-	sessionStorage.setItem('userlevel', level);
-	if(userdata != null)
-		sessionStorage.setItem('userdata', JSON.stringify(userdata));
-}
 function get(key) {
 	return sessionStorage.getItem(key);
 }
 $(document).ready(function (){
 	if (typeof window.parent.loginUser != 'function') {
-		location.replace('index');
+		location.replace('index/login');
 	}
 	$(".user_id").focus();
 	
@@ -364,38 +353,6 @@ $(document).ready(function (){
 		var user_pw = SHA256($('.user_pwd').val());
 		
 		window.parent.loginUser(user_id, user_pw);
-		
-		/* var obj = new Object();
-		obj.command = "RINFRA_LOGIN";
-		obj.user_id = $('.user_id').val();
-		obj.user_pw = SHA256($('.user_pwd').val());
-		
-		obj.app_type = "W";
-		
-		var jsonData = JSON.stringify(obj);
-		var jsonUrl = "/loginList";
-		
-		$.ajax({
-			type : "POST",
-			dataType : "json",
-			contentType : "application/json;charset=UTF-8",
-			url : jsonUrl,
-			data : jsonData,
-			success : function(data) {
-				if (data.return == "incorrect") {
-					alert(getTranslate('wrongIDorPassword'));
-				} else if (data.return == "null") {
-					alert(getTranslate('specifyNewPassword'));
-				} else if (data.return == "success") {
-					alert(getTranslate('welcome') + data.user_id + getTranslate('sir'));
-					setUserLogin(data.user_level, data);
-					$(window.parent.location).attr('href', './index.htm');
-				}
-			},
-			error : function(request, status, error) {
-				alert(getTranslate('errorLogin'));
-			}
-		}); */
 	});
 });
 </script>

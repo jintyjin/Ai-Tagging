@@ -125,6 +125,12 @@ function get(key) {
 	return sessionStorage.getItem(key);
 }
 $(document).ready(function () {
+	if (window.parent.userId == null) {
+		location.replace('/index');
+	}
+	if (typeof window.parent.loginUser != 'function') {
+		location.replace('/index');
+	}
 	var jsonUrl = "/get_license_info";
 
 	$.ajax({
@@ -136,7 +142,7 @@ $(document).ready(function () {
 	    	var end_date = data1.License_Expiry_Date.str;
 	    	var remain_date = data1.License_Left_Days;
 	    	$('#version_text').text(version);
-	    	$('#group_text').text(JSON.parse(get('userdata')).user_id);
+	    	$('#group_text').text(window.parent.userId);
 	    	$('#end_text').text(end_date);
 	    	$('#remain_text').text(remain_date + getTranslate('day'));
 	    },
@@ -176,7 +182,7 @@ $(document).ready(function () {
 	    	var end_date = data1.License_Expiry_Date.str;
 	    	var remain_date = data1.License_Left_Days;
 	    	$('#version_text').text(version);
-	    	$('#group_text').text(JSON.parse(get('userdata')).user_id);
+	    	$('#group_text').text(window.parent.userId);
 	    	$('#end_text').text(end_date);
 	    	$('#remain_text').text(remain_date + getTranslate('day'));
 		});

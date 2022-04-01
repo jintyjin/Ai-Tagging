@@ -554,6 +554,14 @@ function get(key) {
 	return sessionStorage.getItem(key);
 }
 $(document).ready(function () {
+	if (parent.opener.window.parent.userId == null) {
+		self.close();
+		parent.opener.window.parent.location.replace('/index');
+	}
+	if (typeof parent.opener.window.parent.loginUser != 'function') {
+		self.close();
+		parent.opener.window.parent.location.replace('/index/eventSetup');
+	}
 	var model_name = "${model_name}";
 	var dev_ch = "${dev_ch}";
 	var dev_title = "${dev_title}";

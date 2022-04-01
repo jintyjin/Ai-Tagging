@@ -8,14 +8,12 @@
 <title>AI</title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<script src="./resources/js/jquery-3.3.1.min.js"></script>
-<link rel="stylesheet" href="./resources/css/bootstrap.min.css">
-<!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css"> -->
-<script src="./resources/js/bootstrap.bundle.min.js"></script>
-<!-- <script src="./resources/js/bootstrap.min.js"></script> -->
-<link rel="stylesheet" href="./resources/css/bootstrap-theme.min.css">
-<script src="./resources/js/sockjs.min.js"></script> 
-<script src="./resources/js/stomp.min.js"></script>
+<script src="/resources/js/jquery-3.3.1.min.js"></script>
+<link rel="stylesheet" href="/resources/css/bootstrap.min.css">
+<script src="/resources/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="/resources/css/bootstrap-theme.min.css">
+<script src="/resources/js/sockjs.min.js"></script> 
+<script src="/resources/js/stomp.min.js"></script>
 <script type="text/javascript" src="/resources/js/translate.js"></script>
 <link rel="icon" href="data:;base64,iVBORw0KGgo=">
 <style>
@@ -277,11 +275,10 @@ $(document).ready(function () {
 		$(this).removeClass("active");
 		$(this).addClass("active");
 	});
-	
+
 	<% if (request.getAttribute("user") != null) { %>
 		<% User user = (User)request.getAttribute("user"); %>;
 		userId = '<%= user.getUser_id() %>';
-		var user_id = '<%= user.getUser_id() %>';
 		$('span').css('display', '');
 		$('#tab1').css('display', '');
 		$('#tab2').css('display', '');
@@ -292,7 +289,7 @@ $(document).ready(function () {
 		$('#tab7').css('display', '');
 		$('#tab8').css('display', '');
 		$('#tab12').css('display', '');
-		if (user_id == 'admin') {
+		if (userId == 'admin') {
 			$('#tab9').css('display', '');
 			$('#tab10').css('display', '');
 			$('#tab11').css('display', '');
@@ -301,45 +298,21 @@ $(document).ready(function () {
 		$('#tab13').css('display', '');
 		$('#tab14').css('display', '');
 		$('#newMenu').css('display', '');
-		$('#iframe').attr('src', './dashBoard.htm');
+		$('#iframe').attr('src', '/' + '<%= request.getAttribute("pageUrl").toString() %>' + ".htm");
 	<% }%>
-	
-	/* if (isEmpty(get('userdata'))) {
-	} else {
-		$('span').css('display', '');
-		$('#tab1').css('display', '');
-		$('#tab2').css('display', '');
-		$('#tab3').css('display', '');
-		//$('#tab4').css('display', '');	// 모니터링
-		$('#tab5').css('display', '');
-		$('#tab6').css('display', '');
-		$('#tab7').css('display', '');
-		$('#tab8').css('display', '');
-		$('#tab12').css('display', '');
-		if (JSON.parse(get('userdata')).user_id == 'admin') {
-			$('#tab9').css('display', '');
-			$('#tab10').css('display', '');
-			$('#tab11').css('display', '');
-			$('#tab15').css('display', '');
-		}
-		$('#tab13').css('display', '');
-		$('#tab14').css('display', '');
-		$('#newMenu').css('display', '');
-		$('#iframe').attr('src', './dashBoard.htm');
-	} */
 	
 	$('#logoutButton').on('click', function () {
 		var form = document.createElement("form");
 	    form.setAttribute("charset", "UTF-8");
 	    form.setAttribute("method", "Post");  //Post 방식
-	    form.setAttribute("action", "logout"); //요청 보낼 주소
+	    form.setAttribute("action", "/logout"); //요청 보낼 주소
 	    
 	    document.body.appendChild(form);
 
 	    form.submit();
 	    
 //		del();
-//		$(window.parent.location).attr('href', './index.htm');
+//		$(window.parent.location).attr('href', '/index.htm');
 	});
 	
 	$('#downloadButton').on('click', function () {
@@ -522,18 +495,6 @@ $(document).ready(function () {
 	var socket = new SockJS(websocketUrl);
 	var stompClient = Stomp.over(socket);
 	stompClient.connect({}, function (frame) {
-		/* 
-		stompClient.subscribe('/downloadZip', function (message) {
-			location.href = '/web_server/' + JSON.parse(get('userdata')).user_id + '/download/' + message.body;
-		});
-		*/
-		/* stompClient.subscribe('/tmpResponse', function (message) {
-			var json = JSON.parse(message.body);
-			var login_id = json.user_name;
-			if (login_id == JSON.parse(get('userdata')).user_id) {
-				alert(message.body);
-			}
-		}); */
 		stompClient.subscribe('/showPopupImage', function (message) {
 			var json = JSON.parse(message.body);
 			var img_name = json.img_name;
@@ -569,22 +530,8 @@ $(document).ready(function () {
 
 			<% } %>
 		});
-		/* stompClient.subscribe('/playAlarm', function (message) {
-			var json = JSON.parse(message.body);
-
-			if (get('userdata') != null) {
-				var audio = document.getElementById('audio_play');
-				
-			    if (!audio.paused) { 
-			    } else{ 
-			        audio.pause(); 
-			    }
-
-		        audio.play();
-			}
-		}); */
 		stompClient.subscribe('/eventStatus', function (message) {
-			if (get('userdata') != null) {
+			if (userId != null) {
 				if(popup_window[POPUP_MORE] && !popup_window[POPUP_MORE].closed) {
 				} else {
 					popup_window[POPUP_MORE] = openWindow('/eventStatusSetup', 'eventStatusSetup', 1280, 720);	// 1280 + 16, 720 + 68	
@@ -688,7 +635,7 @@ function loginUser(user_id, user_pw) {
 	var form = document.createElement("form");
     form.setAttribute("charset", "UTF-8");
     form.setAttribute("method", "Post");  //Post 방식
-    form.setAttribute("action", "login"); //요청 보낼 주소
+    form.setAttribute("action", "/login"); //요청 보낼 주소
 
     var hiddenField = document.createElement("input");
     hiddenField.setAttribute("type", "text");
@@ -720,43 +667,43 @@ function loginUser(user_id, user_pw) {
 	</div>
 	<div id="menu">
 		<ul>
-			<li id="tab1" style="display:none;"><span onclick="menuClick('./dashBoard.htm');" class="tabMenu active" style="padding-left:1px;"><span class="glyphicon glyphicon-cloud" style="margin-right:0.7em;"></span><spring:message code="tab.dashboard"/></span></li>
+			<li id="tab1" style="display:none;"><span onclick="menuClick('/dashBoard.htm');" class="tabMenu active" style="padding-left:1px;"><span class="glyphicon glyphicon-cloud" style="margin-right:0.7em;"></span><spring:message code="tab.dashboard"/></span></li>
 			<li id="tab14" style="display:none;"><span onclick="connectMonitoring('kmonitoring://');" class="tabMenu"><span class="glyphicon glyphicon-bell" style="margin-right:0.7em;"></span><spring:message code="tab.liveMonitoring"/></span></li>
-			<li id="tab5" style="display:none;"><span onclick="menuClick('./album.htm');" class="tabMenu"><span class="glyphicon glyphicon-book" style="margin-right:0.7em;"></span><spring:message code="tab.gallery"/></span></li>
-			<li id="tab6" style="display:none;"><span onclick="menuClick('./log.htm');" class="tabMenu"><span class="glyphicon glyphicon-bell" style="margin-right:0.7em;"></span><spring:message code="tab.log"/></span>
-			<li id="tab7" style="display:none;"><span onclick="menuClick('./eventStatusSetup.htm');" class="tabMenu"><span class="glyphicon glyphicon-list-alt" style="margin-right:0.7em;"></span><spring:message code="tab.eventStatus"/></span></li>
-			<li id="tab2" style="display:none;"><span onclick="menuClick('./userList.htm');" class="tabMenu" style="padding-left:1px;"><span class="glyphicon glyphicon-user" style="margin-right:0.7em;"></span><spring:message code="tab.user"/></span></li>
-			<li id="tab3" style="display:none;"><span onclick="menuClick('./device.htm');" class="tabMenu" style="padding-left:1px;"><span class="glyphicon glyphicon-blackboard" style="margin-right:0.7em;"></span><spring:message code="tab.device"/></span>
+			<li id="tab5" style="display:none;"><span onclick="menuClick('/album.htm');" class="tabMenu"><span class="glyphicon glyphicon-book" style="margin-right:0.7em;"></span><spring:message code="tab.gallery"/></span></li>
+			<li id="tab6" style="display:none;"><span onclick="menuClick('/log.htm');" class="tabMenu"><span class="glyphicon glyphicon-bell" style="margin-right:0.7em;"></span><spring:message code="tab.log"/></span>
+			<li id="tab7" style="display:none;"><span onclick="menuClick('/eventStatusSetup.htm');" class="tabMenu"><span class="glyphicon glyphicon-list-alt" style="margin-right:0.7em;"></span><spring:message code="tab.eventStatus"/></span></li>
+			<li id="tab2" style="display:none;"><span onclick="menuClick('/userList.htm');" class="tabMenu" style="padding-left:1px;"><span class="glyphicon glyphicon-user" style="margin-right:0.7em;"></span><spring:message code="tab.user"/></span></li>
+			<li id="tab3" style="display:none;"><span onclick="menuClick('/device.htm');" class="tabMenu" style="padding-left:1px;"><span class="glyphicon glyphicon-blackboard" style="margin-right:0.7em;"></span><spring:message code="tab.device"/></span>
 				<ul id="device_ul">
-					<li><a href="#" class="tabMenu" onclick="menuClick('./deviceSearch.htm');"><spring:message code="tab.device.search"/></a></li>
-					<!-- <li><a href="#" class="tabMenu" onclick="menuClick('./deviceJoin.htm');">등록</a></li> -->
-					<li><a href="#" class="tabMenu" onclick="menuClick('./eventSetup.htm');"><spring:message code="tab.device.setup"/></a></li>
-					<!-- <li><a href="#" class="tabMenu" onclick="menuClick('./eventActionSetup.htm');">이벤트 액션 설정</a></li> -->
-					<li><a href="#" class="tabMenu" onclick="menuClick('./eventActionList.htm');"><spring:message code="tab.device.actionSetup"/></a></li>
-					<!-- <li><a href="#" class="tabMenu" onclick="menuClick('./rejectSetup.htm');">이벤트 무시 설정</a></li> -->
-					<li><a href="#" class="tabMenu" onclick="menuClick('./networkSpeakerList.htm');"><spring:message code="tab.device.networkSpeaker"/></a></li>
+					<li><a href="#" class="tabMenu" onclick="menuClick('/deviceSearch.htm');"><spring:message code="tab.device.search"/></a></li>
+					<!-- <li><a href="#" class="tabMenu" onclick="menuClick('/deviceJoin.htm');">등록</a></li> -->
+					<li><a href="#" class="tabMenu" onclick="menuClick('/eventSetup.htm');"><spring:message code="tab.device.setup"/></a></li>
+					<!-- <li><a href="#" class="tabMenu" onclick="menuClick('/eventActionSetup.htm');">이벤트 액션 설정</a></li> -->
+					<li><a href="#" class="tabMenu" onclick="menuClick('/eventActionList.htm');"><spring:message code="tab.device.actionSetup"/></a></li>
+					<!-- <li><a href="#" class="tabMenu" onclick="menuClick('/rejectSetup.htm');">이벤트 무시 설정</a></li> -->
+					<li><a href="#" class="tabMenu" onclick="menuClick('/networkSpeakerList.htm');"><spring:message code="tab.device.networkSpeaker"/></a></li>
 				</ul>
 			</li>
 			<li id="tab13" style="display:none;"><span onclick="location.href='http://10.15.32.150:18080';" class="tabMenu"><span class="glyphicon glyphicon-tint" style="margin-right:0.7em;"></span><spring:message code="tab.AISystemFirstName"/><br />&nbsp;&nbsp; <spring:message code="tab.AISystemSecondName"/></span></li>
-			<!-- <li id="tab4" style="display:none;"><span onclick="menuClick('./image.htm');" class="tabMenu" style="padding-left:1px;"><span class="glyphicon glyphicon-facetime-video" style="margin-right:0.7em;"></span>모니터링</span></li> -->
-			<!-- <li id="tab4" style="display:none;"><span onclick="menuClick('./monitor.htm');" class="tabMenu" style="padding-left:1px;"><span class="glyphicon glyphicon-facetime-video" style="margin-right:0.7em;"></span>모니터링</span></li> -->
+			<!-- <li id="tab4" style="display:none;"><span onclick="menuClick('/image.htm');" class="tabMenu" style="padding-left:1px;"><span class="glyphicon glyphicon-facetime-video" style="margin-right:0.7em;"></span>모니터링</span></li> -->
+			<!-- <li id="tab4" style="display:none;"><span onclick="menuClick('/monitor.htm');" class="tabMenu" style="padding-left:1px;"><span class="glyphicon glyphicon-facetime-video" style="margin-right:0.7em;"></span>모니터링</span></li> -->
 				<!-- <ul id="log_ul">
-					<li><a href="#" class="tabMenu" onclick="menuClick('./eventStatusSetup.htm');">이벤트 현황</a></li>
+					<li><a href="#" class="tabMenu" onclick="menuClick('/eventStatusSetup.htm');">이벤트 현황</a></li>
 				</ul> -->
 			<li id="tab9" style="display:none;"><span onclick="openUl();" class="tabMenu"><span class="glyphicon glyphicon-cog" style="margin-right:0.7em;"></span><spring:message code="tab.setup"/></span>
 				<ul id="setup_ul">
-					<li><a href="#" onclick="menuClick('./license.htm');"><spring:message code="tab.setup.license"/></a></li>
-					<li><a href="#" onclick="menuClick('./driveSize.htm');"><spring:message code="tab.setup.storageSpace"/></a></li>
-					<li><a href="#" onclick="menuClick('./oem.htm');"><spring:message code="tab.setup.about"/></a></li>
-					<li><a href="#" onclick="menuClick('./urlSetup.htm');"><spring:message code="tab.setup.url"/></a></li>
+					<li><a href="#" onclick="menuClick('/license.htm');"><spring:message code="tab.setup.license"/></a></li>
+					<li><a href="#" onclick="menuClick('/driveSize.htm');"><spring:message code="tab.setup.storageSpace"/></a></li>
+					<li><a href="#" onclick="menuClick('/oem.htm');"><spring:message code="tab.setup.about"/></a></li>
+					<li><a href="#" onclick="menuClick('/urlSetup.htm');"><spring:message code="tab.setup.url"/></a></li>
 					<!-- <li><a href="#">History</a></li> -->
 					<!-- <li><a href="#">About</a></li> -->
 					<!-- <li><a href="#">Contact</a></li> -->
 				</ul>
 			</li>
 			<!-- <li id="tab15" style="display:none;"><span onclick="networkTest();" class="tabMenu"><span class="glyphicon glyphicon-list-alt" style="margin-right:0.7em;"></span>네트워크 스피커 테스트</span></li> -->
-			<!-- <li id="tab10" style="display:none;"><span onclick="menuClick('./backupLog.htm');" class="tabMenu"><span class="glyphicon glyphicon-pencil" style="margin-right:0.7em;"></span>BackupLog</span></li> -->
-			<!-- <li id="tab11" style="display:none;"><span onclick="menuClick('./errorLog.htm');" class="tabMenu"><span class="glyphicon glyphicon-remove" style="margin-right:0.7em;"></span>ErrorLog</span></li> -->
+			<!-- <li id="tab10" style="display:none;"><span onclick="menuClick('/backupLog.htm');" class="tabMenu"><span class="glyphicon glyphicon-pencil" style="margin-right:0.7em;"></span>BackupLog</span></li> -->
+			<!-- <li id="tab11" style="display:none;"><span onclick="menuClick('/errorLog.htm');" class="tabMenu"><span class="glyphicon glyphicon-remove" style="margin-right:0.7em;"></span>ErrorLog</span></li> -->
             <!-- <li id="tab12" style="display:none;"><span onclick="saveTestImage();" class="tabMenu"><span class="glyphicon glyphicon-remove" style="margin-right:0.7em;"></span>saveTestImage</span></li> -->
 			<!-- <li id="tab9" style="display:none;"><span onclick="updateData();" class="tabMenu"><span class="glyphicon glyphicon-list-alt" style="margin-right:0.7em;"></span>test</span></li> -->
 			<li id="tab8" class="dropdown nav-item" style="display:none;">
@@ -764,31 +711,31 @@ function loginUser(user_id, user_pw) {
 				+
 				</a>
 				<ul class="dropdown-menu" role="menu">
-	                <li role="presentation"><a role="menuitem" tabindex="-1" href="#" onclick="popupMenu('./dashBoard.htm');"><spring:message code="tab.dashboard"/></a></li>
-	                <li role="presentation"><a role="menuitem" tabindex="-1" href="#" onclick="popupMenu('./userList.htm');"><spring:message code="tab.user"/></a></li>
-	                <li role="presentation"><a role="menuitem" tabindex="-1" href="#" onclick="popupMenu('./device.htm');"><spring:message code="tab.device"/></a></li>
-	                <!-- <li role="presentation"><a role="menuitem" tabindex="-1" href="#" onclick="popupMenu('./image.htm');">모니터링</a></li> -->
-	                <li role="presentation"><a role="menuitem" tabindex="-1" href="#" onclick="popupMenu('./album.htm');"><spring:message code="tab.gallery"/></a></li>
-	                <li role="presentation"><a role="menuitem" tabindex="-1" href="#" onclick="popupMenu('./log.htm');"><spring:message code="tab.log" /></a></li>
-	                <li role="presentation"><a role="menuitem" tabindex="-1" href="#" onclick="popupMenu('./eventActionList.htm');"><spring:message code="tab.device.actionSetup" /></a></li>
+	                <li role="presentation"><a role="menuitem" tabindex="-1" href="#" onclick="popupMenu('/dashBoard.htm');"><spring:message code="tab.dashboard"/></a></li>
+	                <li role="presentation"><a role="menuitem" tabindex="-1" href="#" onclick="popupMenu('/userList.htm');"><spring:message code="tab.user"/></a></li>
+	                <li role="presentation"><a role="menuitem" tabindex="-1" href="#" onclick="popupMenu('/device.htm');"><spring:message code="tab.device"/></a></li>
+	                <!-- <li role="presentation"><a role="menuitem" tabindex="-1" href="#" onclick="popupMenu('/image.htm');">모니터링</a></li> -->
+	                <li role="presentation"><a role="menuitem" tabindex="-1" href="#" onclick="popupMenu('/album.htm');"><spring:message code="tab.gallery"/></a></li>
+	                <li role="presentation"><a role="menuitem" tabindex="-1" href="#" onclick="popupMenu('/log.htm');"><spring:message code="tab.log" /></a></li>
+	                <li role="presentation"><a role="menuitem" tabindex="-1" href="#" onclick="popupMenu('/eventActionList.htm');"><spring:message code="tab.device.actionSetup" /></a></li>
 				</ul>
 			</li>
 			<!-- <li id="tab9" style="display:none;"><span onclick="updateData();" class="tabMenu"><span class="glyphicon glyphicon-list-alt" style="margin-right:0.7em;"></span>업데이트 데이터</span></li> -->
 			<!-- <li id="tab8" style="display:none;"><span onclick="updateData();" class="tabMenu"><span class="glyphicon glyphicon-list-alt" style="margin-right:0.7em;"></span>데이터 업데이트</span></li>
-			<li id="tab8" style="display:none;"><span onclick="menuClick('./test.htm');" class="tabMenu"><span class="glyphicon glyphicon-list-alt" style="margin-right:0.7em;"></span>테스트</span></li>
-			<li id="tab9" style="display:none;"><span onclick="menuClick('./search.htm');" class="tabMenu"><span class="glyphicon glyphicon-list-alt" style="margin-right:0.7em;"></span>Search</span></li>
-			<li id="tab10" style="display:none;"><a class="tabMenu" onclick="popupMenu('./image.htm');">모니터링(팝업)</a></li> -->
+			<li id="tab8" style="display:none;"><span onclick="menuClick('/test.htm');" class="tabMenu"><span class="glyphicon glyphicon-list-alt" style="margin-right:0.7em;"></span>테스트</span></li>
+			<li id="tab9" style="display:none;"><span onclick="menuClick('/search.htm');" class="tabMenu"><span class="glyphicon glyphicon-list-alt" style="margin-right:0.7em;"></span>Search</span></li>
+			<li id="tab10" style="display:none;"><a class="tabMenu" onclick="popupMenu('/image.htm');">모니터링(팝업)</a></li> -->
 		</ul>
 	</div>
 	<!-- <div id="new">
 		<select name="choice" class="form-control" id="newMenu" onchange="newMenu('page')" style="display:none;">
 			<option value="none" selected>새 창 추가</option>
-			<option value="./main.htm">Dashboard</option>
-			<option value="./user.htm">User</option>
-			<option value="./device.htm">Device</option>
-			<option value="./image.htm">Monitoring</option>
-			<option value="./album.htm">Gallery</option>
-			<option value="./monitoring.htm">Log</option>
+			<option value="/main.htm">Dashboard</option>
+			<option value="/user.htm">User</option>
+			<option value="/device.htm">Device</option>
+			<option value="/image.htm">Monitoring</option>
+			<option value="/album.htm">Gallery</option>
+			<option value="/monitoring.htm">Log</option>
 			<option value="eventAction">Event Action</option>
 		</select>
 	</div> -->
@@ -803,7 +750,7 @@ function loginUser(user_id, user_pw) {
 </div>
 </td>
 <td style="width:87%;">
-	<iframe id="iframe" src="./login.htm" style="width:100%; height:100%;"></iframe>
+	<iframe id="iframe" src="/login.htm" style="width:100%; height:100%;"></iframe>
 </td></tr>
 <tr style="background-color:#464646; height:3%;">
 	<td colspan="2">

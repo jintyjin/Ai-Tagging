@@ -1,3 +1,4 @@
+<%@ page import="com.refa.ai.entity.User" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <!DOCTYPE html>
@@ -146,6 +147,13 @@ var POPUP_MORE = 0;
 var popup_window = new Array();
 var tmp = [];
 $(document).ready(function () {
+	if (window.parent.userId == null) {
+		location.replace('/index');
+	}
+	var userId = window.parent.userId;
+	if (typeof window.parent.loginUser != 'function') {
+		location.replace('/index/userList');
+	}
 	var jsonUrl = "/userList";
 	var ascount = 0;
 	var jsonData = "Y";
@@ -159,7 +167,7 @@ $(document).ready(function () {
 		success: function(data) {
 			var arr = new Array();
 			for(var i = 0; i < data.length; i++) {
-				if (JSON.parse(get('userdata')).user_id == 'admin' || data[i].user_id == JSON.parse(get('userdata')).user_id) {
+				if (userId == 'admin' || data[i].user_id == userId) {
 					ascount = ascount + 1;
 					var month = data[i].user_joindate.monthValue;
 					var day = data[i].user_joindate.dayOfMonth;
@@ -281,7 +289,7 @@ $(document).ready(function () {
 		    
 		    var val = "'" + "user" + "'"
 		    
-			if (JSON.parse(get('userdata')).user_id == 'admin') {
+			if (userId == 'admin') {
 				$('.addButton').append('<button class="button_check" onclick="addInfo(' + val + ');"><span class="glyphicon glyphicon-plus check" aria-hidden="true"></span>' + getTranslate('add') + '</button>');
 			}
 		},

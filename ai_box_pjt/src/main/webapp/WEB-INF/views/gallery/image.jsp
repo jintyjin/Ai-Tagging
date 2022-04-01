@@ -718,9 +718,15 @@ var prevTime = 1;
 var durationObj = new Object();
 var time = 1;
 $(document).ready(function () {
+	if (window.parent.userId == null) {
+		location.replace('/index');
+	}
+	if (typeof window.parent.loginUser != 'function') {
+		location.replace('/index');
+	}
 	var tagInfo;
 	var obj = new Object();
-	obj.login_id = JSON.parse(get('userdata')).user_id;
+	obj.login_id = window.parent.userId;
 	var arr = [];
 	var jsonData = JSON.stringify(obj);
 	var jsonUrl = '/imageInfo';
@@ -733,7 +739,7 @@ $(document).ready(function () {
 		data : jsonData,          		   
 	    success: function(data) {
 	    	if (data.length > 0) {
-				if (JSON.parse(data[0]).login_id == JSON.parse(get('userdata')).user_id) {
+				if (JSON.parse(data[0]).login_id == window.parent.userId) {
 					//var tmpClass = $(document.createDocumentFragment());
 					var dataArr = data;
 					var dataLength = data.length;
@@ -830,7 +836,7 @@ $(document).ready(function () {
 	var stompClient = Stomp.over(socket);
 	stompClient.connect({}, function (frame) {
 		stompClient.subscribe('/showImage', function (message) {
-			if (JSON.parse(message.body).login_id == JSON.parse(get('userdata')).user_id) {
+			if (JSON.parse(message.body).login_id == window.parent.userId) {
 				var json = JSON.parse(message.body);
 				
 				if (eval('durationObj.' + json.monitoring_tag) != null) {
@@ -843,7 +849,7 @@ $(document).ready(function () {
 			}
 		}); 
 		stompClient.subscribe('/updateMonitoringCount', function (message) {
-			if (JSON.parse(message.body).login_id == JSON.parse(get('userdata')).user_id) {
+			if (JSON.parse(message.body).login_id == window.parent.userId) {
 				var json2 = JSON.parse(message.body);
 				var monitoringClass = $('.' + json2.monitoring_tag);
 				var count = parseInt(monitoringClass.attr('id')) - 1;
@@ -857,7 +863,7 @@ $(document).ready(function () {
 			}
 		}); 
 		stompClient.subscribe('/deleteMonitoring', function (message) {
-			if (JSON.parse(message.body).login_id == JSON.parse(get('userdata')).user_id) {
+			if (JSON.parse(message.body).login_id == window.parent.userId) {
 				var json2 = JSON.parse(message.body);
 				var monitoringClass = $('.' + json2.monitoring_tag);
 				if (monitoringClass.parents('div').find('monitoring_tag').length == 0) {

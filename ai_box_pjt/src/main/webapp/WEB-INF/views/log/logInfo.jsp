@@ -619,6 +619,14 @@ var POPUP_SEARCH = 1;
 var popup_window = new Array();
 
 $(document).ready(function () {
+	if (parent.opener.window.parent.userId == null) {
+		self.close();
+		parent.opener.location.replace('/index');
+	}
+	if (typeof parent.opener.window.parent.loginUser != 'function') {
+		self.close();
+		parent.opener.location.replace('/index/log');
+	}
     change_text()
     
 	var obj = new Object();
@@ -703,7 +711,7 @@ $(document).ready(function () {
 						if (rowData.event_source == 'SCADA') {
 							alert(getTranslate('noImage'));
 						} else {
-							if (get('userdata') != null) {
+							if (parent.opener.window.parent.userId != null) {
 								if(popup_window[POPUP_SEARCH] && !popup_window[POPUP_SEARCH].closed)
 									popup_window[POPUP_SEARCH].close();
 

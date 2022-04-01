@@ -215,6 +215,12 @@ var POPUP_MORE = 0;
 var popup_window = new Array();
 var tmp = [];
 $(document).ready(function () {
+	if (window.parent.userId == null) {
+		location.replace('/index');
+	}
+	if (typeof window.parent.loginUser != 'function') {
+		location.replace('/index/networkSpeakerList');
+	}
 	$('.type').click(function () {
 		$('#type').find('.active').removeClass('active');
 		$(this).removeClass("active");
@@ -224,7 +230,7 @@ $(document).ready(function () {
 	var jsonUrl = "/networkSpeakerSetup";
 	var obj = new Object();
 	
-	obj.login_id = JSON.parse(get('userdata')).user_id;
+	obj.login_id = window.parent.userId;
 	obj.dev_type = 'ipc';
 	
 	var jsonData = JSON.stringify(obj);
@@ -358,7 +364,7 @@ function chkType(type) {
 	var jsonUrl = "/deviceListByType";
 	var obj = new Object();
 	
-	obj.login_id = JSON.parse(get('userdata')).user_id;
+	obj.login_id = window.parent.userId;
 	obj.dev_type = type;
 		
 	var jsonData = JSON.stringify(obj);

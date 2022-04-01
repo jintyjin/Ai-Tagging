@@ -331,8 +331,11 @@ var week = new Array('일', '월', '화', '수', '목', '금', '토');
 var day2 = new Date();
 var year2 = day2.getFullYear();
 $(document).ready(function () {
+	if (window.parent.userId == null) {
+		location.replace('/index');
+	}
 	if (typeof window.parent.loginUser != 'function') {
-		location.replace('index');
+		location.replace('/index/dashBoard');
 	}
 	
 	function getStartFormatDate(date){

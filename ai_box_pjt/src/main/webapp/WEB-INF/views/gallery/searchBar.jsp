@@ -925,6 +925,12 @@ var status;
 var image_idx;
 document.documentElement.className = hasSupport ? 'pass' : 'fail';
 $(document).ready(function () {
+	if (window.parent.userId == null) {
+		location.replace('/index');
+	}
+	if (typeof window.parent.loginUser != 'function') {
+		location.replace('/index');
+	}
 	window.scrollTo(0, 0);
 	keyword = "${keyword}";
 	status = "${status}";
@@ -1071,7 +1077,7 @@ $(document).ready(function () {
 		$('html').scrollTop(0);
 		
 		var obj = new Object();
-		obj.login_id = JSON.parse(get('userdata')).user_id;
+		obj.login_id = window.parent.userId;
 		obj.keyword = keyword;
 
 		if (get('keywordOption') != null) {
@@ -1243,7 +1249,7 @@ $(document).ready(function () {
 	var stompClient = Stomp.over(socket);
 	stompClient.connect({}, function (frame) {
 		stompClient.subscribe('/deleteImageNow', function (message) {
-			if (JSON.parse(message.body).login_id == JSON.parse(get('userdata')).user_id) {
+			if (JSON.parse(message.body).login_id == window.parent.userId) {
 				var json2 = JSON.parse(message.body);
 				var monitoringClass = $('#' + json2.image_idx);
 				var deleteDiv = $('.' + monitoringClass.parents('div'));
@@ -1303,7 +1309,7 @@ $(document).ready(function () {
 				
 				var obj = new Object();
 				
-				obj.login_id = JSON.parse(get('userdata')).user_id;
+				obj.login_id = window.parent.userId;
 				obj.idxArr = idxArr;
 				obj.fileName = fileName;
 

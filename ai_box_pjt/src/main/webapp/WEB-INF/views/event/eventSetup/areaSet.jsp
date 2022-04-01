@@ -59,6 +59,17 @@ var arr = new Array();
 // 2. 모든 좌표가 들어가 있는 배열
 var totalArr = new Array();
 $(document).ready(function () {
+	if (parent.opener.parent.opener.window.parent.userId == null) {
+		self.close();
+		parent.opener.close();
+		parent.opener.parent.opener.window.parent.location.replace('/index');
+	}
+	if (typeof parent.opener.parent.opener.window.parent.loginUser != 'function') {
+		self.close();
+		parent.opener.close();
+		parent.opener.parent.opener.window.parent.location.replace('/index/eventSetup');
+	}
+	
 	var area_event = "${area_event}";
 	var dev_ch = "${dev_ch}";
 	var dev_title = "${dev_title}";
@@ -114,10 +125,6 @@ $(document).ready(function () {
 		contentType : "application/json; charset=UTF-8",       
 		data : jsonData,          		     		 
 		success: function(data) {
-			/* if (data.base64 != null) {
-				$("#imgDiv").css("background-image", "url(data:image/jpg;base64," + data.base64 + ")");
-			} */
-			
 			if (data.result == 'success') {
 				totalArr = JSON.parse(data.area_total);
 				arr = JSON.parse(data.area_now);

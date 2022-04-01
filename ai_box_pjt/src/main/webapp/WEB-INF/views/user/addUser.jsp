@@ -549,6 +549,14 @@ var POPUP_MORE = 0;
 var popup_window = new Array();
 
 $(document).ready(function () {
+	if (parent.opener.window.parent.userId == null) {
+		self.close();
+		parent.opener.window.parent.location.replace('/index');
+	}
+	if (typeof parent.opener.window.parent.loginUser != 'function') {
+		self.close();
+		parent.opener.window.parent.location.replace('/index/userList');
+	}
 	var isCheck = false;
 	var tokkenCheck = false;
 	var checkId = "";

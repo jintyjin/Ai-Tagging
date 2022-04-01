@@ -374,6 +374,12 @@ var categorySourceAdapter = new $.jqx.dataAdapter(categorySource);
 var POPUP_MORE = 0;
 var popup_window = new Array();
 $(document).ready(function () {
+	if (window.parent.userId == null) {
+		location.replace('/index');
+	}
+	if (typeof window.parent.loginUser != 'function') {
+		location.replace('/index/eventSetup');
+	}
 	var jsonUrl = "/eventSetup";
 	
 	var obj = new Object();

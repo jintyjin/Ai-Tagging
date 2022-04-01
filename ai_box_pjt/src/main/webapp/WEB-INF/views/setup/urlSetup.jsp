@@ -42,6 +42,13 @@ input[type="button"] {
 </head>
 <script>
 window.onload = function () {
+	if (window.parent.userId == null) {
+		location.replace('/index');
+	}
+	if (typeof window.parent.loginUser != 'function') {
+		location.replace('/index/urlSetup');
+	}
+	
 	var request_url = "${request_url}";
 	var analyze_url = "${analyze_url}";
 	

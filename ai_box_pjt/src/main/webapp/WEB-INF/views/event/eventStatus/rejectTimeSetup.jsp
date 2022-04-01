@@ -53,6 +53,14 @@ function get(key) {
 }
 var row;
 window.onload = function () {
+	if (parent.opener.window.parent.userId == null) {
+		self.close();
+		parent.opener.location.replace('/index');
+	}
+	if (typeof parent.opener.window.parent.loginUser != 'function') {
+		self.close();
+		parent.opener.location.replace('/index/eventStatusSetup');
+	}
 	var dev_title = "${dev_title}";
 	var model_name = "${model_name}";
 	var event_time = "${event_time}";
@@ -82,7 +90,7 @@ function submit() {
 	} else {
 		var obj = new Object();
 		
-		obj.login_id = JSON.parse(get('userdata')).user_id;
+		obj.login_id = window.parent.userId;
 		obj.datetime = value;
 		obj.dev_ch = dev_ch;
 		obj.model_name = model_name;

@@ -554,6 +554,12 @@ var categorySource1 = [{
 }];
 
 $(document).ready(function () {
+	if (window.parent.userId == null) {
+		location.replace('/index');
+	}
+	if (typeof window.parent.loginUser != 'function') {
+		location.replace('/index/eventActionList');
+	}
 	var jsonUrl = "/selectEventAction";
 	
 	var obj = new Object();
@@ -732,7 +738,7 @@ $(document).ready(function () {
                      			
                      		obj = new Object();
 
-                   			obj.login_id = JSON.parse(get('userdata')).user_id;
+                   			obj.login_id = window.parent.userId;
                    			obj.idx = data.action_key;
                      		obj.action_isuse = isuse;
                      		var jsonData = JSON.stringify(obj);
@@ -1018,7 +1024,7 @@ $(document).ready(function () {
 	
 	$('.checkBtn').click(function () {
 		obj = new Object();
-		obj.login_id = JSON.parse(get('userdata')).user_id;
+		obj.login_id = window.parent.userId;
 		
 		var checkedeventArr = [];
 		

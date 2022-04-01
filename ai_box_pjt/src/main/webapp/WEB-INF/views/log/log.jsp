@@ -541,6 +541,12 @@ $(document).ready(function(){
 	//$('#excelExport').show();
 });
 $(document).ready(function () {
+	if (window.parent.userId == null) {
+		location.replace('/index');
+	}
+	if (typeof window.parent.loginUser != 'function') {
+		location.replace('/index/log');
+	}
 	var obj = new Object();
 	obj.count = "100";
 	
@@ -622,7 +628,7 @@ $(document).ready(function () {
 						if (rowData.event_source == 'SCADA') {
 							alert(getTranslate('noImage'));
 						} else {
-							if (get('userdata') != null) {
+							if (window.parent.userId != null) {
 								if(popup_window[POPUP_SEARCH] && !popup_window[POPUP_SEARCH].closed)
 									popup_window[POPUP_SEARCH].close();
 

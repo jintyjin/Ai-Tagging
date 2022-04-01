@@ -225,6 +225,12 @@ $(document).ajaxStop(function(data){
 }); 
 
 $(document).ready(function () {
+	if (window.parent.userId == null) {
+		location.replace('/index');
+	}
+	if (typeof window.parent.loginUser != 'function') {
+		location.replace('/index/album');
+	}
 	var arr = [];
 	var jsonUrl = '/albumInfo';
 

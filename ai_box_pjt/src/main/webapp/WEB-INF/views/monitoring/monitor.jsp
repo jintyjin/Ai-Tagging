@@ -61,6 +61,12 @@ function get(key) {
 	return sessionStorage.getItem(key);
 }
 window.addEventListener('DOMContentLoaded', function() {
+	if (window.parent.userId == null) {
+		location.replace('/index');
+	}
+	if (typeof window.parent.loginUser != 'function') {
+		location.replace('/index');
+	}
 	for (var i = 1; i < 65; i++) {
 		$("#bottom").append('<div class="chImage" id="ch' + i + '"><div class="dev_title" id="dev_title_' + i + '" ></div><a id="a_' + i + '"><img id="' + i + '" onError="noImage(this);"/></a></div>');
 	}
@@ -98,7 +104,7 @@ window.addEventListener('DOMContentLoaded', function() {
 	var stompClient = Stomp.over(socket);
 	stompClient.connect({}, function (frame) {
 		stompClient.subscribe('/showMonitor', function (message) {
-			if (JSON.parse(get('userdata')) != null) {
+			if (window.parent.userId != null) {
 				var data = JSON.parse(message.body);
 				var dev_ch = data.dev_ch;
 				var dev_title = data.dev_title;
@@ -109,7 +115,7 @@ window.addEventListener('DOMContentLoaded', function() {
 			}
 		}); 
 		stompClient.subscribe('/showBase64', function (message) {
-			if (JSON.parse(get('userdata')) != null) {
+			if (window.parent.userId != null) {
 				var data = JSON.parse(message.body);
 				var dev_ch = data.dev_ch;
 				var img_data = data.img_data;

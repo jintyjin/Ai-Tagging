@@ -9,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.SessionAttribute;
 
@@ -54,9 +55,13 @@ public class HomeController {
 		return "redirect:/index";
 	}
 	
-	@GetMapping("/index")
-	public String index(@SessionAttribute(name = SessionConst.LOGIN_MEMBER, required = false) User user, Model model) {
+	@GetMapping(value = {"/index/{pageUrl}", "/index"})
+	public String index(@PathVariable(required = false) String pageUrl, @SessionAttribute(name = SessionConst.LOGIN_MEMBER, required = false) User user, Model model) {
 		model.addAttribute("user", user);
+		if (pageUrl == null) {
+			pageUrl = "dashBoard";
+		}
+		model.addAttribute("pageUrl", pageUrl);
 		
 		return "index";
 	}

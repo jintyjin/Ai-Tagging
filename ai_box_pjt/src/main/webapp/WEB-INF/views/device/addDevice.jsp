@@ -523,7 +523,7 @@ function get(key) {
 	return sessionStorage.getItem(key);
 }
 $(document).ready(function () {
-    var web_user = JSON.parse(get('userdata')).user_id;
+    var web_user = window.parent.userId;
 	var webSocket = new WebSocket("ws://" + "${address}");
     //var rtsp_url = "${dev_rtsp_url}";
 

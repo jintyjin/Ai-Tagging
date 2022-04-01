@@ -108,6 +108,12 @@ button:focus {
 </style>
 <script>
 $(document).ready(function () {
+	if (window.parent.userId == null) {
+		location.replace('/index');
+	}
+	if (typeof window.parent.loginUser != 'function') {
+		location.replace('/index/driveSize');
+	}
 	var jsonUrl2 = "/sizeData";
 	var obj2 = new Object();
 	var jsonData2 = JSON.stringify(obj2);
