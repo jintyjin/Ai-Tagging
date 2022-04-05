@@ -269,6 +269,22 @@ var popup_width = 1280;
 var popup_height = 720;
 var userId;
 $(document).ready(function () {
+	var isDisabled = "${isDisabled}";
+	var noLoginId = "${noLoginId}";
+	var loginCount = "${loginCount}";
+
+	if (isDisabled != null && isDisabled != '' && JSON.parse("${isDisabled}")) {
+		alert(getTranslate('isDisabled'));
+	}
+	
+	if (noLoginId != null && noLoginId != '' && JSON.parse("${noLoginId}")) {
+		alert(getTranslate('noLoginId'));
+	}
+	
+	if (loginCount != null && loginCount != '' && loginCount > 0) {
+		alert(getTranslate('wrongPassword') + ' : ' + loginCount);
+	}
+	
 	$('.tabMenu').click(function () {
 		$('#menu').find('.active').addClass('tabMenu');
 		$('#menu').find('.active').removeClass('active');
@@ -636,6 +652,7 @@ function loginUser(user_id, user_pw) {
     form.setAttribute("charset", "UTF-8");
     form.setAttribute("method", "Post");  //Post 방식
     form.setAttribute("action", "/login"); //요청 보낼 주소
+    //form.setAttribute("onsubmit", "return false");
 
     var hiddenField = document.createElement("input");
     hiddenField.setAttribute("type", "text");

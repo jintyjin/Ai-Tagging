@@ -230,62 +230,65 @@ public class MyHandler extends AbstractWebSocketHandler {
 					webSession.sendDifferentMessage(return_message, webSocketService, userSession);
 				}
 			} else if (map.get("command").toString().equals("RF_REQ_IPCAMERA_UPDATE") && map.get("sender").equals("web")) {
-				map.put("status", "failed");
+				eventDao.updateDeviceTag(map);
+				
+				if (eventDao.selectByChIsConnect(map) != null) {
+					map.put("status", "failed");
 
-				String pw = map.get("dev_pwd").toString();
-				
-				pw = aes256Util.encryptAES(pw, false);
-				
-				map.put("dev_pwd", pw);
-				
-				eventDao.updateDevInfo(map);
-				eventDao.updatePresetByIsuse(map);
-				eventDao.updateActionSetup(map);
-				actionSetupService.updateTitle(map);
-				
-				//eventDao.updateActionInfoTitle(map);
-				
-				Map device_info = eventDao.deviceInfoOne2(map);
+					String pw = map.get("dev_pwd").toString();
+					
+					pw = aes256Util.encryptAES(pw, false);
+					
+					map.put("dev_pwd", pw);
+					
+					eventDao.updateDevInfo(map);
+					eventDao.updatePresetByIsuse(map);
+					eventDao.updateActionSetup(map);
+					actionSetupService.updateTitle(map);
+					
+					//eventDao.updateActionInfoTitle(map);
+					
+					Map device_info = eventDao.deviceInfoOne2(map);
 
-				Map returnMap = new LinkedHashMap();
-				returnMap.put("command", "RF_REQ_IPCAMERA_UPDATE");
-				returnMap.put("sender", "web");
-				returnMap.put("web_user", map.get("web_user"));
-				returnMap.put("req_info", device_info);
+					Map returnMap = new LinkedHashMap();
+					returnMap.put("command", "RF_REQ_IPCAMERA_UPDATE");
+					returnMap.put("sender", "web");
+					returnMap.put("web_user", map.get("web_user"));
+					returnMap.put("req_info", device_info);
 
-				TextMessage return_message = new TextMessage(new ObjectMapper().writeValueAsString(returnMap));
-				webSession.sendDifferentMessage(return_message, webSocketService, userSession);
-				
-				Map listMap = new HashMap();
-				listMap.put("ip", map.get("dev_ip").toString());
-				listMap.put("title", map.get("dev_title").toString());
-				listMap.put("ch", Integer.parseInt(map.get("dev_ch").toString()));
-				listMap.put("kwater_falldown_detection", map.get("dev_falldown").toString());
-				listMap.put("kwater_fire_detection", map.get("dev_fire").toString());
-				listMap.put("kwater_flood_detection", map.get("dev_flood").toString());
-				listMap.put("kwater_glove_detection", map.get("dev_glove").toString());
-				listMap.put("kwater_invasion_detection", map.get("dev_invasion").toString());
-				listMap.put("kwater_leak_detection", map.get("dev_leak").toString());
-				listMap.put("kwater_loitering_detection", map.get("dev_loitering").toString());
-				listMap.put("kwater_handaction_detection", map.get("dev_handaction").toString());
-				listMap.put("kwater_spin_detection", map.get("dev_spin").toString());
-				listMap.put("kwater_cmtank_leak", map.get("dev_cmtank").toString());
-				listMap.put("kwater_outtank_leak", map.get("dev_outtank").toString());
-				listMap.put("kwater_overflow", map.get("dev_overflow").toString());
-				
-				List<Map> list = new ArrayList<Map>();
-				list.add(listMap);
-				
-				Map scadaMap = new HashMap();
-				scadaMap.put("status", "update");
-				scadaMap.put("setting", list);
-				scadaMap.put("scada", "SUCCESS");
-				
-				return_message = new TextMessage(new ObjectMapper().writeValueAsString(scadaMap));
-				webSession.sendMessage(return_message, webSocketService);
-				
-				//System.out.println("return_message = " + return_message.getPayload());
-				
+					TextMessage return_message = new TextMessage(new ObjectMapper().writeValueAsString(returnMap));
+					webSession.sendDifferentMessage(return_message, webSocketService, userSession);
+					
+					Map listMap = new HashMap();
+					listMap.put("ip", map.get("dev_ip").toString());
+					listMap.put("title", map.get("dev_title").toString());
+					listMap.put("ch", Integer.parseInt(map.get("dev_ch").toString()));
+					listMap.put("kwater_falldown_detection", map.get("dev_falldown").toString());
+					listMap.put("kwater_fire_detection", map.get("dev_fire").toString());
+					listMap.put("kwater_flood_detection", map.get("dev_flood").toString());
+					listMap.put("kwater_glove_detection", map.get("dev_glove").toString());
+					listMap.put("kwater_invasion_detection", map.get("dev_invasion").toString());
+					listMap.put("kwater_leak_detection", map.get("dev_leak").toString());
+					listMap.put("kwater_loitering_detection", map.get("dev_loitering").toString());
+					listMap.put("kwater_handaction_detection", map.get("dev_handaction").toString());
+					listMap.put("kwater_spin_detection", map.get("dev_spin").toString());
+					listMap.put("kwater_cmtank_leak", map.get("dev_cmtank").toString());
+					listMap.put("kwater_outtank_leak", map.get("dev_outtank").toString());
+					listMap.put("kwater_overflow", map.get("dev_overflow").toString());
+					
+					List<Map> list = new ArrayList<Map>();
+					list.add(listMap);
+					
+					Map scadaMap = new HashMap();
+					scadaMap.put("status", "update");
+					scadaMap.put("setting", list);
+					scadaMap.put("scada", "SUCCESS");
+					
+					return_message = new TextMessage(new ObjectMapper().writeValueAsString(scadaMap));
+					webSession.sendMessage(return_message, webSocketService);
+					
+					//System.out.println("return_message = " + return_message.getPayload());
+				}
 			} else if (map.get("command").toString().equals("RF_RES_IPCAMERA_UPDATE")) {
 				map.put("command", "RF_SET_IPCAMERA_INFO");
 				map.put("sender", "web");

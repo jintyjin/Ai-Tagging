@@ -515,4 +515,12 @@ public class EventDao {
 	public Map selectLogPopup(Map map) {
 		return sqlSession.selectOne("sql.selectLogPopup", map);
 	}
+	
+	public void updateDeviceTag(Map map) {
+		sqlSession.update("sql.updateDeviceTag", map);
+	}
+	
+	public Map selectByChIsConnect(Map map) {
+		return sqlSession.selectOne("sql.selectByChIsConnect", map);
+	}
 }

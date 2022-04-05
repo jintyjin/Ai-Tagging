@@ -36,8 +36,12 @@ public class UserRepository {
 		return sqlSessionTemplate.selectOne("user.findRecentOne");
 	}
 	
-	public User login(User user) {
-		return sqlSessionTemplate.selectOne("user.login", user);
+	public User checkId(String user_id) {
+		return sqlSessionTemplate.selectOne("user.checkId", user_id);
+	}
+	
+	public User checkPw(User user) {
+		return sqlSessionTemplate.selectOne("user.checkPw", user);
 	}
 	
 }

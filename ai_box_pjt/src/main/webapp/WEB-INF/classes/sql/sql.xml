@@ -449,10 +449,10 @@
 			<if test='status == "failed"'>
 				, dev_isconnect = 'N'
 			</if>
-			<if test='command == "RF_REQ_IPCAMERA_UPDATE"'>
+			<!-- <if test='command == "RF_REQ_IPCAMERA_UPDATE"'>
 				, dev_fire = #{dev_fire}, dev_falldown = #{dev_falldown}, dev_flood = #{dev_flood}, dev_glove = #{dev_glove}, dev_invasion = #{dev_invasion}, dev_leak = #{dev_leak}, dev_loitering = #{dev_loitering}
 				, dev_handaction = #{dev_handaction}, dev_spin = #{dev_spin}, dev_cmtank = #{dev_cmtank}, dev_outtank = #{dev_outtank}, dev_overflow = #{dev_overflow}
-			</if>
+			</if> -->
 		</set>
 		where dev_ch = #{dev_ch}::integer;
 	</insert>
@@ -1060,4 +1060,18 @@
 		set width = #{width}, height = #{height}
 		where dev_ch = #{dev_ch} and event_time = #{event_time};
 	</update>
+	
+	<update id="updateDeviceTag" parameterType="java.util.Map">
+		update data.devinfo
+		set 
+			dev_fire = #{dev_fire}, dev_falldown = #{dev_falldown}, dev_flood = #{dev_flood}, dev_glove = #{dev_glove}, dev_invasion = #{dev_invasion}, dev_leak = #{dev_leak}, dev_loitering = #{dev_loitering},
+			dev_handaction = #{dev_handaction}, dev_spin = #{dev_spin}, dev_cmtank = #{dev_cmtank}, dev_outtank = #{dev_outtank}, dev_overflow = #{dev_overflow}
+		where dev_ch = #{dev_ch}::integer;
+	</update>
+	
+	<select id="selectByChIsConnect" parameterType="java.util.Map" resultType="java.util.Map">
+		select *
+		from data.devinfo
+		where dev_ch = #{dev_ch} and dev_isconnect = 'Y';
+	</select>
 </mapper>

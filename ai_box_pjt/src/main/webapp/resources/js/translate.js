@@ -201,6 +201,11 @@ var lang = {
 		speakerPassword : "스피커 비밀번호",
 		
 		driveCapacity : " 드라이브 용량 (F/T)",
+		
+		// 로그인
+		noLoginId : "존재하지 않는 회원입니다." ,
+		isDisabled : "비밀번호가 5회 이상 잘못 입력되어  아이디가 잠겼습니다. 관리자에게 문의하세요." ,
+		wrongPassword : "잘못된 비밀번호 입니다. 5회이상 잘못 입력될 시 아이디가 잠기고 관리자에게 문의하여야 합니다. 현재 로그인 시도 횟수",
 	},
 	"en" : {
 		webTitle : "Intelligent Video Safety Management System", 
@@ -404,6 +409,11 @@ var lang = {
 		speakerPassword : "Speaker password",
 
 		driveCapacity : " Drive capacity (F/T)",
+
+		// 로그인
+		noLoginId : "You are a member who does not exist" ,
+		isDisabled : "The ID was locked because the password was entered incorrectly more than 5 times. Please contact your administrator." ,
+		wrongPassword : "Invalid password. If you enter it incorrectly more than 5 times, your ID will be locked and you will have to contact the administrator. Current login attempts",
 	}
 }
 function getLanguage() {

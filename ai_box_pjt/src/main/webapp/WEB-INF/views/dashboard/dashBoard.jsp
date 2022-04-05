@@ -330,6 +330,15 @@ var eventArr = ['falldown', 'fire', 'flood', 'glove', 'invasion', 'leak', 'loite
 var week = new Array('일', '월', '화', '수', '목', '금', '토');
 var day2 = new Date();
 var year2 = day2.getFullYear();
+function get(key) {
+	return sessionStorage.getItem(key);
+}
+function setStartDate(startDate) {
+	sessionStorage.setItem('startDate', startDate);
+}
+function setEndDate(endDate) {
+	sessionStorage.setItem('endDate', endDate);
+}
 $(document).ready(function () {
 	if (window.parent.userId == null) {
 		location.replace('/index');
@@ -367,7 +376,12 @@ $(document).ready(function () {
 		width: 180, height: 30, formatString: 'yyyy-MM-dd', theme: 'metrodark', dropDownVerticalAlignment: 'bottom'	//, placeHolder: getEndFormatDate(new Date)
 	});
 	
-	getStartFormatDate(new Date());
+	if (get('startDate') != null && get('endDate') != null) {
+		$('#startDate').jqxDateTimeInput('setDate', new Date(get('startDate').split('-')[0], get('startDate').split('-')[1] - 1, get('startDate').split('-')[2]));
+		$('#endDate').jqxDateTimeInput('setDate', new Date(get('endDate').split('-')[0], get('endDate').split('-')[1] - 1, get('endDate').split('-')[2]));
+	} else {
+		getStartFormatDate(new Date());
+	}
 
 	$(".calendar").on('valueChanged', function (event) {
 		getStatisticsData($('#startDate').jqxDateTimeInput('val'), $('#endDate').jqxDateTimeInput('val'));
@@ -389,6 +403,9 @@ function getStatisticsData(startDate, endDate) {
 	var obj = new Object();
 	obj.startDate = startDate;
 	obj.endDate = endDate;
+
+	setStartDate(startDate);
+	setEndDate(endDate);
 	
 	var jsonUrl = "/dashboard";
 	
@@ -407,7 +424,6 @@ function getStatisticsData(startDate, endDate) {
 	    	clearRightData();
 	    	changeMiddleCount(totalEventCountData);
 	    	changeBottomCount(dateEventCountData);
-	    	
 	    },
 		error: function(errorThrown) {
 			alert(errorThrown.statusText);

@@ -12,10 +12,12 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.SessionAttribute;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.refa.ai.dto.user.UserLoginDto;
 import com.refa.ai.entity.User;
 import com.refa.ai.infra.SessionConst;
+import com.refa.ai.repository.LoginCountRepository;
 import com.refa.ai.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -25,18 +27,34 @@ import lombok.RequiredArgsConstructor;
 public class HomeController {
 
 	private final UserRepository userRepository;
+	private final LoginCountRepository loginCountRepository;
 	
 	@GetMapping("/login")
 	public String login(Model model) {
+		System.out.println("login GET");
 		return "login";
 	}
 	
 	@PostMapping("/login")
-	public String login(@ModelAttribute UserLoginDto userLoginDto, HttpServletRequest request) {
-		User user = userRepository.login(new User(userLoginDto.getUser_id(), userLoginDto.getUser_pw()));
+	public String login(@ModelAttribute UserLoginDto userLoginDto, HttpServletRequest request, RedirectAttributes redirectAttribute) {
+		System.out.println("login POST");
+		if (loginCountRepository.isDisabled(userLoginDto.getUser_id())) {
+			redirectAttribute.addFlashAttribute("isDisabled", true);
+			return "redirect:/index";
+		}
+		
+		if (userRepository.checkId(userLoginDto.getUser_id()) == null) {
+			redirectAttribute.addFlashAttribute("noLoginId", true);
+			return "redirect:/index";
+		}
+		
+		User user = userRepository.checkPw(new User(userLoginDto.getUser_id(), userLoginDto.getUser_pw()));
 		
 		if (user == null) {
-			return "index";
+			int loginCount = loginCountRepository.addLoginCount(userLoginDto.getUser_id());
+			redirectAttribute.addFlashAttribute("loginCount", loginCount);
+			redirectAttribute.addFlashAttribute("isDisabled", loginCountRepository.isDisabled(userLoginDto.getUser_id()));
+			return "redirect:/index";
 		}
 		
 		HttpSession session = request.getSession();
