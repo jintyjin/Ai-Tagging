@@ -546,14 +546,14 @@ $(document).ready(function () {
 
 			<% } %>
 		});
-		stompClient.subscribe('/eventStatus', function (message) {
+		/* stompClient.subscribe('/eventStatus', function (message) {
 			if (userId != null) {
 				if(popup_window[POPUP_MORE] && !popup_window[POPUP_MORE].closed) {
 				} else {
 					popup_window[POPUP_MORE] = openWindow('/eventStatusSetup', 'eventStatusSetup', 1280, 720);	// 1280 + 16, 720 + 68	
 				}
 			}
-		});
+		}); */
 	});
 	$('#output_path').change(function (e) {
 		$('#formUploadDir').submit();

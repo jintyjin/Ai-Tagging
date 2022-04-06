@@ -560,12 +560,12 @@ function get(key) {
 	return sessionStorage.getItem(key);
 }
 $(document).ready(function () {
-	if (window.parent.userId == null) {
+	/* if (window.parent.userId == null) {
 		location.replace('/index');
-	}
-	if (typeof window.parent.loginUser != 'function') {
+	} */
+	/* if (typeof window.parent.loginUser != 'function') {
 		location.replace('/index/addNetworkSpeaker');
-	}
+	} */
     var web_user = window.parent.userId;
 
 	$('#falldown').jqxDropDownList({displayMember: 'text', valueMember: 'value', scrollBarSize:10, dropDownHeight: 200,  width: 230, height: 25, theme: 'metrodark'});

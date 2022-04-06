@@ -176,9 +176,17 @@ public class ResponseEventsRepositoryImpl implements ResponseEventsRepository {
 
 							// sendEventAction(metadata, ml_result); // 추후 수정
 
-							checkShowPopUp(metadata, ml_result);
-
-							sendWebsocket(map);
+							try {
+								checkShowPopUp(metadata, ml_result);
+							} catch (Exception e) {
+								System.out.println("checkShowPopUp Error");
+							}
+							
+							try {
+								sendWebsocket(map);
+							} catch (Exception e) {
+								System.out.println("sendWebsocket Error");
+							}
 						}
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
@@ -715,6 +723,10 @@ public class ResponseEventsRepositoryImpl implements ResponseEventsRepository {
 							if (action_action.contains("프리셋")) {
 								goToPreset(map);
 							}
+							
+							if (action_action.contains("스피커")) {
+								checkNetworkSpeaker(map);
+							}
 
 						}
 
@@ -793,11 +805,11 @@ public class ResponseEventsRepositoryImpl implements ResponseEventsRepository {
 		if (returnMap != null) {
 			// 이벤트 액션 설정 체크해야됨
 
-			List<Map> list = eventDao.selectNetworkSpeaker();
+//			List<Map> list = eventDao.selectNetworkSpeaker();
 
-			for (int i = 0; i < list.size(); i++) {
-				playNetworkSpeaker(returnMap, list.get(i));
-			}
+//			for (int i = 0; i < list.size(); i++) {
+//				playNetworkSpeaker(returnMap, list.get(i));
+//			}
 
 			this.template.setMessageConverter((MessageConverter) new StringMessageConverter());
 			this.template.convertAndSend("/playAlarm", returnStr);
@@ -863,6 +875,33 @@ public class ResponseEventsRepositoryImpl implements ResponseEventsRepository {
 		}
 	}
 
+	private void checkNetworkSpeaker(Map map) throws JsonProcessingException {
+		ObjectMapper mapper = new ObjectMapper();
+		String returnStr = mapper.writeValueAsString(map);
+
+		map.put("action_action", "스피커");
+
+		String dev_title = "";
+		Map returnMap2 = eventDao.deviceInfoOne2(map);
+		if (returnMap2 != null) {
+			dev_title = returnMap2.get("dev_title").toString();
+		}
+		map.put("dev_title", dev_title);
+		map.put("isEvent", true);
+
+		Map returnMap = eventDao.selectEventActionByAction(map);
+
+		if (returnMap != null) {
+			// 이벤트 액션 설정 체크해야됨
+
+			List<Map> list = eventDao.selectNetworkSpeaker();
+
+			for (int i = 0; i < list.size(); i++) {
+				playNetworkSpeaker(returnMap, list.get(i));
+			}
+		}
+	}
+	
 	private void playNetworkSpeaker(Map returnMap, Map map) {
 //		System.out.println("sendSpeakerNumber()");
 
