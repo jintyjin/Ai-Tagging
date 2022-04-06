@@ -1,5 +1,7 @@
 package com.refa.ai.controller;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Locale;
 
 import javax.servlet.http.HttpServletRequest;
@@ -19,6 +21,7 @@ import com.refa.ai.entity.User;
 import com.refa.ai.infra.SessionConst;
 import com.refa.ai.repository.LoginCountRepository;
 import com.refa.ai.repository.UserRepository;
+import com.refa.ai.service.LoginCountService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -28,6 +31,7 @@ public class HomeController {
 
 	private final UserRepository userRepository;
 	private final LoginCountRepository loginCountRepository;
+	private final LoginCountService loginCountService;
 	
 	@GetMapping("/login")
 	public String login(Model model) {
@@ -38,8 +42,16 @@ public class HomeController {
 	@PostMapping("/login")
 	public String login(@ModelAttribute UserLoginDto userLoginDto, HttpServletRequest request, RedirectAttributes redirectAttribute) {
 		System.out.println("login POST");
-		if (loginCountRepository.isDisabled(userLoginDto.getUser_id())) {
+		
+		String userId = userLoginDto.getUser_id();
+		String userPw = userLoginDto.getUser_pw();
+		
+		if (loginCountRepository.isDisabled(userId)) {
 			redirectAttribute.addFlashAttribute("isDisabled", true);
+			
+			Duration duration = Duration.between(LocalDateTime.now(), loginCountRepository.getDisabledTime(userId));
+			redirectAttribute.addFlashAttribute("disabledTime", duration.getSeconds() / 60);
+			
 			return "redirect:/index";
 		}
 		
@@ -48,12 +60,18 @@ public class HomeController {
 			return "redirect:/index";
 		}
 		
-		User user = userRepository.checkPw(new User(userLoginDto.getUser_id(), userLoginDto.getUser_pw()));
+		User user = userRepository.checkPw(new User(userId, userPw));
 		
 		if (user == null) {
-			int loginCount = loginCountRepository.addLoginCount(userLoginDto.getUser_id());
-			redirectAttribute.addFlashAttribute("loginCount", loginCount);
-			redirectAttribute.addFlashAttribute("isDisabled", loginCountRepository.isDisabled(userLoginDto.getUser_id()));
+			if (!loginCountService.addAndCheckDisabled(userId)) {
+				redirectAttribute.addFlashAttribute("isDisabled", !loginCountService.addAndCheckDisabled(userId));
+				
+				Duration duration = Duration.between(LocalDateTime.now(), loginCountRepository.getDisabledTime(userId));
+				redirectAttribute.addFlashAttribute("disabledTime", duration.getSeconds() / 60);
+			} else {
+				int loginCount = loginCountRepository.getLoginCount(userId);
+				redirectAttribute.addFlashAttribute("loginCount", loginCount);
+			}
 			return "redirect:/index";
 		}
 		

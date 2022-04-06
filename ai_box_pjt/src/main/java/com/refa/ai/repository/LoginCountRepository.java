@@ -1,30 +1,47 @@
 package com.refa.ai.repository;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.stereotype.Repository;
 
+import com.refa.ai.dto.LoginCountDto;
+
 @Repository
 public class LoginCountRepository {
 	
-	private static Map<String, Integer> list = new ConcurrentHashMap<String, Integer>();
+	private static Map<String, LoginCountDto> list = new ConcurrentHashMap<String, LoginCountDto>();
 	
 	private final int MAX_LOGIN_COUNT = 5;
+	private final int LIMIT_MINUTE = 5;
 	
-	public int addLoginCount(String loginId) {
+	public int addCount(String loginId) {
 		if (isNull(loginId)) {
-			list.put(loginId, 1);
+			list.put(loginId, new LoginCountDto(1));
 			return 1;
 		}
 		
-		if (isDisabled(loginId)) {
-			return 5;
+		list.get(loginId).setCount(list.get(loginId).getCount() + 1);
+		
+		if (list.get(loginId).getCount() == MAX_LOGIN_COUNT) {
+			updateDate(loginId);
 		}
 		
-		list.put(loginId, list.get(loginId) + 1);
-		return list.get(loginId);
+		return list.get(loginId).getCount();
 		
+	}
+	
+	public boolean isMaxLoginCount(int loginCount) {
+		return loginCount == MAX_LOGIN_COUNT;
+	}
+	
+	public LocalDateTime getDisabledTime(String loginId) {
+		if (isNull(loginId)) {
+			return null;
+		}
+		
+		return list.get(loginId).getDisabledTime();
 	}
 	
 	public int getLoginCount(String loginId) {
@@ -32,12 +49,12 @@ public class LoginCountRepository {
 			return 0;
 		}
 		
-		return list.get(loginId);
+		return list.get(loginId).getCount();
 		
 	}
 	
 	public boolean isDisabled(String loginId) {
-		if (isNull(loginId) || list.get(loginId) < MAX_LOGIN_COUNT) {
+		if (isNull(loginId) || list.get(loginId).getCount() < MAX_LOGIN_COUNT) {
 			return false;
 		}
 		
@@ -47,4 +64,13 @@ public class LoginCountRepository {
 	private boolean isNull(String loginId) {
 		return list.get(loginId) == null;
 	}
+
+	private void updateDate(String loginId) {
+		list.get(loginId).setDisabledTime(LocalDateTime.now().plusMinutes(LIMIT_MINUTE));
+	}
+	
+	private void initAll(String loginId) {
+		list.remove(loginId);
+	}
+
 }

@@ -272,9 +272,15 @@ $(document).ready(function () {
 	var isDisabled = "${isDisabled}";
 	var noLoginId = "${noLoginId}";
 	var loginCount = "${loginCount}";
+	var disabledTime = "${disabledTime}";
 
+	console.log(isDisabled);
+	console.log(noLoginId);
+	console.log(loginCount);
+	console.log(disabledTime);
+	
 	if (isDisabled != null && isDisabled != '' && JSON.parse("${isDisabled}")) {
-		alert(getTranslate('isDisabled'));
+		alert(getTranslate('isDisabled') + disabledTime + getTranslate('minutes'));
 	}
 	
 	if (noLoginId != null && noLoginId != '' && JSON.parse("${noLoginId}")) {
