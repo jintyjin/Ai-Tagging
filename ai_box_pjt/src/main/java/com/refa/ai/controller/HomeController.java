@@ -35,38 +35,27 @@ public class HomeController {
 	
 	@GetMapping("/login")
 	public String login(Model model) {
-		System.out.println("login GET");
 		return "login";
 	}
 	
 	@PostMapping("/login")
 	public String login(@ModelAttribute UserLoginDto userLoginDto, HttpServletRequest request, RedirectAttributes redirectAttribute) {
-		System.out.println("login POST");
-		
 		String userId = userLoginDto.getUser_id();
 		String userPw = userLoginDto.getUser_pw();
-		
-		if (loginCountRepository.isDisabled(userId)) {
-			redirectAttribute.addFlashAttribute("isDisabled", true);
-			
-			Duration duration = Duration.between(LocalDateTime.now(), loginCountRepository.getDisabledTime(userId));
-			redirectAttribute.addFlashAttribute("disabledTime", duration.getSeconds() / 60);
-			
-			return "redirect:/index";
-		}
-		
-		if (userRepository.checkId(userLoginDto.getUser_id()) == null) {
+
+		if (userRepository.checkId(userId) == null) {
 			redirectAttribute.addFlashAttribute("noLoginId", true);
 			return "redirect:/index";
 		}
 		
 		User user = userRepository.checkPw(new User(userId, userPw));
+		LocalDateTime now = LocalDateTime.now();
 		
 		if (user == null) {
 			if (!loginCountService.addAndCheckDisabled(userId)) {
 				redirectAttribute.addFlashAttribute("isDisabled", !loginCountService.addAndCheckDisabled(userId));
 				
-				Duration duration = Duration.between(LocalDateTime.now(), loginCountRepository.getDisabledTime(userId));
+				Duration duration = Duration.between(now, loginCountRepository.getDisabledTime(userId));
 				redirectAttribute.addFlashAttribute("disabledTime", duration.getSeconds() / 60);
 			} else {
 				int loginCount = loginCountRepository.getLoginCount(userId);
@@ -75,8 +64,28 @@ public class HomeController {
 			return "redirect:/index";
 		}
 		
+		if (loginCountRepository.isDisabled(userId)) {
+			if (loginCountRepository.getDisabledTime(userId).isEqual(now) || loginCountRepository.getDisabledTime(userId).isBefore(now) && user != null) {
+				loginCountRepository.initAll(userId);
+
+				HttpSession session = request.getSession();
+				session.setAttribute(SessionConst.LOGIN_MEMBER, user);
+				
+				return "redirect:/index";
+			}
+
+			redirectAttribute.addFlashAttribute("isDisabled", true);
+			
+			Duration duration = Duration.between(now, loginCountRepository.getDisabledTime(userId));
+			redirectAttribute.addFlashAttribute("disabledTime", duration.getSeconds() / 60);
+			
+			return "redirect:/index";
+		}
+		
 		HttpSession session = request.getSession();
 		session.setAttribute(SessionConst.LOGIN_MEMBER, user);
+
+		loginCountRepository.initAll(userId);
 		
 		return "redirect:/index";
 	}

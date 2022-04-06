@@ -69,7 +69,7 @@ public class LoginCountRepository {
 		list.get(loginId).setDisabledTime(LocalDateTime.now().plusMinutes(LIMIT_MINUTE));
 	}
 	
-	private void initAll(String loginId) {
+	public void initAll(String loginId) {
 		list.remove(loginId);
 	}
 
