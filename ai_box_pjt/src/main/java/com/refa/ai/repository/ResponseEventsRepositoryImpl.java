@@ -127,6 +127,7 @@ public class ResponseEventsRepositoryImpl implements ResponseEventsRepository {
 
 	@Override
 	public void startResponseQ() {
+		System.out.println("startResponseQ()");
 		Runnable runnable = new Runnable() {
 			@Override
 			public void run() {
@@ -136,6 +137,8 @@ public class ResponseEventsRepositoryImpl implements ResponseEventsRepository {
 					try {
 //						responseEventDto = responseQ.take();
 						map = responseQ.take();
+						
+						System.out.println("Map = " + map);
 
 //						String base64 = responseEventDto.getBase64();
 						String base64 = map.get("base64").toString();
@@ -143,8 +146,12 @@ public class ResponseEventsRepositoryImpl implements ResponseEventsRepository {
 //						MetadataDto metadata = responseEventDto.getMetadata();
 						Map metadata = (Map) map.get("metadata");
 						
+						System.out.println("metadata = " + metadata);
+						
 //						List<MlResultDto> ml_result = responseEventDto.getMl_result();
 						ArrayList ml_result = (ArrayList) map.get("ml_result");
+
+						System.out.println("ml_result = " + ml_result);
 						
 						// insertResponseLogJson(map); // 추후 수정
 
@@ -162,17 +169,46 @@ public class ResponseEventsRepositoryImpl implements ResponseEventsRepository {
 						 * 7. 그 외 이벤트 액션도 개편 예정인데 쓰레드에 통합으로 넣을 지 각각 넣을 지는 좀 더 고민해봐야 함 
 						 */
 						
-						boolean isDuration = saveImage(metadata, ml_result, base64);
+						System.out.println("start isDuration");
+						
+						boolean isDuration = false;
+						try {
+							isDuration = saveImage(metadata, ml_result, base64);
+						} catch(Exception e) {
+							System.out.println("saveImage Error");
+						}
+						
+						System.out.println("isDuration = " + isDuration);
+						
+						isDuration = false;
+						
 						if (isDuration) {
-							saveImageData(metadata, ml_result);
+							try {
+								saveImageData(metadata, ml_result);
+							} catch(Exception e) {
+								System.out.println("saveImageData Error");
+							}
 
 //							monitoringThread(metadata, ml_result);
 
-							sendScada(map);
+							try {
+								sendScada(map);
+							} catch(Exception e) {
+								System.out.println("sendScada Error");
+							}
 
-							dashThread(metadata, ml_result);
+							try {
+								dashThread(metadata, ml_result);
+							} catch(Exception e) {
+								System.out.println("dashThread Error");
+							}
 
-							logThread(metadata, ml_result);
+							try {
+								logThread(metadata, ml_result);
+							} catch(Exception e) {
+								System.out.println("logThread Error");
+							}
+
 
 							// sendEventAction(metadata, ml_result); // 추후 수정
 
@@ -190,7 +226,7 @@ public class ResponseEventsRepositoryImpl implements ResponseEventsRepository {
 						}
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
-						System.out.println("startResponseQ Error");
+						System.out.println("123123123123123");
 					}
 				}
 			}
@@ -203,6 +239,9 @@ public class ResponseEventsRepositoryImpl implements ResponseEventsRepository {
 			throws ParseException, java.text.ParseException {
 		// System.out.println("saveImage()");
 		boolean isDuration = false;
+		
+		System.out.println("ml_result.size() = " + ml_result.size());
+		
 		if (ml_result.size() > 0) {
 
 			String class_name = "";
@@ -238,9 +277,9 @@ public class ResponseEventsRepositoryImpl implements ResponseEventsRepository {
 					monitoring_info += "/" + model_name + ":" + 1;
 
 					
-//					System.out.println("=====EventController isDuration 체크 시작=====");
+					System.out.println("=====EventController isDuration 체크 시작=====");
 					
-//					System.out.println("model_name = " + model_name);
+					System.out.println("model_name = " + model_name);
 
 					boolean isTrue = scheduleRepository.chkDate(Integer.parseInt(dev_ch), model_name.split("_")[1].toLowerCase(), day);
 					boolean isTrue1 = actionSetupService.checkOn(Integer.parseInt(dev_ch), model_name);
@@ -260,6 +299,8 @@ public class ResponseEventsRepositoryImpl implements ResponseEventsRepository {
 					}
 				}
 			}
+			
+			System.out.println("saveImage isDuration = " + isDuration);
 
 			if (isDuration) {
 				String firstPath = ":/web_server/";
@@ -710,8 +751,8 @@ public class ResponseEventsRepositoryImpl implements ResponseEventsRepository {
 						if (actionEventMemoryRepository.findByEvent(dev_title, model_name) != null) {
 							Map actionMap = actionEventMemoryRepository.findByEvent(dev_title, model_name);
 
-							String action_action = actionMap.get("action_action").toString();
-
+							String action_action = actionMap.getOrDefault("action_action", "").toString();
+							
 							if (action_action.contains("팝업")) {
 								showPopupImage(map);
 							}

@@ -410,7 +410,7 @@ public class EventController {
 		imageTableDto.setLimit_num(limit_num);
 		imageTableDto.setRow_num(row_num);
 
-		List<ImageTableDto> imageList = null;
+		List<ImageTableDto> imageList = new ArrayList<ImageTableDto>();
 
 		if (login.get("value") != null && login.get("value").toString().equals("갯수")) {
 			imageTableDto.setMonitoring_tag(keyword);
@@ -1451,7 +1451,7 @@ public class EventController {
 	@ResponseBody
 //	public Map responseEvents(@RequestBody ResponseEventDto responseEventDto) throws JsonProcessingException, java.text.ParseException {
 	public Map responseEvents(@RequestBody Map map) throws JsonProcessingException, java.text.ParseException, InterruptedException {
-//		System.out.println("responseEvents()");
+		System.out.println("responseEvents()");
 		
 //		MetadataDto metadata = responseEventDto.getMetadata();
 		Map metadata = (Map) map.get("metadata");
@@ -1468,10 +1468,9 @@ public class EventController {
 
 		for (Map ml_result_map : ml_result) {
 			String model_name = ml_result_map.get("model_name").toString();
-//			System.out.println("===== responseEvents 검사 시작 =====");
-//			System.out.println("model_name = " + model_name);
-//			System.out.println("resultMap.get(model_name) = " + resultMap.get(model_name));
-//			System.out.println("===== responseEvents 검사 종료 =====");
+			System.out.println("===== responseEvents 검사 시작 =====");
+			System.out.println("model_name = " + model_name);
+			System.out.println("===== responseEvents 검사 종료 =====");
 			if (!responseEventsRepository.isBox(model_name)) {
 				returnMap.put("status", "failed");
 				returnMap.put("detail", "not support");
@@ -1482,7 +1481,9 @@ public class EventController {
 		}
 		
 		if (oneSecDurService.join(oneSecDurDto)) {
+			System.out.println("responseEventsService.insertResponseQ(map) 시작");
 			responseEventsService.insertResponseQ(map);
+			System.out.println("responseEventsService.insertResponseQ(map) 종료");
 
 			returnMap.put("queue", responseEventsRepository.size());
 			returnMap.put("status", "ok");
@@ -2463,7 +2464,9 @@ public class EventController {
 		String image_name = versionMemoryRepository.findPartDriveName() + ":" + imageDto.getImage_name();
 		String thumb_name = versionMemoryRepository.findPartDriveName() + ":" + imageDto.getThumb_name();
 
-		File f = new File(image_name);
+		File f = new File(versionMemoryRepository.findPartDriveName() + ":"
+				+ imageDto.getImage_name().replaceAll("/","").replaceAll("\\","").replaceAll(".","").replaceAll("&","")
+				);
 
 		BufferedImage bi = ImageIO.read(f);
 
@@ -2479,7 +2482,9 @@ public class EventController {
 					System.out.println("not supported image type");
 				}
 				EasyImage resizedImage = easyImage.resize(640, 480);
-				FileOutputStream out = new FileOutputStream(thumb_name);
+				FileOutputStream out = new FileOutputStream(versionMemoryRepository.findPartDriveName() + ":" 
+						+ imageDto.getThumb_name().replaceAll("/","").replaceAll("\\","").replaceAll(".","").replaceAll("&","")
+						);
 				resizedImage.writeTo(out, "jpg");
 				out.close();
 			}

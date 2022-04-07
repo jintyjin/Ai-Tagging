@@ -56,7 +56,7 @@ public class ScheduleRepository {
 	}
 	
 	public boolean chkDate(int dev_ch, String event_name, String day) {
-		if (find(dev_ch, event_name) != null && !find(dev_ch, event_name).get("schedule_content").toString().isEmpty()) {
+		if (find(dev_ch, event_name) != null && find(dev_ch, event_name).get("schedule_content") != null && !find(dev_ch, event_name).get("schedule_content").toString().isEmpty()) {
 			if (find(dev_ch, event_name).get("schedule_content").toString().indexOf(day) != -1) {
 				return true;
 			}
