@@ -50,8 +50,16 @@ public class ImageService {
 
 	public String saveImage(String firstPath, String login_id, String item_name, String event_time, String img_data, String img_name) {
 		// 폴더 경로 잡아줌 - 장비 및 채널 정보 가져와서 추가로 만들어줌
-		img_name = img_name.replaceAll("/","").replaceAll("\\","").replaceAll(".","").replaceAll("&","");
+		String imgType = img_name.substring(img_name.indexOf("."));
+		img_name = img_name.substring(0, img_name.indexOf("."));
+		img_name = img_name.replaceAll("/","");
+		img_name = img_name.replaceAll("\\\\","");
+		img_name = img_name.replaceAll("\\.","");
+		img_name = img_name.replaceAll("[&]","");
+		img_name = img_name + imgType;
+		
 		String uploadPath = versionMemoryRepository.findMasterDriveName() + firstPath;
+		
 		File folder = new File(uploadPath);
 
 		if (!folder.exists()) {
@@ -96,12 +104,12 @@ public class ImageService {
 		} catch (Exception e) {
 			System.out.println("원본 이미지 저장 안됨");
 		}
-
+		
 		File f = new File(uploadPath + img_name);
 		
 		String thumb_name = (uploadPath + img_name).substring(0, (uploadPath + img_name).lastIndexOf("."))
 				+ "_thumb.jpg";
-		thumb_name = thumb_name.replaceAll("/","").replaceAll("\\","").replaceAll(".","").replaceAll("&","");
+		thumb_name = thumb_name.replaceAll("/","").replaceAll("\\\\","").replaceAll("\\.","").replaceAll("[&]","");
 		
 		String img_size = "";
 		

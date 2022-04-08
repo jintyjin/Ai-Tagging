@@ -1296,6 +1296,7 @@ public class EventController {
 		saveMap.put("action_action", action_action);
 		saveMap.put("action_source", map.get("action_source").toString());
 		saveMap.put("dev_title", map.get("dev_title").toString());
+		saveMap.put("action_isuse", map.get("action_isuse").toString());
 
 		if (Boolean.parseBoolean(map.get("isPreset").toString())) {
 			saveMap.put("pre_title", map.get("pre_title").toString());
@@ -1451,7 +1452,7 @@ public class EventController {
 	@ResponseBody
 //	public Map responseEvents(@RequestBody ResponseEventDto responseEventDto) throws JsonProcessingException, java.text.ParseException {
 	public Map responseEvents(@RequestBody Map map) throws JsonProcessingException, java.text.ParseException, InterruptedException {
-		System.out.println("responseEvents()");
+//		System.out.println("responseEvents()");
 		
 //		MetadataDto metadata = responseEventDto.getMetadata();
 		Map metadata = (Map) map.get("metadata");
@@ -1468,9 +1469,9 @@ public class EventController {
 
 		for (Map ml_result_map : ml_result) {
 			String model_name = ml_result_map.get("model_name").toString();
-			System.out.println("===== responseEvents 검사 시작 =====");
-			System.out.println("model_name = " + model_name);
-			System.out.println("===== responseEvents 검사 종료 =====");
+//			System.out.println("===== responseEvents 검사 시작 =====");
+//			System.out.println("model_name = " + model_name);
+//			System.out.println("===== responseEvents 검사 종료 =====");
 			if (!responseEventsRepository.isBox(model_name)) {
 				returnMap.put("status", "failed");
 				returnMap.put("detail", "not support");
@@ -1481,9 +1482,9 @@ public class EventController {
 		}
 		
 		if (oneSecDurService.join(oneSecDurDto)) {
-			System.out.println("responseEventsService.insertResponseQ(map) 시작");
+//			System.out.println("responseEventsService.insertResponseQ(map) 시작");
 			responseEventsService.insertResponseQ(map);
-			System.out.println("responseEventsService.insertResponseQ(map) 종료");
+//			System.out.println("responseEventsService.insertResponseQ(map) 종료");
 
 			returnMap.put("queue", responseEventsRepository.size());
 			returnMap.put("status", "ok");

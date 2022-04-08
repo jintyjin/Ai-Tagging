@@ -138,21 +138,15 @@ public class ResponseEventsRepositoryImpl implements ResponseEventsRepository {
 //						responseEventDto = responseQ.take();
 						map = responseQ.take();
 						
-						System.out.println("Map = " + map);
-
 //						String base64 = responseEventDto.getBase64();
 						String base64 = map.get("base64").toString();
 						
 //						MetadataDto metadata = responseEventDto.getMetadata();
 						Map metadata = (Map) map.get("metadata");
 						
-						System.out.println("metadata = " + metadata);
-						
 //						List<MlResultDto> ml_result = responseEventDto.getMl_result();
 						ArrayList ml_result = (ArrayList) map.get("ml_result");
 
-						System.out.println("ml_result = " + ml_result);
-						
 						// insertResponseLogJson(map); // 추후 수정
 
 						// insertResponseLog(map); // 추후 수정
@@ -169,18 +163,12 @@ public class ResponseEventsRepositoryImpl implements ResponseEventsRepository {
 						 * 7. 그 외 이벤트 액션도 개편 예정인데 쓰레드에 통합으로 넣을 지 각각 넣을 지는 좀 더 고민해봐야 함 
 						 */
 						
-						System.out.println("start isDuration");
-						
 						boolean isDuration = false;
 						try {
 							isDuration = saveImage(metadata, ml_result, base64);
 						} catch(Exception e) {
 							System.out.println("saveImage Error");
 						}
-						
-						System.out.println("isDuration = " + isDuration);
-						
-						isDuration = false;
 						
 						if (isDuration) {
 							try {
@@ -216,17 +204,19 @@ public class ResponseEventsRepositoryImpl implements ResponseEventsRepository {
 								checkShowPopUp(metadata, ml_result);
 							} catch (Exception e) {
 								System.out.println("checkShowPopUp Error");
+								e.printStackTrace();
 							}
 							
 							try {
 								sendWebsocket(map);
 							} catch (Exception e) {
 								System.out.println("sendWebsocket Error");
+								e.printStackTrace();
 							}
 						}
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
-						System.out.println("123123123123123");
+						System.out.println("startResponseQ Error");
 					}
 				}
 			}
@@ -239,8 +229,6 @@ public class ResponseEventsRepositoryImpl implements ResponseEventsRepository {
 			throws ParseException, java.text.ParseException {
 		// System.out.println("saveImage()");
 		boolean isDuration = false;
-		
-		System.out.println("ml_result.size() = " + ml_result.size());
 		
 		if (ml_result.size() > 0) {
 
@@ -275,12 +263,7 @@ public class ResponseEventsRepositoryImpl implements ResponseEventsRepository {
 					String model_name = ml_result_map.get("model_name").toString();
 					class_name += model_name + 1;
 					monitoring_info += "/" + model_name + ":" + 1;
-
 					
-					System.out.println("=====EventController isDuration 체크 시작=====");
-					
-					System.out.println("model_name = " + model_name);
-
 					boolean isTrue = scheduleRepository.chkDate(Integer.parseInt(dev_ch), model_name.split("_")[1].toLowerCase(), day);
 					boolean isTrue1 = actionSetupService.checkOn(Integer.parseInt(dev_ch), model_name);
 					boolean isTrue2 = actionSetupService.selectOne(Integer.parseInt(dev_ch)) != null;
@@ -300,8 +283,6 @@ public class ResponseEventsRepositoryImpl implements ResponseEventsRepository {
 				}
 			}
 			
-			System.out.println("saveImage isDuration = " + isDuration);
-
 			if (isDuration) {
 				String firstPath = ":/web_server/";
 				String img_name = metadata.get("img_name").toString(); // 원본 이미지 파일명으로 받음
@@ -592,7 +573,7 @@ public class ResponseEventsRepositoryImpl implements ResponseEventsRepository {
 	}
 
 	private void logThread(Map metadata, ArrayList ml_result) throws ParseException {
-		System.out.println("logThread()");
+//		System.out.println("logThread()");
 		if (ml_result.size() > 0) {
 			boolean isResult = false;
 
@@ -676,107 +657,112 @@ public class ResponseEventsRepositoryImpl implements ResponseEventsRepository {
 	}
 
 	private void checkShowPopUp(Map metadata, ArrayList ml_result) throws Exception { // 팝업 보여줄 지 확인하는 로직
-		System.out.println("checkShowPopUp()");
+//		System.out.println("checkShowPopUp()");
 
-		if (ml_result.size() > 0) {
-			boolean isResult = false;
+		try {
+			if (ml_result.size() > 0) {
+				boolean isResult = false;
 
-			String class_name = "";
-			
-			String login_id = metadata.get("user_name").toString(); // 사용자 ID
-			String dev_ch = metadata.get("dev_ch").toString();
-			String dev_title = "";
-			String dev_mac_address = "";
-			Map return_map = eventDao.deviceInfoOne2(metadata);
-			if (return_map != null) {
-				if (return_map.get("dev_title") != null) {
-					dev_title = return_map.get("dev_title").toString();
+				String class_name = "";
+				
+				String login_id = metadata.get("user_name").toString(); // 사용자 ID
+				String dev_ch = metadata.get("dev_ch").toString();
+				String dev_title = "";
+				String dev_mac_address = "";
+				Map return_map = eventDao.deviceInfoOne2(metadata);
+				if (return_map != null) {
+					if (return_map.get("dev_title") != null) {
+						dev_title = return_map.get("dev_title").toString();
+					}
+					if (return_map.get("dev_mac_address") != null) {
+						dev_mac_address = return_map.get("dev_mac_address").toString();
+					}
 				}
-				if (return_map.get("dev_mac_address") != null) {
-					dev_mac_address = return_map.get("dev_mac_address").toString();
-				}
-			}
-			String dev_id = metadata.get("dev_id").toString();
-			String dev_pwd = metadata.get("dev_pwd").toString();
-			String item_name = metadata.get("item_name").toString();
-			String dev_ip = metadata.get("dev_ip").toString();
-			String event_time = metadata.get("event_time").toString();
-			String img_name = metadata.get("img_name").toString(); // 원본 이미지 파일명으로 받음
-			String dev_web_port = metadata.get("dev_web_port").toString();
+				String dev_id = metadata.get("dev_id").toString();
+				String dev_pwd = metadata.get("dev_pwd").toString();
+				String item_name = metadata.get("item_name").toString();
+				String dev_ip = metadata.get("dev_ip").toString();
+				String event_time = metadata.get("event_time").toString();
+				String img_name = metadata.get("img_name").toString(); // 원본 이미지 파일명으로 받음
+				String dev_web_port = metadata.get("dev_web_port").toString();
 
-			for (int i = 0; i < ml_result.size(); i++) {
-				Map ml_result_map = (Map) ml_result.get(i);
-				if (ml_result_map.get("status").toString().equals("SUCCESS")
-						&& Integer.parseInt(ml_result_map.get("count").toString()) > 0) {
-					String model_name = ml_result_map.get("model_name").toString();
+				for (int i = 0; i < ml_result.size(); i++) {
+					Map ml_result_map = (Map) ml_result.get(i);
+					if (ml_result_map.get("status").toString().equals("SUCCESS")
+							&& Integer.parseInt(ml_result_map.get("count").toString()) > 0) {
+						String model_name = ml_result_map.get("model_name").toString();
 
-					String uploadPath = versionMemoryRepository.findMasterDriveName() + ":/web_server/" + login_id + "/" + item_name + "/"
-							+ event_time.split(" ")[0].split("-")[0] + event_time.split(" ")[0].split("-")[1]
-							+ event_time.split(" ")[0].split("-")[2] + "/" + img_name;
+						String uploadPath = versionMemoryRepository.findMasterDriveName() + ":/web_server/" + login_id + "/" + item_name + "/"
+								+ event_time.split(" ")[0].split("-")[0] + event_time.split(" ")[0].split("-")[1]
+								+ event_time.split(" ")[0].split("-")[2] + "/" + img_name;
 
-					File f = new File(uploadPath);
+						File f = new File(uploadPath);
 
-					BufferedImage bi = ImageIO.read(f);
+						BufferedImage bi = ImageIO.read(f);
 
-					int hWidth = bi.getWidth();
-					int hHeight = bi.getHeight();
+						int hWidth = bi.getWidth();
+						int hHeight = bi.getHeight();
 
-					Map map = new HashMap();
-					map.put("img_name", uploadPath.substring(uploadPath.indexOf("/")));
-					map.put("width", hWidth);
-					map.put("height", hHeight);
-					map.put("event_name", login_id + "_" + dev_ch + "_" + model_name);
-					map.put("dev_ip", dev_ip);
-					map.put("login_id", login_id);
-					map.put("dev_ch", dev_ch);
-					map.put("model_name", model_name);
-					map.put("event_time", event_time);
-					map.put("dev_title", dev_title);
-					map.put("action_source", "지능형안전관리시스템");
-					map.put("dev_id", dev_id);
-					map.put("dev_pwd", dev_pwd);
-					map.put("dev_web_port", dev_web_port);
-					map.put("dev_mac_address", dev_mac_address);
+						Map map = new HashMap();
+						map.put("img_name", uploadPath.substring(uploadPath.indexOf("/")));
+						map.put("width", hWidth);
+						map.put("height", hHeight);
+						map.put("event_name", login_id + "_" + dev_ch + "_" + model_name);
+						map.put("dev_ip", dev_ip);
+						map.put("login_id", login_id);
+						map.put("dev_ch", dev_ch);
+						map.put("model_name", model_name);
+						map.put("event_time", event_time);
+						map.put("dev_title", dev_title);
+						map.put("action_source", "지능형안전관리시스템");
+						map.put("dev_id", dev_id);
+						map.put("dev_pwd", dev_pwd);
+						map.put("dev_web_port", dev_web_port);
+						map.put("dev_mac_address", dev_mac_address);
 
-					Date date_time = new Date();
+						Date date_time = new Date();
 
-//					System.out.println("무시 여부 = " + rejectEventService.chkTime(Integer.parseInt(dev_ch), model_name, date_time));
+//						System.out.println("무시 여부 = " + rejectEventService.chkTime(Integer.parseInt(dev_ch), model_name, date_time));
 
-					if (rejectEventService.chkTime(Integer.parseInt(dev_ch), model_name,
-							new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(event_time))) {
-//						System.out.println(model_name + " / " + dev_ch);
+						if (rejectEventService.chkTime(Integer.parseInt(dev_ch), model_name,
+								new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(event_time))) {
+//							System.out.println(model_name + " / " + dev_ch);
 
-						eventReject(map);
+							eventReject(map);
 
-						if (actionEventMemoryRepository.findByEvent(dev_title, model_name) != null) {
-							Map actionMap = actionEventMemoryRepository.findByEvent(dev_title, model_name);
+							if (actionEventMemoryRepository.findByEvent(dev_title, model_name) != null) {
+								Map actionMap = actionEventMemoryRepository.findByEvent(dev_title, model_name);
 
-							String action_action = actionMap.getOrDefault("action_action", "").toString();
-							
-							if (action_action.contains("팝업")) {
-								showPopupImage(map);
-							}
+								String action_action = actionMap.getOrDefault("action_action", "").toString();
+								
+								if (action_action.contains("팝업")) {
+									showPopupImage(map);
+								}
 
-							if (action_action.contains("알람")) {
-								playAlarm(map);
-							}
+								if (action_action.contains("알람")) {
+									playAlarm(map);
+								}
 
-							if (action_action.contains("프리셋")) {
-								goToPreset(map);
-							}
-							
-							if (action_action.contains("스피커")) {
-								checkNetworkSpeaker(map);
+								if (action_action.contains("프리셋")) {
+									goToPreset(map);
+								}
+								
+								if (action_action.contains("스피커")) {
+									checkNetworkSpeaker(map);
+								}
+
 							}
 
 						}
-
 					}
 				}
-			}
 
-			if (isResult) {
+				if (isResult) {
+				}
 			}
+		} catch (Exception e) {
+			System.out.println("checkShowPopUp error");
+			e.printStackTrace();
 		}
 	}
 	
@@ -1053,7 +1039,7 @@ public class ResponseEventsRepositoryImpl implements ResponseEventsRepository {
 					body = handler.handleResponse(response);
 //					System.out.println("스피커 = " + body);
 				} else {
-					System.out.println("response is error : " + response.getStatusLine().getStatusCode());
+//					System.out.println("response is error : " + response.getStatusLine().getStatusCode());
 				}
 				response.close();
 			} catch(IOException ie) {
@@ -1063,110 +1049,113 @@ public class ResponseEventsRepositoryImpl implements ResponseEventsRepository {
 	}
 
 	private void sendWebsocket(Map responseMap) throws Exception {
-		 System.out.println("sendWebsocket()");
+//		System.out.println("sendWebsocket()");
 
 		Map metadata = (Map) responseMap.get("metadata");
 
 		ArrayList ml_result = (ArrayList) responseMap.get("ml_result");
 
-		if (ml_result.size() > 0) {
-			boolean isResult = false;
+		try {
+			if (ml_result.size() > 0) {
+				boolean isResult = false;
 
-			String class_name = "";
+				String class_name = "";
 
-			String ip = metadata.get("dev_ip").toString();
-			int port = Integer.parseInt(metadata.get("dev_port").toString());
-			int ch = Integer.parseInt(metadata.get("dev_ch").toString());
-			List list = new ArrayList();
-			String event_time = metadata.get("event_time").toString();
-			String scada = "SUCCESS";
+				String ip = metadata.get("dev_ip").toString();
+				int port = Integer.parseInt(metadata.get("dev_port").toString());
+				int ch = Integer.parseInt(metadata.get("dev_ch").toString());
+				List list = new ArrayList();
+				String event_time = metadata.get("event_time").toString();
+				String scada = "SUCCESS";
 
-			String login_id = metadata.get("user_name").toString(); // 사용자 ID
-			String dev_ch = metadata.get("dev_ch").toString();
+				String login_id = metadata.get("user_name").toString(); // 사용자 ID
+				String dev_ch = metadata.get("dev_ch").toString();
 
-			String dev_title = "";
-			Map return_map = eventDao.deviceInfoOne2(metadata);
-			if (return_map != null) {
-				dev_title = return_map.get("dev_title").toString();
-			}
-			metadata.put("dev_title", dev_title);
+				String dev_title = "";
+				Map return_map = eventDao.deviceInfoOne2(metadata);
+				if (return_map != null) {
+					dev_title = return_map.get("dev_title").toString();
+				}
+				metadata.put("dev_title", dev_title);
 
-			String item_name = metadata.get("item_name").toString();
-			String img_name = metadata.get("img_name").toString(); // 원본 이미지 파일명으로 받음
+				String item_name = metadata.get("item_name").toString();
+				String img_name = metadata.get("img_name").toString(); // 원본 이미지 파일명으로 받음
 
-			List<Map> result_list = new ArrayList<Map>();
+				List<Map> result_list = new ArrayList<Map>();
 
-			for (int i = 0; i < ml_result.size(); i++) {
-				Map ml_result_map = (Map) ml_result.get(i);
-				
-				boolean isTrue1 = ml_result_map.get("status").toString().equals("SUCCESS");
-				boolean isTrue2 = Integer.parseInt(ml_result_map.get("count").toString()) > 0;
-
-//				System.out.println("sendWebsocket method isTrue1 = " + isTrue1);
-//				System.out.println("sendWebsocket method isTrue2 = " + isTrue2);
-				
-				if (isTrue1 && isTrue2) {
-					result_list.add(ml_result_map);
-					String model_name = ml_result_map.get("model_name").toString();
-
-					Date date_time = new Date();
+				for (int i = 0; i < ml_result.size(); i++) {
+					Map ml_result_map = (Map) ml_result.get(i);
 					
-					boolean isTrue3 = rejectEventService.chkTime(Integer.parseInt(dev_ch), model_name,
-							new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(event_time));
+					boolean isTrue1 = ml_result_map.get("status").toString().equals("SUCCESS");
+					boolean isTrue2 = Integer.parseInt(ml_result_map.get("count").toString()) > 0;
 
-//					System.out.println("sendWebsocket method isTrue3 = " + isTrue3);
+//					System.out.println("sendWebsocket method isTrue1 = " + isTrue1);
+//					System.out.println("sendWebsocket method isTrue2 = " + isTrue2);
 					
-					if (!isTrue3) {
-						return;
-					}
+					if (isTrue1 && isTrue2) {
+						result_list.add(ml_result_map);
+						String model_name = ml_result_map.get("model_name").toString();
 
-					metadata.put("model_name", model_name);
-					metadata.put("action_action", "SMS(SCADA)");
-					metadata.put("action_source", "지능형안전관리시스템");
-					metadata.put("isEvent", true);
-
-					Map returnMap = eventDao.selectEventActionByAction(metadata);
-
-					boolean isTrue4 = actionEventMemoryRepository.findByEvent(dev_title, model_name) != null;
-
-//					System.out.println("sendWebsocket method isTrue4 = " + isTrue4);
-					
-					if (isTrue4) {
-						Map actionMap = actionEventMemoryRepository.findByEvent(dev_title, model_name);
-
-						String action_action = actionMap.get("action_action").toString();
-
-						boolean isTrue5 = returnMap != null && action_action.indexOf("SMS(SCADA)") != -1;
-
-//						System.out.println("sendWebsocket method isTrue5 = " + isTrue5);
+						Date date_time = new Date();
 						
-						if (isTrue5) {
-							isResult = true;
-						}
-					}
+						boolean isTrue3 = rejectEventService.chkTime(Integer.parseInt(dev_ch), model_name,
+								new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(event_time));
 
-					list.add(model_name);
+//						System.out.println("sendWebsocket method isTrue3 = " + isTrue3);
+						
+						if (!isTrue3) {
+							return;
+						}
+
+						metadata.put("model_name", model_name);
+						metadata.put("action_action", "SMS(SCADA)");
+						metadata.put("action_source", "지능형안전관리시스템");
+						metadata.put("isEvent", true);
+
+						Map returnMap = eventDao.selectEventActionByAction(metadata);
+
+						boolean isTrue4 = actionEventMemoryRepository.findByEvent(dev_title, model_name) != null;
+
+//						System.out.println("sendWebsocket method isTrue4 = " + isTrue4);
+						
+						if (isTrue4) {
+							Map actionMap = actionEventMemoryRepository.findByEvent(dev_title, model_name);
+
+							String action_action = actionMap.get("action_action").toString();
+
+							boolean isTrue5 = returnMap != null && action_action.indexOf("SMS(SCADA)") != -1;
+
+//							System.out.println("sendWebsocket method isTrue5 = " + isTrue5);
+							
+							if (isTrue5) {
+								isResult = true;
+							}
+						}
+
+						list.add(model_name);
+					}
+				}
+				
+//				System.out.println("sendWebsocket method isResult = " + isResult);
+
+				if (isResult) {
+					Map map = new LinkedHashMap();
+					map.put("ip", ip);
+					map.put("port", port);
+					map.put("ch", ch);
+					map.put("model_name", list);
+					map.put("result_list", result_list);
+					map.put("event_time", event_time);
+					map.put("scada", scada);
+					map.put("isEventAction", "Y");
+
+					TextMessage return_message = new TextMessage(new ObjectMapper().writeValueAsString(map));
+					webSession.sendMessage(return_message, webSocketService);
 				}
 			}
-			
-//			System.out.println("sendWebsocket method isResult = " + isResult);
-
-			if (isResult) {
-				Map map = new LinkedHashMap();
-				map.put("ip", ip);
-				map.put("port", port);
-				map.put("ch", ch);
-				map.put("model_name", list);
-				map.put("result_list", result_list);
-				map.put("event_time", event_time);
-				map.put("scada", scada);
-				map.put("isEventAction", "Y");
-
-				TextMessage return_message = new TextMessage(new ObjectMapper().writeValueAsString(map));
-				webSession.sendMessage(return_message, webSocketService);
-			}
+		} catch (Exception e) {
+			System.out.println("sendWebsocket error");
+			e.printStackTrace();
 		}
 	}
-
-
 }
