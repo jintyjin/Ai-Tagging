@@ -282,7 +282,7 @@ $(document).ready(function () {
     $("#jqxgrid").on('contextmenu', function () {
         return false;
     });
-	/* $("#jqxgrid").on('rowclick', function (event) {
+	$("#jqxgrid").on('rowclick', function (event) {
         if (event.args.rightclick) {
             $("#jqxgrid").jqxGrid('selectrow', event.args.rowindex);
             var scrollTop = $(window).scrollTop();
@@ -290,7 +290,45 @@ $(document).ready(function () {
             contextMenu.jqxMenu('open', parseInt(event.args.originalEvent.clientX) + 5 + scrollLeft, parseInt(event.args.originalEvent.clientY) + 5 + scrollTop);
             return false;
         }
-    }); */
+    });
+	
+	$("#Menu").on('itemclick', function (event) {
+        var args = event.args;
+        var rowindex = $("#jqxgrid").jqxGrid('getselectedrowindex');
+        if ($.trim($(args).text()) == getTranslate('modify')) {
+            if (rowindex != -1) {
+                var offset = $("#jqxgrid").offset();
+                var dataRecord = $("#jqxgrid").jqxGrid('getrowdata', rowindex);
+        		
+                //alert(dataRecord.dev_ch);
+                var login_id = window.parent.userId;
+                if (login_id == 'admin') {
+                	login_id = dataRecord.login_id;
+                }
+                var dev_ch = dataRecord.dev_ch;
+                popup_window[POPUP_MORE] = openWindow('./addDevice.htm?dev_ch=' + dev_ch + '&login_id=' + login_id, 'deviceModify', 1948, 880);
+            }
+        } else {
+            if (rowindex != -1) {
+                var offset = $("#jqxgrid").offset();
+                var dataRecord = $("#jqxgrid").jqxGrid('getrowdata', rowindex);
+
+           		var msg = {
+        			command: 'RF_REQ_IPCAMERA_DELETE',
+        			web_user: window.parent.userId,
+        			sender: 'web',
+        			dev_ch: dataRecord.dev_ch,
+        			dev_title: dataRecord.dev_title
+        		};
+
+        		// Send the msg object as a JSON-formatted string.
+        		webSocket.send(JSON.stringify(msg));
+
+        		location.reload();
+            }
+        }
+    });
+	
 	var webSocket = new WebSocket("ws://" + "${address}");
 
 	webSocket.onmessage = function(message) {
@@ -302,7 +340,6 @@ $(document).ready(function () {
    			location.reload();
 		}
 	};
-	
 	
 	$('#modify').click(function() {
         var rowindex = $("#jqxgrid").jqxGrid('getselectedrowindex');

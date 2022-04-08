@@ -301,7 +301,59 @@ $(document).ready(function () {
 			alert(JSON.stringify(data));
 		}
 	});
-	
+
+	var contextMenu = $("#Menu").jqxMenu({ width: 100, autoOpenPopup: false, mode: 'popup'});
+    $("#jqxgrid").on('contextmenu', function () {
+        return false;
+    });
+	$("#jqxgrid").on('rowclick', function (event) {
+        if (event.args.rightclick) {
+            $("#jqxgrid").jqxGrid('selectrow', event.args.rowindex);
+            var scrollTop = $(window).scrollTop();
+            var scrollLeft = $(window).scrollLeft();
+            contextMenu.jqxMenu('open', parseInt(event.args.originalEvent.clientX) + 5 + scrollLeft, parseInt(event.args.originalEvent.clientY) + 5 + scrollTop);
+            return false;
+        }
+    });
+
+	$("#Menu").on('itemclick', function (event) {
+        var args = event.args;
+        var rowindex = $("#jqxgrid").jqxGrid('getselectedrowindex');
+        if ($.trim($(args).text()) == getTranslate('modify')) {
+            if (rowindex != -1) {
+                var offset = $("#jqxgrid").offset();
+                var dataRecord = $("#jqxgrid").jqxGrid('getrowdata', rowindex);
+                var speakerIdx = dataRecord.network_idx;
+                popup_window[POPUP_MORE] = openWindow('./addNetworkSpeaker.htm?status=modify&speakerIdx=' + speakerIdx, 'addNetworkSpeaker', 1400, 1200);
+            }
+        } else {
+            if (rowindex != -1) {
+                var offset = $("#jqxgrid").offset();
+                var dataRecord = $("#jqxgrid").jqxGrid('getrowdata', rowindex);
+                var speakerIdx = dataRecord.network_idx;
+                
+            	var jsonUrl = "/deleteNetworkSpeaker";
+            	var obj = new Object();
+            	obj.idx = speakerIdx;
+            		
+            	var jsonData = JSON.stringify(obj);
+            	
+            	$.ajax({
+            		type : "POST",                        	 	     
+            		url : jsonUrl,                      		
+            		dataType : "json",                        	  
+            		contentType : "application/json; charset=UTF-8",
+            		data : jsonData,        		     		 
+            		success: function(data) {
+               			location.reload();
+            		},
+            		error: function(errorThrown) {
+            			alert(errorThrown.statusText);
+            		}
+            	});
+            }
+        }
+    });
 	$('#modify').click(function() {
         var args = event.args;
         var rowindex = $("#jqxgrid").jqxGrid('getselectedrowindex');
@@ -414,6 +466,12 @@ function chkType(type) {
 		<span id="nvr" class="type" onclick="chkType('nvr');">nvr</span>
 	</div>
 	<div id="jqxgrid"></div>
+	<div id='Menu'>
+		<ul>
+			<li><spring:message code="common.modify" /></li>
+			<li><spring:message code="common.delete" /></li>
+		</ul>
+	</div>
 </div>
 <div class="btnDiv">
 	<button class="button_check" onclick="addInfo();">
