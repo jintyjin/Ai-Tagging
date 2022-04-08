@@ -204,14 +204,12 @@ public class ResponseEventsRepositoryImpl implements ResponseEventsRepository {
 								checkShowPopUp(metadata, ml_result);
 							} catch (Exception e) {
 								System.out.println("checkShowPopUp Error");
-								e.printStackTrace();
 							}
 							
 							try {
 								sendWebsocket(map);
 							} catch (Exception e) {
 								System.out.println("sendWebsocket Error");
-								e.printStackTrace();
 							}
 						}
 					} catch (Exception e) {
