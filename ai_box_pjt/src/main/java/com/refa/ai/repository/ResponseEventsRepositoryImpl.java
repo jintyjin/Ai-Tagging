@@ -760,7 +760,6 @@ public class ResponseEventsRepositoryImpl implements ResponseEventsRepository {
 			}
 		} catch (Exception e) {
 			System.out.println("checkShowPopUp error");
-			e.printStackTrace();
 		}
 	}
 	
@@ -1153,7 +1152,6 @@ public class ResponseEventsRepositoryImpl implements ResponseEventsRepository {
 			}
 		} catch (Exception e) {
 			System.out.println("sendWebsocket error");
-			e.printStackTrace();
 		}
 	}
 }
