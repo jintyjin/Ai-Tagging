@@ -107,9 +107,7 @@ public class ImageService {
 		
 		File f = new File(uploadPath + img_name);
 		
-		String thumb_name = (uploadPath + img_name).substring(0, (uploadPath + img_name).lastIndexOf("."))
-				+ "_thumb.jpg";
-		thumb_name = thumb_name.replaceAll("/","").replaceAll("\\\\","").replaceAll("\\.","").replaceAll("[&]","");
+		String thumb_name = uploadPath + img_name.substring(0, img_name.indexOf(".")) + "_thumb" + imgType;
 		
 		String img_size = "";
 		

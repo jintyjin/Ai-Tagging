@@ -860,12 +860,12 @@ var year2 = day2.getFullYear();
 var isDateStr = "";
 var isShow = false;
 $(document).ready(function () {
-	if (window.parent.userId == null) {
+	if (window.parent.userId == null && parent.opener.window.parent.userId == null) {
 		location.replace('/index');
 	}
-	if (typeof window.parent.loginUser != 'function') {
+	/* if (typeof window.parent.loginUser != 'function') {
 		location.replace('index');
-	}
+	} */
 	<% User user = (User)request.getAttribute("user"); %>
 	
 	var userId = '<%= user.getUser_id() %>';
