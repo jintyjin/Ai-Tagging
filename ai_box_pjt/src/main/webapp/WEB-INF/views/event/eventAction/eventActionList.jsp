@@ -667,7 +667,8 @@ $(document).ready(function () {
 		        	{ name: 'action_source', type: 'string'},
 		        	{ name: 'action_key', type: 'string'},
 		        	{ name: 'action', type: 'string'},
-		        	{ name: 'scada_tag', type: 'string'}
+		        	{ name: 'scada_tag', type: 'string'},
+		        	{ name: 'network_title', type: 'string'}
 				]
 			};
 			var dataAdapter = new $.jqx.dataAdapter(source);
@@ -803,24 +804,24 @@ $(document).ready(function () {
 	     // event.args.rowindex is a bound index.
 		$('.modify_setting_hide').attr('class','modify_setting');
 		var data = $('.grid').jqxGrid('getrowdata', event.args.rowindex);
-		
+
 		var actionList = data.action_action.split(', ');
-		
-		if (data.action_action.indexOf(getTranslate('스피커')) != -1) {
-			selectNetworkSpeaker(data.dev_title, ".action_content_network_content", data.network_title);
-		}
-		
+
 		$(".tag_content_tag_content").jqxDropDownList('uncheckAll'); 
 		$(".tag_content_device_content").jqxDropDownList('uncheckAll'); 
 		$(".action_content_action_content").jqxDropDownList('uncheckAll'); 
 		$(".action_content_manager_content").jqxDropDownList('uncheckAll'); 
 
-		$(".tag_content_device_content").jqxDropDownList('selectItem', data.dev_title);
-		
 		for (var i = 0; i < actionList.length; i++) {
 			$(".action_content_action_content").jqxDropDownList('checkItem', actionList[i]);
 		}
 
+		if (data.action_action.indexOf(getTranslate('스피커')) != -1) {
+			selectNetworkSpeaker(data.dev_title, ".action_content_network_content", data.network_title);
+		}
+		
+		$(".tag_content_device_content").jqxDropDownList('selectItem', data.dev_title);
+		
 		/* if (data.action_action.indexOf('프리셋') != -1) {
 			selectPreset250(data.dev_title, ".action_content_manager_content", data.pre_title);
 		} */
