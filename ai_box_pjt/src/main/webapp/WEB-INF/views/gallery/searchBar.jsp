@@ -925,7 +925,7 @@ var status;
 var image_idx;
 document.documentElement.className = hasSupport ? 'pass' : 'fail';
 $(document).ready(function () {
-	if (window.parent.userId == null && parent.opener.window.parent.userId == null) {
+	if (window.parent.userId == null && parent.opener.window.parent.userId == null && parent.opener.parent.opener.window.parent.userId == null) {
 		location.replace('/index');
 	}
 	/* if (typeof window.parent.loginUser != 'function') {

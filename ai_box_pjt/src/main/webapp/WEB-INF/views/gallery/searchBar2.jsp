@@ -473,10 +473,10 @@ var changeTopWidth;
 var changeLeft;
 var leftVal;
 $(document).ready(function () {
-	if (window.parent.userId == null) {
+	if (window.parent.userId == null && parent.opener.window.parent.userId == null && parent.opener.parent.opener.window.parent.userId == null) {
 		location.replace('/index');
 	}
-	if (typeof window.parent.loginUser != 'function') {
+	if (typeof window.parent.loginUser != 'function' && typeof parent.opener.window.parent.loginUser != 'function' && parent.opener.parent.opener.window.parent.userId == null) {
 		location.replace('/searchBar.htm?status=first&keyword=');
 	}
 	//alert(get('ModalInfoArr'));
