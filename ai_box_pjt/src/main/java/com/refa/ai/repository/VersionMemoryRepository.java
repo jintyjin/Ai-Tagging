@@ -39,7 +39,10 @@ public class VersionMemoryRepository {
 	public String findPartDriveName() {
 		return partDriveName;
 	}
-
+	
+	public int findDriveCount() {
+		return driveCount;
+	}
 
 	public void initDriveName() {
 		String drive;

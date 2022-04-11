@@ -235,6 +235,7 @@ public class EventController {
 	@PostConstruct
 	public void init()
 			throws ParseException, java.text.ParseException, ClientProtocolException, IOException, SQLException {
+		drive_count = versionMemoryRepository.findDriveCount();
 		backupImageDay(null);
 		deleteImageDay(null);
 		if (drive_count > 1) {
@@ -244,6 +245,7 @@ public class EventController {
 		requestScadaQ = new LinkedBlockingQueue<RequestScadaDto>();
 
 		startRequestScadaQ();
+		
 		// startEventActionQ();
 	}
 
@@ -290,7 +292,7 @@ public class EventController {
 
 	@RequestMapping(value = "/downloadImageGroup")
 	@ResponseBody
-	public int downloadImage(@RequestBody Map<String, Object> login, HttpServletResponse response) throws IOException {
+	public int downloadImageGroup(@RequestBody Map<String, Object> login, HttpServletResponse response) throws IOException {
 
 		// System.out.println("Heap Size(M) : " + heapSize / (1024 * 1024) + " MB");
 
@@ -320,7 +322,7 @@ public class EventController {
 
 	@RequestMapping(value = "/downloadImage")
 	@ResponseBody
-	public int downloadImageGroup(@RequestBody Map<String, Object> login, HttpServletResponse response)
+	public int downloadImage(@RequestBody Map<String, Object> login, HttpServletResponse response)
 			throws IOException {
 		// System.out.println("downloadImage()");
 
@@ -2099,7 +2101,6 @@ public class EventController {
 
 	public String downloadZipGroup(Map<String, Object> login, HttpServletResponse response, String zipName)
 			throws IOException {
-		System.out.println("downloadZipGroup()");
 		// long heapSize = Runtime.getRuntime().totalMemory();
 
 		// System.out.println("Heap Size(M) : " + heapSize / (1024 * 1024) + " MB");
@@ -2128,9 +2129,7 @@ public class EventController {
 				files.add(versionMemoryRepository.findMasterDriveName() + ":" + i.get("image_name").toString().replace("webserver", "web_server"));
 				file_size += FileUtils.sizeOf(new File(versionMemoryRepository.findMasterDriveName() + ":" + i.get("image_name").toString().replace("webserver", "web_server")));
 				count++;
-				continue;
-			}
-			if (new File(versionMemoryRepository.findPartDriveName() + ":" + i.get("image_name").toString().replace("webserver", "web_server")).exists()) {
+			} else if (new File(versionMemoryRepository.findPartDriveName() + ":" + i.get("image_name").toString().replace("webserver", "web_server")).exists()) {
 				files.add(versionMemoryRepository.findPartDriveName() + ":" + i.get("image_name").toString().replace("webserver", "web_server"));
 				file_size += FileUtils.sizeOf(new File(versionMemoryRepository.findPartDriveName() + ":" + i.get("image_name").toString().replace("webserver", "web_server")));
 				count++;
@@ -2192,29 +2191,31 @@ public class EventController {
 			ZipOutputStream zout = null;
 			FileInputStream in = null;
 
-			for (int k = 0; k < files.size(); k++) {
-				try {
-					zout = new ZipOutputStream(new FileOutputStream(tempPath + zipName));
+			try {
+				zout = new ZipOutputStream(new FileOutputStream(tempPath + zipName));
+				
+				for (int k = 0; k < files.size(); k++) {
 					in = new FileInputStream(files.get(k));
-					
+
 					zout.putNextEntry(new ZipEntry(files.get(k).split("/")[4] + "_" + files.get(k).split("/")[5]));
 
 					int len;
 					while ((len = in.read(buffer)) > 0) {
 						zout.write(buffer, 0, len);
 					}
-				} catch (Exception e) {
-					System.out.println("downloadZipGroup Error");
-				} finally {
-					if (zout != null) {
-						zout.close();
-					}
-					if (in != null) {
-						in.close();
+					
+					if ((k % 100) == 0) {
+//						System.out.println("이미지 압축 현황 : " + k + " / " + files.size());
 					}
 				}
-				if ((k % 100) == 0) {
-//					System.out.println("이미지 압축 현황 : " + k + " / " + files.size());
+			} catch (Exception e) {
+				System.out.println("downloadZipGroup Error");
+			} finally {
+				if (zout != null) {
+					zout.close();
+				}
+				if (in != null) {
+					in.close();
 				}
 			}
 		}
@@ -2299,9 +2300,9 @@ public class EventController {
 			ZipOutputStream zout = null;
 			FileInputStream in = null;
 
-			for (int k = 0; k < files.size(); k++) {
-				try {
-					zout = new ZipOutputStream(new FileOutputStream(tempPath + zipName));
+			try {
+				zout = new ZipOutputStream(new FileOutputStream(tempPath + zipName));
+				for (int k = 0; k < files.size(); k++) {
 					in = new FileInputStream(files.get(k));
 					zout.putNextEntry(new ZipEntry(files.get(k).split("/")[4] + "_" + files.get(k).split("/")[5]));
 
@@ -2309,15 +2310,15 @@ public class EventController {
 					while ((len = in.read(buffer)) > 0) {
 						zout.write(buffer, 0, len);
 					}
-				} catch (Exception e) {
-					System.out.println("downloadZip error");
-				} finally {
-					if (zout != null) {
-						zout.close();
-					}
-					if (in != null) {
-						in.close();
-					}
+				}
+			} catch (Exception e) {
+				System.out.println("downloadZip error");
+			} finally {
+				if (zout != null) {
+					zout.close();
+				}
+				if (in != null) {
+					in.close();
 				}
 			}
 		}
