@@ -264,7 +264,8 @@
 		'event_info',#{event_info},
 		'event_time',#{event_time},
 		'event_isCheck','Y',
-		'event_source',#{event_source} 
+		'event_source',#{event_source},
+		'event_confidence',#{event_confidence} 
 		))
 		returning *;
 	</select>

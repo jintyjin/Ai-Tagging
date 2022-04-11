@@ -577,6 +577,7 @@ public class ResponseEventsRepositoryImpl implements ResponseEventsRepository {
 
 			String class_name = "";
 			List originalTags = new ArrayList();
+			List<Double> confidenceList = new ArrayList<>();
 
 			for (int i = 0; i < ml_result.size(); i++) {
 				Map ml_result_map = (Map) ml_result.get(i);
@@ -585,6 +586,10 @@ public class ResponseEventsRepositoryImpl implements ResponseEventsRepository {
 					isResult = true;
 					class_name += ml_result_map.get("model_name").toString() + 1;
 					originalTags.add(ml_result_map.get("model_name").toString());
+					double confidence = Double.parseDouble(
+							((Map) ((List) ml_result_map.get(boxList.get(ml_result_map.get("model_name").toString()))).get(0))
+							.get("confidence").toString());
+					confidenceList.add(confidence);
 				}
 			}
 
@@ -625,6 +630,7 @@ public class ResponseEventsRepositoryImpl implements ResponseEventsRepository {
 					eventDto.setDev_port(dev_port);
 					eventDto.setDev_web_port(dev_web_port);
 					eventDto.setEvent_source("지능형안전관리시스템");
+					eventDto.setEvent_confidence(confidenceList.get(i));
 
 					eventDto.setEvent_info(event_info);
 
