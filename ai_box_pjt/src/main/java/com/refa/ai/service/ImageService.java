@@ -3,6 +3,7 @@ package com.refa.ai.service;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -32,23 +33,26 @@ public class ImageService {
 	
 	private final VersionMemoryRepository versionMemoryRepository;
 	
-	public void saveImage(String path, String imgName, String base64) {
+	public void saveImage(String path, String imgName, String base64) throws IOException {
 		byte[] imageBytes = DatatypeConverter.parseBase64Binary(base64);
 
+		FileOutputStream lFileOutputStream = null;
+		
 		try {
 			File lOutFile = new File(path + imgName);
 
-			FileOutputStream lFileOutputStream = new FileOutputStream(lOutFile);
+			lFileOutputStream = new FileOutputStream(lOutFile);
 
 			lFileOutputStream.write(imageBytes);
 
-			lFileOutputStream.close();
 		} catch (Exception e) {
 			System.out.println("원본 이미지 저장 안됨");
+		} finally {
+			lFileOutputStream.close();
 		}
 	}
 
-	public String saveImage(String firstPath, String login_id, String item_name, String event_time, String img_data, String img_name) {
+	public String saveImage(String firstPath, String login_id, String item_name, String event_time, String img_data, String img_name) throws IOException {
 		// 폴더 경로 잡아줌 - 장비 및 채널 정보 가져와서 추가로 만들어줌
 		String imgType = img_name.substring(img_name.indexOf("."));
 		img_name = img_name.substring(0, img_name.indexOf("."));
@@ -92,17 +96,21 @@ public class ImageService {
 
 		byte[] imageBytes = DatatypeConverter.parseBase64Binary(data);
 
+		FileOutputStream lFileOutputStream = null; 
+				
 		try {
 			File lOutFile = new File(uploadPath + img_name);
 
-			FileOutputStream lFileOutputStream = new FileOutputStream(lOutFile);
+			lFileOutputStream = new FileOutputStream(lOutFile);
 
 			lFileOutputStream.write(imageBytes);
 
-			lFileOutputStream.close();
-
 		} catch (Exception e) {
 			System.out.println("원본 이미지 저장 안됨");
+		} finally {
+			if (lFileOutputStream != null) {
+				lFileOutputStream.close();
+			}
 		}
 		
 		File f = new File(uploadPath + img_name);
@@ -110,7 +118,10 @@ public class ImageService {
 		String thumb_name = uploadPath + img_name.substring(0, img_name.indexOf(".")) + "_thumb" + imgType;
 		
 		String img_size = "";
-		
+
+		FileOutputStream lFileOutputStream2 = null; 
+		FileOutputStream out = null;
+				
 		try {
 			EasyImage easyImage = new EasyImage(f);
 			BufferedImage bi = ImageIO.read(f);
@@ -127,25 +138,29 @@ public class ImageService {
 			if (hWidth < 640 || hHeight < 480) {
 				File lOutFile = new File(thumb_name);
 
-				FileOutputStream lFileOutputStream = new FileOutputStream(lOutFile);
+				lFileOutputStream2 = new FileOutputStream(lOutFile);
 
-				lFileOutputStream.write(imageBytes);
-
-				lFileOutputStream.close();
+				lFileOutputStream2.write(imageBytes);
 
 			} else {
 				// resize
 				EasyImage resizedImage = easyImage.resize(640, 480);
 
-				FileOutputStream out = new FileOutputStream(thumb_name);
+				out = new FileOutputStream(thumb_name);
 
 				resizedImage.writeTo(out, "jpg");
 
-				out.close();
 			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			System.out.println("썸네일 이미지 저장 안됨");
+		} finally {
+			if (out != null) {
+				out.close();
+			}
+			if (lFileOutputStream2 != null) {
+				lFileOutputStream2.close();
+			}
 		}
 
 		return img_size;

@@ -37,36 +37,42 @@ public class ImageUtil {
 	 }
 	 
 	 //파일을 복사하는 메소드
-	 public static void fileCopy(String inFileName, String outFileName) {
+	 public static void fileCopy(String inFileName, String outFileName) throws IOException {
+		 FileInputStream fis = null; 
+		 FileOutputStream fos = null;
 		 try {
-			 FileInputStream fis = new FileInputStream(inFileName);
-			 FileOutputStream fos = new FileOutputStream(outFileName);
+			 fis = new FileInputStream(inFileName);
+			 fos = new FileOutputStream(outFileName);
 	   
 			 int data = 0;
 			 while((data=fis.read())!=-1) {
 				 fos.write(data);
 			 }
-			 fis.close();
-			 fos.close();
-	   
 		 } catch (IOException e) {
 			 // TODO Auto-generated catch block
 			 System.out.println("파일 복사 불가");
+		 } finally {
+			 if (fis != null) {
+				 fis.close();
+			 }
+			 if (fos != null) {
+				 fos.close();
+			 }
 		 }
 	 }
 	 
 	 //파일을 이동하는 메소드
-	 public static void fileMove(String inFileName, String outFileName) {
+	 public static void fileMove(String inFileName, String outFileName) throws IOException {
+		 FileInputStream fis = null;
+		 FileOutputStream fos = null;
 		 try {
-			 FileInputStream fis = new FileInputStream(inFileName);
-			 FileOutputStream fos = new FileOutputStream(outFileName);
+			 fis = new FileInputStream(inFileName);
+			 fos = new FileOutputStream(outFileName);
 	   
 			 int data = 0;
 			 while((data=fis.read())!=-1) {
 				 fos.write(data);
 			 }
-			 fis.close();
-			 fos.close();
 	   
 			 //복사한뒤 원본파일을 삭제함
 			 fileDelete(inFileName);
@@ -74,6 +80,13 @@ public class ImageUtil {
 		 } catch (IOException e) {
 			 // TODO Auto-generated catch block
 			 System.out.println("파일 이동 불가");
+		 } finally {
+			 if (fis != null) {
+				 fis.close();
+			 }
+			 if (fos != null) {
+				 fos.close();
+			 }
 		 }
 	 }
 	 

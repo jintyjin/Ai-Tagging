@@ -548,7 +548,8 @@ $(document).ready(function () {
 		location.replace('/index/log');
 	}
 	var obj = new Object();
-	obj.count = "100";
+	var count = "100";
+	obj.count = count;
 	
 	var ascount = 0;
 	

@@ -224,7 +224,7 @@ public class ResponseEventsRepositoryImpl implements ResponseEventsRepository {
 	}
 
 	private boolean saveImage(Map metadata, ArrayList ml_result, String base64)
-			throws ParseException, java.text.ParseException {
+			throws ParseException, java.text.ParseException, IOException {
 		// System.out.println("saveImage()");
 		boolean isDuration = false;
 		

@@ -59,6 +59,5 @@ public class PropertiestTest {
 	@Test
 	public void properties가져오기() {
 		AES256Util aES256Util = new AES256Util();
-		System.out.println(aES256Util.decryptAES(aES256Util.encryptAES("12345", false)));
 	}
 }

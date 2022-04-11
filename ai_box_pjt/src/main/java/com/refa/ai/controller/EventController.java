@@ -2105,8 +2105,6 @@ public class EventController {
 		// System.out.println("Heap Size(M) : " + heapSize / (1024 * 1024) + " MB");
 		List<String> files = new ArrayList<String>();
 
-		ZipOutputStream zout = null;
-
 		// 파일 이름은 유저이름 + 날짜 + 시간(초단위)로 변경
 		String tempPath = "";
 
@@ -2190,39 +2188,35 @@ public class EventController {
 				// System.out.println("폴더가 이미 존재합니다.");
 			}
 
-			zout = new ZipOutputStream(new FileOutputStream(tempPath + zipName));
 			byte[] buffer = new byte[1024];
+			ZipOutputStream zout = null;
 			FileInputStream in = null;
 
 			for (int k = 0; k < files.size(); k++) {
 				try {
+					zout = new ZipOutputStream(new FileOutputStream(tempPath + zipName));
 					in = new FileInputStream(files.get(k));
+					
+					zout.putNextEntry(new ZipEntry(files.get(k).split("/")[4] + "_" + files.get(k).split("/")[5]));
+
+					int len;
+					while ((len = in.read(buffer)) > 0) {
+						zout.write(buffer, 0, len);
+					}
 				} catch (Exception e) {
-					in = new FileInputStream(files.get(k));
+					System.out.println("downloadZipGroup Error");
+				} finally {
+					if (zout != null) {
+						zout.close();
+					}
+					if (in != null) {
+						in.close();
+					}
 				}
-				// zout.putNextEntry(new
-				// ZipEntry(files.get(k).substring(files.get(k).lastIndexOf("/") + 1)));
-				zout.putNextEntry(new ZipEntry(files.get(k).split("/")[4] + "_" + files.get(k).split("/")[5]));
-				// heapSize = Runtime.getRuntime().totalMemory();
-
-				// System.out.println("Heap Size(M) : " + heapSize / (1024 * 1024) + " MB");
-				// System.out.println("압축에 들어간 파일명 : " + files.get(k).split("/")[4] + "_" +
-				// files.get(k).split("/")[5]);
-
-				int len;
-				while ((len = in.read(buffer)) > 0) {
-					zout.write(buffer, 0, len);
-				}
-
-				zout.closeEntry();
-				in.close();
-
 				if ((k % 100) == 0) {
 //					System.out.println("이미지 압축 현황 : " + k + " / " + files.size());
 				}
 			}
-
-			zout.close();
 		}
 
 		// System.out.println("다운로드 한 파일 갯수 : " + files.size());
@@ -2234,8 +2228,6 @@ public class EventController {
 	public String downloadZip(Map<String, Object> login, HttpServletResponse response, String zipName)
 			throws IOException {
 		List<String> files = new ArrayList<String>();
-
-		ZipOutputStream zout = null;
 
 		// 파일 이름은 유저이름 + 날짜 + 시간(초단위)로 변경
 		String tempPath = "";
@@ -2302,28 +2294,32 @@ public class EventController {
 				// System.out.println("폴더가 이미 존재합니다.");
 			}
 
-			zout = new ZipOutputStream(new FileOutputStream(tempPath + zipName));
 			byte[] buffer = new byte[1024];
+			
+			ZipOutputStream zout = null;
 			FileInputStream in = null;
 
 			for (int k = 0; k < files.size(); k++) {
 				try {
+					zout = new ZipOutputStream(new FileOutputStream(tempPath + zipName));
 					in = new FileInputStream(files.get(k));
+					zout.putNextEntry(new ZipEntry(files.get(k).split("/")[4] + "_" + files.get(k).split("/")[5]));
+
+					int len;
+					while ((len = in.read(buffer)) > 0) {
+						zout.write(buffer, 0, len);
+					}
 				} catch (Exception e) {
-					in = new FileInputStream(files.get(k));
+					System.out.println("downloadZip error");
+				} finally {
+					if (zout != null) {
+						zout.close();
+					}
+					if (in != null) {
+						in.close();
+					}
 				}
-				zout.putNextEntry(new ZipEntry(files.get(k).split("/")[4] + "_" + files.get(k).split("/")[5]));
-
-				int len;
-				while ((len = in.read(buffer)) > 0) {
-					zout.write(buffer, 0, len);
-				}
-
-				zout.closeEntry();
-				in.close();
 			}
-
-			zout.close();
 		}
 
 		String fileName = tempPath + zipName;
@@ -2483,11 +2479,19 @@ public class EventController {
 					System.out.println("not supported image type");
 				}
 				EasyImage resizedImage = easyImage.resize(640, 480);
-				FileOutputStream out = new FileOutputStream(versionMemoryRepository.findPartDriveName() + ":" 
-						+ imageDto.getThumb_name().replaceAll("/","").replaceAll("\\","").replaceAll(".","").replaceAll("&","")
-						);
-				resizedImage.writeTo(out, "jpg");
-				out.close();
+				FileOutputStream out = null;
+				try {
+					out = new FileOutputStream(versionMemoryRepository.findPartDriveName() + ":" 
+							+ imageDto.getThumb_name().replaceAll("/","").replaceAll("\\","").replaceAll(".","").replaceAll("&","")
+							);
+					resizedImage.writeTo(out, "jpg");
+				} catch(Exception e) {
+					System.out.println("isErrorImg error");
+				} finally {
+					if (out != null) {
+						out.close();
+					}
+				}
 			}
 			answer = "success";
 		} else {
@@ -3689,10 +3693,16 @@ public class EventController {
 					/* resize */
 					// EasyImage resizedImage = easyImage.resize(640, 480);
 					EasyImage resizedImage = easyImage.resize(1280, 720);
-					FileOutputStream out = new FileOutputStream(uploadPath + "/" + i + "_thumb" + ".jpg");
-					resizedImage.writeTo(out, "jpg");
-					// easyImage.writeTo(out, "jpg");
-					out.close();
+					FileOutputStream out = null;
+					try {
+						out = new FileOutputStream(uploadPath + "/" + i + "_thumb" + ".jpg");
+						resizedImage.writeTo(out, "jpg");
+						// easyImage.writeTo(out, "jpg");
+					} catch(Exception e) {
+						System.out.println("police_upload error");
+					} finally {
+						out.close();
+					}
 					// System.out.println("썸네일 = " + uploadPath + "/" + i + "_thumb" + ".jpg");					
 				}
 			} catch(Exception e) {
@@ -3703,7 +3713,7 @@ public class EventController {
 		return "index";
 	}
 
-	public void sendMonitor(Map map) throws MessagingException, JsonProcessingException {
+	public void sendMonitor(Map map) throws MessagingException, IOException {
 		// System.out.println("sendMonitor");
 
 		this.template.setMessageConverter((MessageConverter) new StringMessageConverter());
@@ -3723,17 +3733,21 @@ public class EventController {
 
 		byte[] imageBytes = DatatypeConverter.parseBase64Binary(data);
 
+		FileOutputStream lFileOutputStream = null;
+		
 		try {
 			File lOutFile = new File(uploadPath + img_name);
 
-			FileOutputStream lFileOutputStream = new FileOutputStream(lOutFile);
+			lFileOutputStream = new FileOutputStream(lOutFile);
 
 			lFileOutputStream.write(imageBytes);
 
-			lFileOutputStream.close();
-
 		} catch (Exception e) {
 			System.out.println("sendMonitor 이미지 저장 안됨 = " + img_name);
+		} finally {
+			if (lFileOutputStream != null) {
+				lFileOutputStream.close();
+			}
 		}
 	}
 
