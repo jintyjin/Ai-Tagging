@@ -3,6 +3,8 @@ package com.refa.ai.repository;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.ConnectException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
@@ -25,6 +27,7 @@ import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.AuthCache;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -905,17 +908,20 @@ public class ResponseEventsRepositoryImpl implements ResponseEventsRepository {
 		}
 	}
 
-	private void checkNetworkSpeaker(Map map) throws JsonProcessingException {
+	private void checkNetworkSpeaker(Map map) throws ClientProtocolException, IOException {
 		ObjectMapper mapper = new ObjectMapper();
 		String returnStr = mapper.writeValueAsString(map);
 
 		map.put("action_action", "½ºÇÇÄ¿");
 
 		String dev_title = "";
+		String dev_ch = "";
 		Map returnMap2 = eventDao.deviceInfoOne2(map);
 		if (returnMap2 != null) {
-			dev_title = returnMap2.get("dev_title").toString();
+			dev_title =returnMap2.get("dev_title").toString();
+			dev_ch = "ch" + returnMap2.get("dev_ch").toString();
 		}
+		map.put("dev_ch", dev_ch);
 		map.put("dev_title", dev_title);
 		map.put("isEvent", true);
 
@@ -926,13 +932,16 @@ public class ResponseEventsRepositoryImpl implements ResponseEventsRepository {
 
 			List<Map> list = eventDao.selectNetworkSpeaker();
 
-			for (int i = 0; i < list.size(); i++) {
-				playNetworkSpeaker(returnMap, list.get(i));
+			for (Map networkSpeaker : list) {
+				if (networkSpeaker.get("network_title").toString().equals(returnMap.get("network_title").toString())) {
+					playNetworkSpeaker(returnMap, networkSpeaker);
+					break;
+				}
 			}
 		}
 	}
 	
-	private void playNetworkSpeaker(Map returnMap, Map map) {
+	private void playNetworkSpeaker(Map returnMap, Map map) throws ClientProtocolException, IOException {
 //		System.out.println("sendSpeakerNumber()");
 
 		String body = "";
@@ -1045,7 +1054,7 @@ public class ResponseEventsRepositoryImpl implements ResponseEventsRepository {
 //					System.out.println("response is error : " + response.getStatusLine().getStatusCode());
 				}
 				response.close();
-			} catch(IOException ie) {
+			} catch(ConnectException e) {
 				System.out.println("playNetworkSpeaker Error");
 			}
 		}

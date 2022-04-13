@@ -760,14 +760,15 @@
 			join
 				data.actioninfo as a
 				on a.dev_title = d.dev_title
+			where lower(a.action_event) = lower(#{model_name}) and a.dev_title = #{dev_title}
+			and a.action_source = #{action_source}
+			
 		<choose>
 			<when test="isEvent != null">
-				where lower(a.action_event) = lower(#{model_name}) and (POSITION(#{action_action} in a.action_action) > 0) and a.dev_title = #{dev_title} 
-				and a.action_source = #{action_source};
+				and (POSITION(#{action_action} in a.action_action) > 0);
 			</when>
 			<otherwise>
-				where lower(a.action_event) = lower(#{model_name}) and a.action_action = #{action_action} and a.dev_title = #{dev_title} 
-				and a.action_source = #{action_source};
+				and a.action_action = #{action_action};
 			</otherwise>
 		</choose>
 	</select>
