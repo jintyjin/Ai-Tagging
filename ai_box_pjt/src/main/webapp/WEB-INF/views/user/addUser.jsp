@@ -617,8 +617,6 @@ $(document).ready(function () {
 	});
 		
 	$('.add').click(function () {
-		console.log(SHA256($('#pwd_text').val()));
-		return false;
 		if($('#name_text').val() == '') {
 			alert(getTranslate('enterName'));
 			$("#name_text").focus();
