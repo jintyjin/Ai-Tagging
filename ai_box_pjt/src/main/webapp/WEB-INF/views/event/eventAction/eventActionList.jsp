@@ -805,7 +805,10 @@ $(document).ready(function () {
 		$('.modify_setting_hide').attr('class','modify_setting');
 		var data = $('.grid').jqxGrid('getrowdata', event.args.rowindex);
 
-		var actionList = data.action_action.split(', ');
+		var eventAction = new EventAction(data);
+		
+		//var actionList = data.action_action.split(', ');
+		var actionList = eventAction.action_action;
 
 		$(".tag_content_tag_content").jqxDropDownList('uncheckAll'); 
 		$(".tag_content_device_content").jqxDropDownList('uncheckAll'); 
@@ -816,43 +819,28 @@ $(document).ready(function () {
 			$(".action_content_action_content").jqxDropDownList('checkItem', actionList[i]);
 		}
 
-		if (data.action_action.indexOf(getTranslate('스피커')) != -1) {
-			selectNetworkSpeaker(data.dev_title, ".action_content_network_content", data.network_title);
+		if (actionList.includes(getTranslate('스피커'))) {
+			selectNetworkSpeaker(eventAction.dev_title, ".action_content_network_content", eventAction.network_title);
 		}
 		
-		$(".tag_content_device_content").jqxDropDownList('selectItem', data.dev_title);
-		
-		/* if (data.action_action.indexOf('프리셋') != -1) {
-			selectPreset250(data.dev_title, ".action_content_manager_content", data.pre_title);
-		} */
+		$(".tag_content_device_content").jqxDropDownList('selectItem', eventAction.dev_title);
 		
 		$('.action_content_manager').show();
-		
-		if (data.action_action.indexOf(getTranslate('프리셋')) != -1) {
-			selectPreset250(data.dev_title, ".action_content_manager_content", data.pre_title);
+
+		if (actionList.includes(getTranslate('프리셋'))) {
+			selectPreset250(eventAction.dev_title, ".action_content_manager_content", eventAction.pre_title);
 			$('.action_content_manager').show();
 		} else {
 			$('.action_content_manager').hide();
 		}
-		
-		if (data.action_action.indexOf(getTranslate('스피커')) != -1) {
+
+		if (actionList.includes(getTranslate('스피커'))) {
 			$('.action_content_network').show();
 		} else {
 			$('.action_content_network').hide();
 		}
-
-		/* if (data.action_action == 'SMS(SCADA)') {
-			console.log(data.scada_tag);
-			$('.action_content_scada_content').val(data.scada_tag);
-			$('.action_content_scada').show();
-		} else {
-			$('.action_content_scada_content').val('');
-			$('.action_content_scada').hide();
-		} */
 		
-		//$(".action_content_action_content").jqxDropDownList('selectItem', data.action_action);
-		
-		if (data.action_source == 'SCADA') {
+		if (eventAction.action_source == 'SCADA') {
 			$('#scada').prop('checked', true);
 			$("input[name='source'][value='kwater']").attr('disabled', true);
 			$("input[name='source'][value='SCADA']").attr('disabled', false);
@@ -1086,17 +1074,6 @@ $(document).ready(function () {
 				checkedNetworkArr = checkedNetworkArr.label;
 			}
 		}
-
-		/* var scada_tag_text = '';
-		if (isScada) {
-			if ($('.action_content_scada_content_2').val() == '') {
-				alert("태그를 입력해주세요.");
-				return;
-			} else {
-				scada_tag_text = $('.action_content_scada_content_2').val();
-			}
-		} */
-		
 		var radio = $("input[name='source_2']:checked").val();
 
 		if (radio == 'kwater_2') {
@@ -1166,66 +1143,6 @@ $(document).ready(function () {
 			//selectNetworkSpeaker(label, ".action_content_network_content_2", null);
 		}
 	});
-
-	/* $('.action_content_action_content').bind('select', function (event) {
-		var args = event.args;
-		if (args) {
-		    var item = args.item;
-		    var label = item.label;
-		    var checked = item.checked;
-		    
-		    if (label == '프리셋') {
-				var selectedrowindex = $(".grid").jqxGrid('getselectedrowindex');
-				if (selectedrowindex > -1) {
-			        var rows = $(".grid").jqxGrid('getrowdata', selectedrowindex);
-
-			        var dev_title = $(".tag_content_device_content").jqxDropDownList('getSelectedItem');
-
-					var action_source = $("input[name='source_2']:checked").val();
-			        
-			        var event = $(".tag_content_tag_content").jqxDropDownList('getSelectedItem');
-			        
-					var action = $(".action_content_action_content").jqxDropDownList('getSelectedItem');
-			        
-					selectPreset250(rows.dev_title, ".action_content_manager_content", rows.pre_title);
-			        
-					$('.action_content_manager').show();
-				}
-		    } else {
-				$(".action_content_manager_content").jqxDropDownList('selectIndex', 0); 
-	    		$('.action_content_manager').hide();
-		    } 
-		    
-		    if (label == '스피커') {
-				var selectedrowindex = $(".grid").jqxGrid('getselectedrowindex');
-				if (selectedrowindex > -1) {
-			        var rows = $(".grid").jqxGrid('getrowdata', selectedrowindex);
-
-			        var dev_title = $(".tag_content_device_content").jqxDropDownList('getSelectedItem');
-
-					var action_source = $("input[name='source_2']:checked").val();
-			        
-			        var event = $(".tag_content_tag_content").jqxDropDownList('getSelectedItem');
-			        
-					var action = $(".action_content_action_content").jqxDropDownList('getSelectedItem');
-			        
-					selectNetworkSpeaker(rows.dev_title, ".action_content_network_content", rows.network_title);
-			        
-					$('.action_content_network').show();
-				}
-		    } else {
-				$(".action_content_network_content").jqxDropDownList('selectIndex', 0); 
-	    		$('.action_content_network').hide();
-		    } 
-		    
-		    /* if (label == 'SMS(SCADA)') {
-				$('.action_content_scada').show();
-			} else {
-				$('.action_content_scada_content').val('');
-				$('.action_content_scada').hide();
-		    }
-		}
-	}); */
 
 	$('.action_content_action_content_2').bind('checkChange', function (event) {
 		var args = event.args;
@@ -1378,6 +1295,7 @@ function selectNetworkSpeaker(label, content_class, preset) {
 			var managerSource = [];
 			var idx = 0;
 
+			console.log('preset = ' + preset);
 			for (var i = 0; i < data.length; i++) {
 				managerSource.push(data[i].network_title);
 				if (preset != null && preset == data[i].network_title) {
@@ -1393,6 +1311,25 @@ function selectNetworkSpeaker(label, content_class, preset) {
 		}
 	}); 
 }
+class EventAction {
+	constructor (data) {
+		this.action_idx = data.action_idx;
+		this.action = data.action;
+		this.action_action = data.action_action.split(', ');
+		this.action_event = data.action_event;
+		this.action_ip = data.action_ip;
+		this.action_isuse = data.action_isuse;
+		this.action_key = data.action_key;
+		this.action_source = data.action_source;
+		this.available = data.available;
+		this.boundindex = data.boundindex;
+		this.dev_title = data.dev_title;
+		this.network_title = data.network_title;
+		this.pre_title = data.pre_title;
+		this.scada_tag = data.scada_tag;
+	}	
+}
+
 </script>
 </head>
 <body>
