@@ -1,3 +1,5 @@
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.Map" %> 
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
@@ -560,6 +562,20 @@ $(document).ready(function () {
 	if (typeof window.parent.loginUser != 'function') {
 		location.replace('/index/eventActionList');
 	}
+	
+	<%
+		List<Map> itemDto = (List<Map>)request.getAttribute("itemDto");
+		List<Map> actionInfo = (List<Map>)request.getAttribute("actionInfo");
+	%>
+	
+	<%
+		for (Map item : itemDto) {
+	%>
+	
+	<%	
+		}
+	%>
+	
 	var jsonUrl = "/selectEventAction";
 	
 	var obj = new Object();
@@ -1329,7 +1345,6 @@ class EventAction {
 		this.scada_tag = data.scada_tag;
 	}	
 }
-
 </script>
 </head>
 <body>

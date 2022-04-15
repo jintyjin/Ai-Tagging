@@ -1,5 +1,7 @@
 package com.refa.ai.dto;
 
+import java.util.List;
+
 import lombok.Data;
 
 @Data
@@ -30,5 +32,6 @@ public class EventDto {
 	private String is_data;
 	private String event_source;
 	private double event_confidence;
+	private String event_points;
 	
 }

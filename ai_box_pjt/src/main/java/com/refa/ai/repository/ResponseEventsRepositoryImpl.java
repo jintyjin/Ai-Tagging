@@ -83,13 +83,15 @@ public class ResponseEventsRepositoryImpl implements ResponseEventsRepository {
 	private final ActionEventMemoryRepository actionEventMemoryRepository;
 	private final EventStatusService eventStatusService;
 	
-	private static Map boxList = new HashMap();
+	private static Map<String, String> boxList = new HashMap<>();
+	private static Map<String, String> pointList = new HashMap<>();
 	private static BlockingQueue<Map> responseQ = new LinkedBlockingQueue<Map>();
 
 	@PostConstruct
 	public void init() {
 		startResponseQ();
 		boxList();
+		pointList();
 	}
 
 	private void boxList() {
@@ -102,6 +104,11 @@ public class ResponseEventsRepositoryImpl implements ResponseEventsRepository {
 		boxList.put("KWATER_Loitering_Detection", "boxes");
 		boxList.put("KWATER_HandAction_Detection", "boxes");
 		boxList.put("KWATER_Spin_Detection", "boxes");
+	}
+	
+	private void pointList() {
+		pointList.put("boxes", "xyxy");
+		pointList.put("segments", "vector");
 	}
 	
 	@Override
@@ -581,6 +588,7 @@ public class ResponseEventsRepositoryImpl implements ResponseEventsRepository {
 			String class_name = "";
 			List originalTags = new ArrayList();
 			List<Double> confidenceList = new ArrayList<>();
+			List<List<Double>> points = new ArrayList<>();
 
 			for (int i = 0; i < ml_result.size(); i++) {
 				Map ml_result_map = (Map) ml_result.get(i);
@@ -593,6 +601,22 @@ public class ResponseEventsRepositoryImpl implements ResponseEventsRepository {
 							((Map) ((List) ml_result_map.get(boxList.get(ml_result_map.get("model_name").toString()))).get(0))
 							.get("confidence").toString());
 					confidenceList.add(confidence);
+					if (pointList.get(boxList.get(ml_result_map.get("model_name").toString())).equals("vector")) {
+						List<List<Double>> vector = (List<List<Double>>) ((Map) ((List) ml_result_map.get(boxList.get(ml_result_map.get("model_name").toString()))).get(0))
+								.get(pointList.get(boxList.get(ml_result_map.get("model_name").toString())));
+
+						List<Double> xyList = new ArrayList<>();
+						for (List<Double> list : vector) {
+							for (Double xy : list) {
+								xyList.add(xy);
+							}
+						}
+						points.add(xyList);
+					} else {
+						List<Double> xyList = (List<Double>) ((Map) ((List) ml_result_map.get(boxList.get(ml_result_map.get("model_name").toString()))).get(0))
+								.get(pointList.get(boxList.get(ml_result_map.get("model_name").toString())));
+						points.add(xyList);
+					}
 				}
 			}
 
@@ -634,6 +658,7 @@ public class ResponseEventsRepositoryImpl implements ResponseEventsRepository {
 					eventDto.setDev_web_port(dev_web_port);
 					eventDto.setEvent_source("지능형안전관리시스템");
 					eventDto.setEvent_confidence(confidenceList.get(i));
+					eventDto.setEvent_points(points.get(i).toString().replaceAll("\\\\", ""));
 
 					eventDto.setEvent_info(event_info);
 

@@ -68,6 +68,7 @@ import java.util.zip.ZipOutputStream;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.imageio.ImageIO;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.swing.JFrame;
 import javax.xml.bind.DatatypeConverter;
@@ -632,8 +633,13 @@ public class EventController {
 	}
 
 	@GetMapping("/eventActionList")
-	public String eventAction(Model model) {
+	public String eventAction(Model model, HttpServletRequest request) {
 		// System.out.println("eventAction()");
+
+		List<Map> itemDto = eventDao.itemInfo();
+
+		request.setAttribute("itemDto", itemDto);
+		request.setAttribute("actionInfo", actionEventRepository.findByIsuse());
 
 		return "./event/eventAction/eventActionList";
 	}

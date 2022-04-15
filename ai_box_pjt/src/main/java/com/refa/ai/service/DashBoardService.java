@@ -6,9 +6,10 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
-import com.refa.ai.dto.dashboard.EventCountDto;
-import com.refa.ai.dto.dashboard.EventCountTimeDto;
 import com.refa.ai.dto.dashboard.StartEndDate;
+import com.refa.ai.dto.reporting.ReportingDto;
+import com.refa.ai.dto.reporting.ReportingOptionDto;
+import com.refa.ai.dto.reporting.ReportingPageDto;
 import com.refa.ai.repository.DashBoardRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -38,5 +39,9 @@ public class DashBoardService {
 		totalList.add(dashBoardRepository.selectBetweenDateEventCount(startEndDate));
 		
 		return totalList;
+	}
+
+	public List<ReportingDto> getReportingData(ReportingPageDto reportingPageDto) {
+		return dashBoardRepository.selectReportingData(new ReportingOptionDto(reportingPageDto));
 	}
 }

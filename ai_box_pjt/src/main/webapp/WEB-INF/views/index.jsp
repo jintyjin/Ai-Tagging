@@ -314,6 +314,7 @@ $(document).ready(function () {
 		}
 		$('#tab13').css('display', '');
 		$('#tab14').css('display', '');
+		$('#tab16').css('display', '');
 		$('#newMenu').css('display', '');
 		$('#iframe').attr('src', '/' + '<%= request.getAttribute("pageUrl").toString() %>' + ".htm");
 	<% }%>
@@ -686,6 +687,7 @@ function loginUser(user_id, user_pw) {
 	<div id="menu">
 		<ul>
 			<li id="tab1" style="display:none;"><span onclick="menuClick('/dashBoard.htm');" class="tabMenu active" style="padding-left:1px;"><span class="glyphicon glyphicon-cloud" style="margin-right:0.7em;"></span><spring:message code="tab.dashboard"/></span></li>
+			<li id="tab16" style="display:none;"><span onclick="menuClick('/reporting.htm');" class="tabMenu" style="padding-left:1px;"><span class="glyphicon glyphicon-signal" style="margin-right:0.7em;"></span><spring:message code="tab.reporting"/></span></li>
 			<li id="tab14" style="display:none;"><span onclick="connectMonitoring('kmonitoring://');" class="tabMenu"><span class="glyphicon glyphicon-bell" style="margin-right:0.7em;"></span><spring:message code="tab.liveMonitoring"/></span></li>
 			<li id="tab5" style="display:none;"><span onclick="menuClick('/album.htm');" class="tabMenu"><span class="glyphicon glyphicon-book" style="margin-right:0.7em;"></span><spring:message code="tab.gallery"/></span></li>
 			<li id="tab6" style="display:none;"><span onclick="menuClick('/log.htm');" class="tabMenu"><span class="glyphicon glyphicon-bell" style="margin-right:0.7em;"></span><spring:message code="tab.log"/></span>

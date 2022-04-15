@@ -16,5 +16,10 @@ public class DashBoardController {
 	public String dashBoard(Model model) {
 		return "./dashboard/dashBoard";
 	}
+
+	@GetMapping("/reporting")
+	public String reporting(Model model) {
+		return "./dashboard/reporting";
+	}
 	
 }
