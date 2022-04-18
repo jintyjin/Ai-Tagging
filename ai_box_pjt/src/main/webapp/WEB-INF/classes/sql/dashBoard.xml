@@ -68,7 +68,7 @@
 	</select>
 	
 	<select id="selectReportingData" parameterType="com.refa.ai.dto.reporting.ReportingOptionDto" resultType="com.refa.ai.dto.reporting.ReportingDto" fetchSize="1000">
-		SELECT ch, time, ARRAY_TO_STRING(ARRAY_AGG(event),',') as event
+		SELECT d.dev_title as title, ch, time, ARRAY_TO_STRING(ARRAY_AGG(event),',') as event
 		FROM (
 			select i.ch, i.time, i.event
 			from data.categoryAll as c
@@ -101,7 +101,9 @@
 			where i.time is not null
 			order by i.ch asc, i.time asc, c.category_idx asc
 		) a
-		GROUP BY ch, time;
+		left join data.devinfo as d
+		on d.dev_ch = ch
+		GROUP BY title, ch, time;
 	</select>
 	
 	<select id="selectDeviceChAndTitle" resultType="com.refa.ai.dto.dashboard.ReportDeviceChAndTitle" fetchSize="1000">

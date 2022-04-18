@@ -6,6 +6,7 @@ import lombok.Data;
 public class ReportingDto {
 
 	private int ch;
+	private String title;
 	private String time;
 	private String event;
 	
