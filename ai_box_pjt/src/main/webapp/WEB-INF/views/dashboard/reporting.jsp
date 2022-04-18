@@ -269,14 +269,18 @@ function showData(format, data) {
 function createChart(title, format) {
 	var chart = new CanvasJS.Chart(title, {
 		animationEnabled: true,
-		theme: "light2",
+		backgroundColor: "#2a2a2c",
 		title:{
+		    fontColor: "#fff",
 			text: title
 		},
 		axisX:{
+	        labelFontColor:"#fff",
 			valueFormatString: "DD MMM"
 		},
 		axisY: {
+			titleFontColor: "#fff",
+	        labelFontColor:"#fff",
 			title: "Count",
 			includeZero: true,
 			crosshair: {
@@ -284,6 +288,7 @@ function createChart(title, format) {
 			}
 		}, 
 		legend:{
+		    fontColor: "#fff",
 			cursor:"pointer",
 			verticalAlign: "bottom",
 			horizontalAlign: "left",
@@ -292,7 +297,7 @@ function createChart(title, format) {
 		data: [{
 			type: "line",
 			xValueFormatString: "DD MMM, YYYY",
-			color: "#F08080",
+			color: "#fff",
 			dataPoints: [
 			]
 		}]
