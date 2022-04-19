@@ -52,8 +52,14 @@ html, body {
 	margin:auto;
 	width:1300px;
 }
+#top {
+	display:none;
+}
 #startDate, #top span, #endDate, #submit {
-	float:right;
+	float:left;
+}
+#endDate {
+	margin-right:20px;
 }
 #submit {
 	margin-left:10px;
@@ -72,6 +78,8 @@ button {
 }
 #ch, #eventName, #type {
 	float:left;
+}
+#ch, #eventName {
 	margin-right:20px;
 }
 .jqx-fill-state-normal-metrodark, .jqx-widget-content-metrodark, .jqx-fill-state-hover-metrodark {
@@ -167,6 +175,8 @@ $(document).ready(function () {
 		width: 180, height: 30, formatString: 'yyyy-MM-dd', theme: 'metrodark', dropDownVerticalAlignment: 'bottom'	//, placeHolder: getEndFormatDate(new Date)
 	});
 	
+	$("#top").show();
+	
 	getStartFormatDate(new Date());
 });
 function getData() {
@@ -199,12 +209,13 @@ function getData() {
 		contentType : "application/json; charset=UTF-8",         
 		data : jsonData,          		   
 	    success: function(data) {
-	    	console.log(data);
 	    	if (data.length > 0) {
 	    		var format = "DD MMM";
 	    		if ($('#type').jqxDropDownList('getSelectedItem').value == 'time') {
 	    			format = "H";
 	    		}
+	    		
+	    		console.log(data);
 	    		
 	    		showData(format, data);
 	    	}
@@ -254,14 +265,15 @@ function showData(format, data) {
 			chart.render();
 		}
 		
-		if (false) {
+		if ($('#type').jqxDropDownList('getSelectedItem').value == 'time') {
 			var timePoint = new TimePoint(data[obj]);
 			chart.data[0].addTo("dataPoints", timePoint);
+			console.log(timePoint);
 			//chart.data[0].addTo("dataPoints", {x : new Date(data[obj].time.split("-")[0], data[obj].time.split("-")[1], data[obj].time.split("-")[2]), y : data[obj].event.split("_")[1]});
 		} else {
 			var dayPoint = new DayPoint(data[obj]); 
 			chart.data[0].addTo("dataPoints", dayPoint);
-			console.log(chart.data[0]);
+			console.log(chart.data[1]);
 			//chart.data[0].addTo("dataPoints", {x : new Date(data[obj].time.split("-")[0], data[obj].time.split("-")[1], data[obj].time.split("-")[2]), y : Number(data[obj].event.split("_")[1])});
 		}
 	}
@@ -274,6 +286,11 @@ function createChart(title, format) {
 		    fontColor: "#fff",
 			text: title
 		},
+		toolTip: {
+			fontColor: "white",
+			backgroundColor: "#2a2a2c",
+	        borderColor: "transparent"   //change color 
+		},
 		axisX:{
 	        labelFontColor:"#fff",
 			valueFormatString: "DD MMM"
@@ -282,13 +299,10 @@ function createChart(title, format) {
 			titleFontColor: "#fff",
 	        labelFontColor:"#fff",
 			title: "Count",
-			includeZero: true,
-			crosshair: {
-				enabled: true
-			}
+			includeZero: true
 		}, 
 		legend:{
-		    fontColor: "#fff",
+		    //fontColor: "#fff",
 			cursor:"pointer",
 			verticalAlign: "bottom",
 			horizontalAlign: "left",
@@ -307,13 +321,15 @@ function createChart(title, format) {
 }
 class DayPoint {
 	constructor(data) {
-		this.x = new Date(data.time.split("-")[0], data.time.split("-")[1], data.time.split("-")[2]);
+		this.x = new Date(data.time.split("-")[0], Number(data.time.split("-")[1]) - 1, data.time.split("-")[2]);
 		this.y = Number(data.event.split("_")[1]); 
+		//this.indexLabelFontColor = "white";
+		//this.indexLabelBackgroundColor = "#2a2a2c";
 	}
 }
 class TimePoint {
 	constructor(data) {
-		this.x = new Date(data.time.split("-")[0], data.time.split("-")[1], data.time.split("-")[2], data.time.split(" ")[1]);
+		this.x = new Date(data.time.split("-")[0], Number(data.time.split("-")[1]) - 1, data.time.split("-")[2], data.time.split(" ")[1], 0, 0);
 		this.y = Number(data.event.split("_")[1]); 
 	}
 }
@@ -321,15 +337,15 @@ class TimePoint {
 <body>
 	<div id="body">
 		<div id="top">
+			<div id="startDate" class="calendar"></div>
+			<span id="tilde"> ~ </span> 
+			<div id="endDate" class="calendar"></div>
 			<div id="ch"></div>
 			<div id="eventName"></div>
 			<div id="type"></div>
 			<div id="submit">
 				<button onclick="getData();">검색</button>
 			</div>
-			<div id="endDate" class="calendar"></div>
-			<span id="tilde"> ~ </span> 
-			<div id="startDate" class="calendar"></div>
 		</div>
 		<div id="bottom"></div>
 	</div>
