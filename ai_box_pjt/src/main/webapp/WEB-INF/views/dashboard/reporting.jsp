@@ -139,6 +139,24 @@ var typeSource = [{
  	text : 'day',
 	value : 'day'
 }];
+function get(key) {
+	return sessionStorage.getItem(key);
+}
+function setReportingStartDate(reportingStartDate) {
+	sessionStorage.setItem('reportingStartDate', reportingStartDate);
+}
+function setReportingEndDate(reportingEndDate) {
+	sessionStorage.setItem('reportingEndDate', reportingEndDate);
+}
+function setReportingCh(reportingCh) {
+	sessionStorage.setItem('reportingCh', reportingCh);
+}
+function setReportingEventName(reportingEventName) {
+	sessionStorage.setItem('reportingEventName', reportingEventName);
+}
+function setReportingType(reportingType) {
+	sessionStorage.setItem('reportingType', reportingType);
+}
 $(document).ready(function () {
 	var jsonUrl = "/reportingData";
 
@@ -175,9 +193,62 @@ $(document).ready(function () {
 		width: 180, height: 30, formatString: 'yyyy-MM-dd', theme: 'metrodark', dropDownVerticalAlignment: 'bottom'	//, placeHolder: getEndFormatDate(new Date)
 	});
 	
+	initMenu();
+	
+	getData();
+	
 	$("#top").show();
 	
-	getStartFormatDate(new Date());
+	$("#startDate").on('valueChanged', function (event) {
+		setReportingStartDate($('#startDate').jqxDateTimeInput('val'));
+	});
+
+	$("#endDate").on('valueChanged', function (event) {
+		setReportingEndDate($('#endDate').jqxDateTimeInput('val'));
+	});
+
+	$("#ch").on('checkChange', function (event) {
+		var chList = "";
+		
+		for (var i = 0; i < $('#ch').jqxDropDownList('getCheckedItems').length; i++) {
+			if (i > 0) {
+				chList += ",";
+			}
+			chList += $('#ch').jqxDropDownList('getCheckedItems')[i].value;
+		}
+		
+		setReportingCh(chList);
+	});
+	
+	$('#eventName').on('select', function (event) {
+	    var args = event.args;
+	    if (args) {
+		    // index represents the item's index.                
+		    var index = args.index;
+		    var item = args.item;
+		    // get item's label and value.
+		    var label = item.label;
+		    var value = item.value;
+		    var type = args.type; // keyboard, mouse or null depending on how the item was selected.
+		    
+		    setReportingEventName(value);
+		}                        
+	});
+
+	$('#type').on('select', function (event) {
+	    var args = event.args;
+	    if (args) {
+		    // index represents the item's index.                
+		    var index = args.index;
+		    var item = args.item;
+		    // get item's label and value.
+		    var label = item.label;
+		    var value = item.value;
+		    var type = args.type; // keyboard, mouse or null depending on how the item was selected.
+		    
+		    setReportingType(value);
+		}                        
+	});
 });
 function getData() {
 	$('#bottom').empty();
@@ -224,6 +295,17 @@ function getData() {
 		}
 	});
 }
+function getDate() {
+	if (get('reportingStartDate') != null) {
+		$('#startDate').jqxDateTimeInput('setDate', new Date(get('reportingStartDate').split('-')[0], get('reportingStartDate').split('-')[1] - 1, get('reportingStartDate').split('-')[2]));
+	} else {
+		getStartFormatDate(new Date());
+	}
+
+	if (get('reportingEndDate') != null) {
+		$('#endDate').jqxDateTimeInput('setDate', new Date(get('reportingEndDate').split('-')[0], get('reportingEndDate').split('-')[1] - 1, get('reportingEndDate').split('-')[2]));
+	}
+}
 function getStartFormatDate(date){
 	date.setDate(date.getDate() - 7);
 	var year = date.getFullYear();              //yyyy
@@ -245,7 +327,6 @@ function getEndFormatDate(date){
 	//return  year + '-' + month + '-' + day;
 }
 function showData(format, data) {
-	console.log(data);
 	var ch = 0;
 	var title = "";
 	var margin = 60;
@@ -253,7 +334,6 @@ function showData(format, data) {
 	for (var obj in data) {
 		if (ch != data[obj].ch) {
 			var chartData = init(ch, title, arr, margin, format, data[obj].ch, data[obj].title);
-			console.log(chartData);
 			ch = chartData.ch;
 			title = chartData.title;
 			arr = chartData.arr;
@@ -313,6 +393,37 @@ function createChart(title, format, arr) {
 		}]
 	});
 	chart.render();
+}
+function initMenu() {
+	getDate();
+	
+	if ($('#ch').jqxDropDownList('getItems') != null) {
+		if (get('reportingCh') != null) {
+			var chList = get('reportingCh').split(',');
+			for (var i = 0; i < chList.length; i++) {
+				$("#ch").jqxDropDownList('checkItem', chList[i]);
+			}
+		} else {
+			$("#ch").jqxDropDownList('checkIndex', 0);
+			setReportingCh($('#ch').jqxDropDownList('getCheckedItems')[0].value);
+		}
+	}
+	
+	if ($('#eventName').jqxDropDownList('getItems') != null) {
+		if (get('reportingEventName') != null) {
+			$('#eventName').jqxDropDownList('selectItem', get('reportingEventName'));
+		} else {
+			$("#eventName").jqxDropDownList('selectIndex', 0);
+		}
+		setReportingEventName($('#eventName').jqxDropDownList('getSelectedItem').value);
+	}
+	
+	if (get('reportingType') != null) {
+		$("#type").jqxDropDownList('selectItem', get('reportingType'));
+	} else {
+		$("#type").jqxDropDownList('selectItem', 'day');
+		setReportingType('day');
+	}
 }
 function init(ch, title, arr, margin, format, objCh, objTitle) {
 	if (arr.length > 0) {
