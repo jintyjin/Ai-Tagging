@@ -30,6 +30,7 @@ import org.apache.http.client.AuthCache;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.protocol.HttpClientContext;
@@ -1064,7 +1065,14 @@ public class ResponseEventsRepositoryImpl implements ResponseEventsRepository {
 //			    httpPost.setEntity(new StringEntity(payload));
 
 				HttpGet httpGet = new HttpGet(postUrl);
-
+				
+				int time = 3 * 1000;
+				RequestConfig requestConfig = RequestConfig.custom()
+						.setSocketTimeout(time)
+						.setConnectTimeout(time)
+						.setConnectionRequestTimeout(time)
+						.build();
+				httpGet.setConfig(requestConfig);
 				// HttpGet httpGet = new
 				// HttpGet("http://192.168.100.57/axis-cgi/playclip.cgi?clip=0");
 				// CloseableHttpResponse response = Getclient.execute(GetpostRequest, httpGet,
