@@ -112,4 +112,16 @@
 		order by dev_ch asc;
 	</select>
 	
+	<select id="selectExistEventName" resultType="com.refa.ai.dto.reporting.ReportingExistEventNameDto" fetchSize="1000">
+		select i.*
+		from data.categoryAll as c
+		left join (
+			select lower(split_part(regexp_split_to_table(substring(tags, 2, length(tags) - 2), ', '),'_',2)) as event
+			from data.imageevent
+			group by event
+		) i
+		on lower(split_part(c.category_small, '_', 2)) = split_part(i.event, '_', 1)
+		where i.event is not null
+		order by c.category_idx asc;
+	</select>
 </mapper>

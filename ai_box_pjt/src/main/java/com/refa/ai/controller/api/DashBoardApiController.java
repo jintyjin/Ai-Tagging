@@ -11,6 +11,7 @@ import com.refa.ai.dto.CountDto;
 import com.refa.ai.dto.dashboard.ReportDeviceChAndTitle;
 import com.refa.ai.dto.dashboard.StartEndDate;
 import com.refa.ai.dto.reporting.ReportingDto;
+import com.refa.ai.dto.reporting.ReportingMenuDataDto;
 import com.refa.ai.dto.reporting.ReportingOptionDto;
 import com.refa.ai.dto.reporting.ReportingPageDto;
 import com.refa.ai.repository.DashBoardRepository;
@@ -44,8 +45,8 @@ public class DashBoardApiController {
 	}
 
 	@PostMapping("/reportingData")
-	public List<ReportDeviceChAndTitle> reportingData(@RequestBody ReportingPageDto reportingPageDto) {
-		return dashBoardRepository.selectDeviceChAndTitle();
+	public ReportingMenuDataDto reportingData(@RequestBody ReportingPageDto reportingPageDto) {
+		return new ReportingMenuDataDto(dashBoardRepository.selectDeviceChAndTitle(), dashBoardRepository.selectExistEventName());
 	}
 	
 	@PostMapping("/reporting")

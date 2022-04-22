@@ -12,6 +12,7 @@ import com.refa.ai.dto.dashboard.EventCountTimeDto;
 import com.refa.ai.dto.dashboard.ReportDeviceChAndTitle;
 import com.refa.ai.dto.dashboard.StartEndDate;
 import com.refa.ai.dto.reporting.ReportingDto;
+import com.refa.ai.dto.reporting.ReportingExistEventNameDto;
 import com.refa.ai.dto.reporting.ReportingOptionDto;
 
 import lombok.RequiredArgsConstructor;
@@ -42,6 +43,10 @@ public class DashBoardRepository {
 		return sqlSessionTemplate.selectList("dashBoard.selectReportingData", reportingOptionDto);
 	}
 
+	public List<ReportingExistEventNameDto> selectExistEventName() {
+		return sqlSessionTemplate.selectList("dashBoard.selectExistEventName");
+	}
+	
 	public List<ReportDeviceChAndTitle> selectDeviceChAndTitle() {
 		return sqlSessionTemplate.selectList("dashBoard.selectDeviceChAndTitle");
 	}

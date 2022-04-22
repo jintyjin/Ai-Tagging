@@ -66,6 +66,8 @@ var lang = {
 		sat : "토",
 		sunday : "일요일",
 		sun : "일",
+		reportingDay : "일별",
+		reportingTime : "시간별",
 		
 		/**** 공통 ****/
 		event_source : "이벤트 소스",
@@ -98,6 +100,7 @@ var lang = {
 		more : "더보기",
 		user_count : "유저 수",
 		add : "추가",
+		count : "개수",
 		
 		idx : "번호",
 		device_type : "장치 종류",
@@ -275,6 +278,8 @@ var lang = {
 		sat : "Sat",
 		sunday : "Sunday",
 		sun : "Sun",
+		reportingDay : "Day",
+		reportingTime : "Time",
 
 		/**** Common ****/
 		event_source : "Event Source",
@@ -307,6 +312,7 @@ var lang = {
 		more : "More",
 		user_count : "USER COUNT",
 		add : "Add",
+		count : "Count",
 
 		idx : "No",
 		device_type : "Type",

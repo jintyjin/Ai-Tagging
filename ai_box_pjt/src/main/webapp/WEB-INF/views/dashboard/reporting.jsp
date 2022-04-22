@@ -95,50 +95,19 @@ button {
 </head>
 <script>
 var chSource = new Array();
-var eventNameSource = [{
-	text : getTranslate('falldown'),
-	value : "falldown"
-}, {
- 	text : getTranslate('fire'),
-	value : "fire"
-}, {
- 	text : getTranslate('flood'),
-	value : "flood" 
-}, {
-	text : getTranslate('glove'),
-	value : "glove"
-}, {
- 	text : getTranslate('invasion'),
-	value : "invasion"
-}, {
- 	text : getTranslate('leak'),
-	value : "leak" 
-}, {
-	text : getTranslate('loitering'),
-	value : "loitering"
-}, {
- 	text : getTranslate('handaction'),
-	value : "handaction"
-}, {
-	text : getTranslate('spin'),
-	value : "spin"
-},{	
-	text : getTranslate('cmtank'),
-	value : "cmtank"
-}, {
- 	text : getTranslate('outtank'),
-	value : "outtank"
-}, {
- 	text : getTranslate('overflow'),
-	value : "overflow" 
-}]; 
-var typeSource = [{
-	text : 'time',
-	value : 'time'
-}, {
- 	text : 'day',
-	value : 'day'
-}];
+var eventNameSource = new Array();
+
+var typeSource = [
+	{
+		text : getTranslate('reportingTime'),
+		value : "time"
+	},
+	{
+		text : getTranslate('reportingDay'),
+		value : "day"
+	}
+];
+
 function get(key) {
 	return sessionStorage.getItem(key);
 }
@@ -172,8 +141,13 @@ $(document).ready(function () {
 		async:false,     
 		data : jsonData,          		   
 	    success: function(data) {
-	    	if (data.length > 0) {
-	    		chSource = data;
+	    	if (data.reportDeviceChAndTitleList.length > 0) {
+	    		chSource = data.reportDeviceChAndTitleList;
+	    	}
+	    	if (data.reportingExistEventNameDtoList.length > 0) {
+	    		for (var i = 0; i < data.reportingExistEventNameDtoList.length; i++) {
+					eventNameSource.push(new EventName(getTranslate(data.reportingExistEventNameDtoList[i].event), data.reportingExistEventNameDtoList[i].event));
+	    		}
 	    	}
 	    },
 		error: function(errorThrown) {
@@ -370,12 +344,13 @@ function createChart(title, format, arr) {
 		},
 		axisX:{
 	        labelFontColor:"#fff",
-			valueFormatString: format
+			valueFormatString: format,
+	        intervalType: "time"
 		},
 		axisY: {
 			titleFontColor: "#fff",
 	        labelFontColor:"#fff",
-			title: "Count",
+			title: getTranslate("count"),
 			includeZero: true
 		}, 
 		legend:{
@@ -386,9 +361,8 @@ function createChart(title, format, arr) {
 			dockInsidePlotArea: true
 		},
 		data: [{
-			type: "line",
+			type: "column",
 			xValueFormatString: format,
-			color: "#fff",
 			dataPoints: arr
 		}]
 	});
@@ -466,6 +440,12 @@ class ChartData {
 		this.arr = arr;
 		this.margin = margin;
 	}	
+}
+class EventName {
+	constructor(text, value) {
+		this.text = text;
+		this.value = value;
+	}
 }
 </script>
 <body>
