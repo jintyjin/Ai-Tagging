@@ -301,6 +301,7 @@ function getEndFormatDate(date){
 	//return  year + '-' + month + '-' + day;
 }
 function showData(format, data) {
+	console.log(data);
 	var ch = 0;
 	var title = "";
 	var margin = 60;

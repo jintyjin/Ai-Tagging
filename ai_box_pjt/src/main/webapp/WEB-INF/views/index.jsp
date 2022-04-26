@@ -268,6 +268,7 @@ var popup_window = new Array();
 var popup_width = 1280;
 var popup_height = 720;
 var userId;
+var isDownload = true;
 $(document).ready(function () {
 	var isDisabled = "${isDisabled}";
 	var noLoginId = "${noLoginId}";
@@ -337,94 +338,6 @@ $(document).ready(function () {
 		location.href = '/webserver/cms_monitoring.zip';
 	});
 	
-	var isDownload = true;
-	$('.downloadButton').on('click', function () {
-		//alert($("#iframe").contents().find('.afterChkV:eq(0)').attr('id'));
-		if (isDownload) {
-			isDownload = false;
-			//$(top.document).find(".downloadImageHide").attr("class","downloadImage");
-			//$('.downloadImageHide').attr('class','downloadImage');
-			$('.downloadImage').css({"transform": "translate3d(0, 0, 0)"});
-			var downloadTag = [];
-			for (var d = 0; d < $("#iframe").contents().find('.afterChkV').length; d++) {
-				downloadTag.push($("#iframe").contents().find('.afterChkV:eq(' + d + ')').attr('id').substring(0, $("#iframe").contents().find('.afterChkV:eq(' + d + ')').attr('id').length - 1));
-			}
-
-			$("#iframe").contents().find('.afterChkV').attr('class','hideChkV');
-			$("#iframe").contents().find('.afterTitleChk').attr('class','hideTitleChk');
-			$("#iframe").contents().find('.afterChkImage').attr('class','beforeChkImage');
-			$("#iframe").contents().find('.searchHidden').attr('class','search');
-			$("#iframe").contents().find('.menu').attr('class','menuHidden');
-			
-			var day = new Date();
-	    	var year = day.getFullYear();
-	    	var month = day.getMonth() + 1;
-	    	var date = day.getDate();
-	    	var hour = day.getHours();
-	    	var min = day.getMinutes();
-	    	var sec = day.getSeconds();
-	    	
-	    	if (month < 10) {
-	    		month = '0' + month;
-	    	} 
-	    	if (date < 10) {
-	    		date = '0' + date;
-	    	}
-	    	if (hour < 10) {
-	    		hour = '0' + hour;
-	    	}
-	    	if (min < 10) {
-	    		min = '0' + min;
-	    	}
-	    	if (sec < 10) {
-	    		sec = '0' + sec;
-	    	}
-		
-			var fileName = year + month + date + '_' + hour + min + sec + '.zip';
-			
-			var obj = new Object();
-			
-			obj.login_id = userId;
-			obj.downloadTag = downloadTag;
-			obj.fileName = fileName;
-			obj.event_name = $("#iframe").contents().find('#event_name').text();
-
-			var jsonUrl = "/downloadImageGroup";
-			var jsonData = JSON.stringify(obj);
-				
-			$.ajax({
-				type : "POST",                        	 	     
-				url : jsonUrl,                      		
-				dataType : "text",                        	  
-				contentType : "application/json; charset=UTF-8",       
-				data : jsonData,          		     		 
-				success: function(data) {
-					var folder;
-					if (data > 1) {
-						folder = '/web_server';
-						location.href = folder + '/download/' + fileName;
-					} else if (data == 0) {
-						alert('서버의 용량이 부족합니다.');
-					} else {
-						folder = '/webserver';
-						location.href = folder + '/download/' + fileName;
-					}
-					/* $('.downloadButton').attr('disabled', false);
-					$('.downloadButton').css('opacity', '1'); */
-					isDownload = true;
-					//$('.downloadImage').attr('class','downloadImageHide');
-					//$(top.document).find(".downloadImage").attr("class","downloadImageHide");
-					$('.downloadImage').css({"transform": "translate3d(-310px, 0, 0)"});
-				},
-				error: function(errorThrown) {
-					alert("에러 = " + errorThrown.statusText);
-					alert("메세지 = " + data);
-				}
-			});
-		} else {
-			alert('다운로드중입니다.');
-		}
-	});
 	$('.downloadButton2').on('click', function () {
 		if (isDownload) {
 			isDownload = false;
@@ -674,6 +587,92 @@ function loginUser(user_id, user_pw) {
 
     form.submit();
 }
+function downloadImage() {
+	if (isDownload) {
+		isDownload = false;
+		//$(top.document).find(".downloadImageHide").attr("class","downloadImage");
+		//$('.downloadImageHide').attr('class','downloadImage');
+		$('.downloadImage').css({"transform": "translate3d(0, 0, 0)"});
+		var downloadTag = [];
+		for (var d = 0; d < $("#iframe").contents().find('.afterChkV').length; d++) {
+			downloadTag.push($("#iframe").contents().find('.afterChkV:eq(' + d + ')').attr('id').substring(0, $("#iframe").contents().find('.afterChkV:eq(' + d + ')').attr('id').length - 1));
+		}
+
+		$("#iframe").contents().find('.afterChkV').attr('class','hideChkV');
+		$("#iframe").contents().find('.afterTitleChk').attr('class','hideTitleChk');
+		$("#iframe").contents().find('.afterChkImage').attr('class','beforeChkImage');
+		$("#iframe").contents().find('.searchHidden').attr('class','search');
+		$("#iframe").contents().find('.menu').attr('class','menuHidden');
+		
+		var day = new Date();
+    	var year = day.getFullYear();
+    	var month = day.getMonth() + 1;
+    	var date = day.getDate();
+    	var hour = day.getHours();
+    	var min = day.getMinutes();
+    	var sec = day.getSeconds();
+    	
+    	if (month < 10) {
+    		month = '0' + month;
+    	} 
+    	if (date < 10) {
+    		date = '0' + date;
+    	}
+    	if (hour < 10) {
+    		hour = '0' + hour;
+    	}
+    	if (min < 10) {
+    		min = '0' + min;
+    	}
+    	if (sec < 10) {
+    		sec = '0' + sec;
+    	}
+	
+		var fileName = year + month + date + '_' + hour + min + sec + '.zip';
+		
+		var obj = new Object();
+		
+		obj.login_id = userId;
+		obj.downloadTag = downloadTag;
+		obj.fileName = fileName;
+		obj.event_name = $("#iframe").contents().find('#event_name').text();
+
+		var jsonUrl = "/downloadImageGroup";
+		var jsonData = JSON.stringify(obj);
+			
+		$.ajax({
+			type : "POST",                        	 	     
+			url : jsonUrl,                      		
+			dataType : "text",                        	  
+			contentType : "application/json; charset=UTF-8",       
+			data : jsonData,          		     		 
+			success: function(data) {
+				var folder;
+				if (data > 1) {
+					folder = '/web_server';
+					location.href = folder + '/download/' + fileName;
+				} else if (data == 0) {
+					alert('서버의 용량이 부족합니다.');
+				} else {
+					folder = '/webserver';
+					location.href = folder + '/download/' + fileName;
+				}
+				/* $('.downloadButton').attr('disabled', false);
+				$('.downloadButton').css('opacity', '1'); */
+				isDownload = true;
+				//$('.downloadImage').attr('class','downloadImageHide');
+				//$(top.document).find(".downloadImage").attr("class","downloadImageHide");
+				$('.downloadImage').css({"transform": "translate3d(-310px, 0, 0)"});
+			},
+			error: function(errorThrown) {
+				alert("에러 = " + errorThrown.statusText);
+				alert("메세지 = " + data);
+			}
+		});
+	} else {
+		alert('다운로드중입니다.');
+	}
+}
 </script>
 </head>
 <body style="overflow-y:hidden;">
@@ -782,7 +781,7 @@ function loginUser(user_id, user_pw) {
 	</td>
 </tr>
 </table>
-<button class="downloadButton"></button>
+<button class="downloadButton" onclick="downloadImage();"></button>
 <button class="downloadButton2"></button>
 <audio id='audio_play' src='/resources/download/AlarmOut.mp3'></audio><label id="form_label" for="output_path" style="margin:0; display:none;">업로드 폴더를 선택해주세요.</label>
 <form action="/saveTestImage" name="analyzeForm" method="post" enctype="multipart/form-data" id="formUploadDir" target="iframe" style="display:none;">

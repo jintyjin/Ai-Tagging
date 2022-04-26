@@ -971,7 +971,12 @@ $(document).ready(function () {
 		if (e.keyCode == 13) $(".svg").click();
 	});
 	$('.downloadButton').click(function() {
-			$(top.document).find(".downloadButton").click();
+		if (typeof window.parent.downloadImage == 'function') {
+			window.parent.downloadImage();
+			return false;
+		}
+		downloadImage();
+		//$(top.document).find(".downloadButton").click();
 			/* $('.downloadButton').attr('disabled', true);
 			$('.downloadButton').css('opacity', '0.5'); */
 
@@ -1058,6 +1063,95 @@ $(document).ready(function () {
   		var targetUl = $(this).next("ul");
   		targetUl.toggleClass("hide");    
      });
+
+	 var isDownload = true;
+	 function downloadImage() {
+			if (isDownload) {
+				isDownload = false;
+				//$(top.document).find(".downloadImageHide").attr("class","downloadImage");
+				//$('.downloadImageHide').attr('class','downloadImage');
+				$('.downloadImage').css({"transform": "translate3d(0, 0, 0)"});
+				var downloadTag = [];
+				console.log($('.afterChkV').length);
+				for (var d = 0; d < $('.afterChkV').length; d++) {
+					downloadTag.push($('.afterChkV:eq(' + d + ')').attr('id').substring(0, $('.afterChkV:eq(' + d + ')').attr('id').length - 1));
+				}
+
+				$('.afterChkV').attr('class','hideChkV');
+				$('.afterTitleChk').attr('class','hideTitleChk');
+				$('.afterChkImage').attr('class','beforeChkImage');
+				$('.searchHidden').attr('class','search');
+				$('.menu').attr('class','menuHidden');
+				
+				var day = new Date();
+		    	var year = day.getFullYear();
+		    	var month = day.getMonth() + 1;
+		    	var date = day.getDate();
+		    	var hour = day.getHours();
+		    	var min = day.getMinutes();
+		    	var sec = day.getSeconds();
+		    	
+		    	if (month < 10) {
+		    		month = '0' + month;
+		    	} 
+		    	if (date < 10) {
+		    		date = '0' + date;
+		    	}
+		    	if (hour < 10) {
+		    		hour = '0' + hour;
+		    	}
+		    	if (min < 10) {
+		    		min = '0' + min;
+		    	}
+		    	if (sec < 10) {
+		    		sec = '0' + sec;
+		    	}
+			
+				var fileName = year + month + date + '_' + hour + min + sec + '.zip';
+				
+				var obj = new Object();
+				
+				obj.login_id = userId;
+				obj.downloadTag = downloadTag;
+				obj.fileName = fileName;
+				obj.event_name = $("#iframe").contents().find('#event_name').text();
+
+				var jsonUrl = "/downloadImageGroup";
+				var jsonData = JSON.stringify(obj);
+					
+				$.ajax({
+					type : "POST",                        	 	     
+					url : jsonUrl,                      		
+					dataType : "text",                        	  
+					contentType : "application/json; charset=UTF-8",       
+					data : jsonData,          		     		 
+					success: function(data) {
+						var folder;
+						if (data > 1) {
+							folder = '/web_server';
+							location.href = folder + '/download/' + fileName;
+						} else if (data == 0) {
+							alert('서버의 용량이 부족합니다.');
+						} else {
+							folder = '/webserver';
+							location.href = folder + '/download/' + fileName;
+						}
+						/* $('.downloadButton').attr('disabled', false);
+						$('.downloadButton').css('opacity', '1'); */
+						isDownload = true;
+						//$('.downloadImage').attr('class','downloadImageHide');
+						//$(top.document).find(".downloadImage").attr("class","downloadImageHide");
+						$('.downloadImage').css({"transform": "translate3d(-310px, 0, 0)"});
+					},
+					error: function(errorThrown) {
+						alert("에러 = " + errorThrown.statusText);
+						alert("메세지 = " + data);
+					}
+				});
+			} else {
+				alert('다운로드중입니다.');
+			}
+		}
 });
 const hasSupport = 'loading' in HTMLImageElement.prototype;
 document.documentElement.className = hasSupport ? 'pass' : 'fail';
