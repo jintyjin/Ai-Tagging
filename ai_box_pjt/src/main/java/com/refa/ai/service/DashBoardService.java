@@ -1,6 +1,7 @@
 package com.refa.ai.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -41,7 +42,15 @@ public class DashBoardService {
 		return totalList;
 	}
 
-	public List<ReportingDto> getReportingData(ReportingPageDto reportingPageDto) {
-		return dashBoardRepository.selectReportingData(new ReportingOptionDto(reportingPageDto));
+	public List<List<ReportingDto>> getReportingData(ReportingPageDto reportingPageDto) {
+		List<ReportingDto> list = dashBoardRepository.selectReportingData(new ReportingOptionDto(reportingPageDto));
+		Map<Integer, List<ReportingDto>> map = new HashMap<>();
+		for (ReportingDto reportingDto : list) {
+			if (map.get(reportingDto.getCh()) == null) {
+				map.put(reportingDto.getCh(), new ArrayList<ReportingDto>());
+			}
+			map.get(reportingDto.getCh()).add(reportingDto);
+		}
+		return new ArrayList<List<ReportingDto>>(map.values());
 	}
 }

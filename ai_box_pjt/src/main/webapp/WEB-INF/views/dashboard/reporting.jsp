@@ -257,7 +257,7 @@ function getData() {
 	    	if (data.length > 0) {
 	    		var format = "DD MMM";
 	    		if ($('#type').jqxDropDownList('getSelectedItem').value == 'time') {
-	    			format = "H";
+	    			format = "#";
 	    		}
 	    		
 	    		showData(format, data);
@@ -304,30 +304,85 @@ function showData(format, data) {
 	var ch = 0;
 	var title = "";
 	var margin = 60;
-	var arr = new Array();
-	for (var obj in data) {
-		if (ch != data[obj].ch) {
-			var chartData = init(ch, title, arr, margin, format, data[obj].ch, data[obj].title);
-			ch = chartData.ch;
-			title = chartData.title;
-			arr = chartData.arr;
-			margin = chartData.margin;
-		}
-		if ($('#type').jqxDropDownList('getSelectedItem').value == 'time') {
-			var timePoint = new TimePoint(data[obj]);
-			arr.push(timePoint);
-			//chart.data[0].addTo("dataPoints", timePoint);
-			//chart.data[0].addTo("dataPoints", {x : new Date(data[obj].time.split("-")[0], data[obj].time.split("-")[1], data[obj].time.split("-")[2]), y : data[obj].event.split("_")[1]});
+	var end;
+	if ($('#type').jqxDropDownList('getSelectedItem').value == 'time') {
+		end = 24;
+	} else {
+		end = 7;
+	}
+	
+	for (var j = 0; j < data.length; j++) {
+		var lt = 0;
+		var len = data[j].length;
+		var arr = new Array();
+		if (len >= end) {
+			for (var i = 0; i < len; i++) {
+				if ($('#type').jqxDropDownList('getSelectedItem').value == 'time') {
+					arr.push(new TimePoint(data[j][i]));
+				} else {
+					arr.push(new DayPoint(data[j][i]));
+				}
+			}
 		} else {
-			var dayPoint = new DayPoint(data[obj]);
-			arr.push(dayPoint);
-			//chart.data[0].addTo("dataPoints", dayPoint);
-			//chart.data[0].addTo("dataPoints", {x : new Date(data[obj].time.split("-")[0], data[obj].time.split("-")[1], data[obj].time.split("-")[2]), y : Number(data[obj].event.split("_")[1])});
+			if ($('#type').jqxDropDownList('getSelectedItem').value == 'time') {
+				var rt = 0;
+				var event = data[j][0].event;
+				while (lt < end) {
+					var tmpObj = new Object();
+					if (data[j][rt] == null || lt != Number(data[j][rt].time)) {
+						tmpObj.event = event.split("_")[0] + "_" + 0;
+						tmpObj.time = lt;
+						arr.push(new TimePoint(tmpObj));
+					} else {
+						event = data[j][rt].event;
+						tmpObj.event = event;
+						tmpObj.time = lt;
+						arr.push(new TimePoint(tmpObj));
+						rt++;
+					}
+					lt++;
+				}
+			} else {
+				var tmpDate;
+				var event;
+				for (var i = 0; i < end; i++) {
+					if (data[j][i] == null) {
+						tmpDate.setDate(tmpDate.getDate() + 1);
+						var tmpObj = new Object();
+						tmpObj.event = event;
+						tmpObj.time = tmpDate.getFullYear() + "-" + (tmpDate.getMonth() + 1) + "-" + tmpDate.getDate();						
+						arr.push(new DayPoint(tmpObj));
+					} else {
+						event = data[j][i].event;
+						tmpDate = new Date(data[j][i].time.split("-")[0], Number(data[j][i].time.split("-")[1]) - 1, data[j][i].time.split("-")[2]);
+						arr.push(new DayPoint(data[j][i]));
+					}
+				}
+			}
+		}
+		init(data[j][0].title, arr, margin, format);
+		margin += 460;
+	}
+	
+	/* for (var i = 0; i < len; i++) {
+		if (data[i] != null) {
+			if (ch != data[i].ch) {
+				var chartData = init(ch, title, arr, margin, format, data[i].ch, data[i].title);
+				ch = chartData.ch;
+				title = chartData.title;
+				arr = chartData.arr;
+				margin = chartData.margin;
+			}
+			if ($('#type').jqxDropDownList('getSelectedItem').value == 'time') {
+				arr.push(new TimePoint(data[i]));
+			} else {
+				arr.push(new DayPoint(data[i]));
+			}
 		}
 	}
 	if (arr.length > 0) {
 		init(ch, title, arr, margin, format, null, null);
-	}
+	} */
 }
 function createChart(title, format, arr) {
 	var chart = new CanvasJS.Chart(title, {
@@ -344,8 +399,8 @@ function createChart(title, format, arr) {
 		},
 		axisX:{
 	        labelFontColor:"#fff",
-			valueFormatString: format,
-	        intervalType: "time"
+			valueFormatString: format/* ,
+	        intervalType: "time" */
 		},
 		axisY: {
 			titleFontColor: "#fff",
@@ -399,21 +454,14 @@ function initMenu() {
 		setReportingType('day');
 	}
 }
-function init(ch, title, arr, margin, format, objCh, objTitle) {
-	if (arr.length > 0) {
-		var div = document.createElement("div");
-		div.className = 'graph';
-		div.id = title;
-		div.style.position = 'absolute';
-		div.style.marginTop = margin + 'px';
-		margin += 460;
-		document.getElementById('bottom').appendChild(div);
-		createChart(title, format, arr);
-	}
-	ch = objCh;
-	title = objTitle;
-	arr = new Array();
-	return new ChartData(ch, title, arr, margin);
+function init(title, arr, margin, format) {
+	var div = document.createElement("div");
+	div.className = 'graph';
+	div.id = title;
+	div.style.position = 'absolute';
+	div.style.marginTop = margin + 'px';
+	document.getElementById('bottom').appendChild(div);
+	createChart(title, format, arr);
 }
 class DayPoint {
 	constructor(data) {
@@ -425,11 +473,7 @@ class DayPoint {
 }
 class TimePoint {
 	constructor(data) {
-		var year = Number(data.time.split(" ")[0].split("-")[0]);
-		var month = Number(data.time.split(" ")[0].split("-")[1]) - 1;
-		var day = Number(data.time.split(" ")[0].split("-")[2]);
-		var hour = Number(data.time.split(" ")[1]);
-		this.x = new Date(year, month, day, hour);
+		this.x = Number(data.time);
 		this.y = Number(data.event.split("_")[1]); 
 	}
 }
@@ -445,6 +489,22 @@ class EventName {
 	constructor(text, value) {
 		this.text = text;
 		this.value = value;
+	}
+}
+class SettingData {
+	constructor() {
+	}
+	
+	setChartData(chartData) {
+		this.chartData = chartData;
+	}
+	
+	setData(data) {
+		if (typeof data == 'TimePoint') {
+			this.timePoint = data;
+		} else {
+			this.dayPoint = data;
+		}
 	}
 }
 </script>

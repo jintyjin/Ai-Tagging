@@ -50,6 +50,11 @@ public class PostRepositoryImpl implements PostRepository {
 			public void run() {
 				// 스레드에게 시킬 작업 내용
 				while (true) {
+					try {
+						Thread.sleep(1);
+					} catch (InterruptedException e1) {
+						System.out.println("startPostQ() sleep() error");
+					}
 					Map map;
 					try {
 						map = postQ.take();

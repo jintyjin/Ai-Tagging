@@ -327,6 +327,7 @@ function get(key) {
 	return sessionStorage.getItem(key);
 }
 $(document).ready(function (){
+	sessionStorage.clear()
 	if (typeof window.parent.loginUser != 'function') {
 		location.replace('index/login');
 	}

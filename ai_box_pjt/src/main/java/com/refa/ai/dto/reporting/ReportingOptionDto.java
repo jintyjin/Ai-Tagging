@@ -13,6 +13,7 @@ public class ReportingOptionDto {
 	private String eventName;
 	private List<Integer> chList = new ArrayList<>();
 	private int type;
+	private int start;
 	
 	
 	public ReportingOptionDto(ReportingPageDto reportingPageDto) {
@@ -23,9 +24,11 @@ public class ReportingOptionDto {
 			chList.add(Integer.parseInt(reportingPageDto.getCh().split(",")[i]));
 		}
 		if (reportingPageDto.getType().equals("time")) {
-			this.type = 13;
+			this.type = 2;
+			this.start = 12;
 		} else {
 			this.type = 10;
+			this.start = 1;
 		}
 	}
 }

@@ -40,7 +40,11 @@ public class DashBoardRepository {
 	}
 
 	public List<ReportingDto> selectReportingData(ReportingOptionDto reportingOptionDto) {
-		return sqlSessionTemplate.selectList("dashBoard.selectReportingData", reportingOptionDto);
+		if (reportingOptionDto.getType() == 2) {
+			return sqlSessionTemplate.selectList("dashBoard.selectReportingTimeData", reportingOptionDto);
+		} else {
+			return sqlSessionTemplate.selectList("dashBoard.selectReportingDayData", reportingOptionDto);
+		}
 	}
 
 	public List<ReportingExistEventNameDto> selectExistEventName() {

@@ -67,7 +67,37 @@
 		GROUP BY time;
 	</select>
 	
-	<select id="selectReportingData" parameterType="com.refa.ai.dto.reporting.ReportingOptionDto" resultType="com.refa.ai.dto.reporting.ReportingDto" fetchSize="1000">
+	<select id="selectReportingTimeData" parameterType="com.refa.ai.dto.reporting.ReportingOptionDto" resultType="com.refa.ai.dto.reporting.ReportingDto" fetchSize="1000">
+		SELECT d.dev_title as title, ch, time, ARRAY_TO_STRING(ARRAY_AGG(event),',') as event
+		FROM (
+			select i.ch, i.time, i.event
+			from data.categoryAll as c
+			left join (
+				select a.ch, substring(a.time, 12, 2) as time, a.event_name || '_' || count(*) as event
+				from (
+					select dev_ch::integer as ch, substring(event_time, 1, 13) as time, lower(split_part(regexp_split_to_table(substring(tags, 2, length(tags) - 2), ', '),'_',2)) as event_name 
+					from data.imageevent
+					where dev_ch::integer in 
+						<foreach collection="chList" item="ch" open="(" close=")" separator=",">
+							#{ch}
+						</foreach>
+					and to_timestamp(event_time, 'YYYY-MM-DD')::timestamp between #{startDate}::timestamp and #{endDate}::timestamp
+					order by time asc, ch asc, event_name asc
+				) a
+				where event_name = #{eventName}
+				group by a.ch, substring(a.time, 12, 2), a.event_name
+				order by substring(a.time, 12, 2), ch asc, event asc
+			) as i
+			on lower(split_part(c.category_small, '_', 2)) = split_part(i.event, '_', 1)
+			where i.time is not null
+			order by i.time asc, i.ch asc, c.category_idx asc
+		) a
+		left join data.devinfo as d
+		on d.dev_ch = ch
+		GROUP BY title, ch, time
+	</select>
+	
+	<select id="selectReportingDayData" parameterType="com.refa.ai.dto.reporting.ReportingOptionDto" resultType="com.refa.ai.dto.reporting.ReportingDto" fetchSize="1000">
 		SELECT d.dev_title as title, ch, time, ARRAY_TO_STRING(ARRAY_AGG(event),',') as event
 		FROM (
 			select i.ch, i.time, i.event
@@ -75,22 +105,14 @@
 			left join (
 				select a.ch, a.time, a.event_name || '_' || count(*) as event
 				from (
-					select dev_ch::integer as ch, substring(event_time, 1, #{type}) as time, lower(split_part(regexp_split_to_table(substring(tags, 2, length(tags) - 2), ', '),'_',2)) as event_name
+					select dev_ch::integer as ch, substring(event_time, #{start}, #{type}) as time, lower(split_part(regexp_split_to_table(substring(tags, 2, length(tags) - 2), ', '),'_',2)) as event_name
 					from data.imageevent
 					where dev_ch::integer in 
-					<foreach collection="chList" item="ch" open="(" close=")" separator=",">
-						#{ch}
-					</foreach>
-					and 
-					<choose>
-						<when test="type == 13">
-							to_timestamp(event_time, 'YYYY-MM-DD')::timestamp between #{startDate}::timestamp and #{startDate}::timestamp
-						</when>
-						<otherwise>
-							to_timestamp(event_time, 'YYYY-MM-DD')::timestamp between #{startDate}::timestamp and #{endDate}::timestamp
-						</otherwise>
-					</choose>
-					group by ch, substring(event_time, 1, #{type}), lower(split_part(regexp_split_to_table(substring(tags, 2, length(tags) - 2), ', '),'_',2)), event_time
+						<foreach collection="chList" item="ch" open="(" close=")" separator=",">
+							#{ch}
+						</foreach>
+					and to_timestamp(event_time, 'YYYY-MM-DD')::timestamp between #{startDate}::timestamp and #{endDate}::timestamp
+					group by ch, substring(event_time, #{start}, #{type}), lower(split_part(regexp_split_to_table(substring(tags, 2, length(tags) - 2), ', '),'_',2)), event_time
 					order by ch asc, time asc, event_name asc
 				) a
 				where event_name = #{eventName}

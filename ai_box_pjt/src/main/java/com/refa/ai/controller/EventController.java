@@ -1550,6 +1550,11 @@ public class EventController {
 			@Override
 			public void run() {
 				while (true) {
+					try {
+						Thread.sleep(1);
+					} catch (InterruptedException e1) {
+						System.out.println("startRequestScadaQ() sleep() error");
+					}
 					RequestScadaDto requestScadaDto;
 					try {
 						requestScadaDto = requestScadaQ.take();

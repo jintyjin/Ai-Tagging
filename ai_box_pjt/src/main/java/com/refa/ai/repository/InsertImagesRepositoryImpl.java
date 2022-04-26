@@ -62,6 +62,11 @@ public class InsertImagesRepositoryImpl implements InsertImagesRepository {
 			@Override
 			public void run() {
 				while (true) {
+					try {
+						Thread.sleep(1);
+					} catch (InterruptedException e1) {
+						System.out.println("startInsertQ() sleep() error");
+					}
 					Map map;
 					try {
 						map = insertQ.take();

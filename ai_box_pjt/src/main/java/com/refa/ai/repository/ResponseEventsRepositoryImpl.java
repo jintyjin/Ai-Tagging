@@ -138,11 +138,15 @@ public class ResponseEventsRepositoryImpl implements ResponseEventsRepository {
 
 	@Override
 	public void startResponseQ() {
-		System.out.println("startResponseQ()");
 		Runnable runnable = new Runnable() {
 			@Override
 			public void run() {
 				while (true) {
+					try {
+						Thread.sleep(1);
+					} catch (InterruptedException e1) {
+						System.out.println("startResponseQ() sleep() error");
+					}
 //					ResponseEventDto responseEventDto;
 					Map map;
 					try {

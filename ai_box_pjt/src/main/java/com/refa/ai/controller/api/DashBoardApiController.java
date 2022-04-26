@@ -1,5 +1,6 @@
 package com.refa.ai.controller.api;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -50,7 +51,7 @@ public class DashBoardApiController {
 	}
 	
 	@PostMapping("/reporting")
-	public List<ReportingDto> reporting(@RequestBody ReportingPageDto reportingPageDto) {
+	public List<List<ReportingDto>> reporting(@RequestBody ReportingPageDto reportingPageDto) {
 		return dashBoardService.getReportingData(reportingPageDto);
 	}
 }
