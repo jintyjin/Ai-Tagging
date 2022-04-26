@@ -349,7 +349,7 @@ function showData(format, data) {
 					if (data[j][i] == null) {
 						tmpDate.setDate(tmpDate.getDate() + 1);
 						var tmpObj = new Object();
-						tmpObj.event = event;
+						tmpObj.event = event.split("_") + "_" + 0;
 						tmpObj.time = tmpDate.getFullYear() + "-" + (tmpDate.getMonth() + 1) + "-" + tmpDate.getDate();						
 						arr.push(new DayPoint(tmpObj));
 					} else {
