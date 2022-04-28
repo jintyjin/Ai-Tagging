@@ -155,9 +155,11 @@ $(document).ready(function () {
 		if (canvas.getContext) {
 			var i = $(this).offset().left;
 			var t = $(this).offset().top;
-			var x = e.pageX - i;
-			var y = e.pageY - t;
+			var x = parseInt(e.pageX - i);
+			var y = parseInt(e.pageY - t);
 			var r = 3;
+			
+			console.log(x, y);
 			
 			ctx.beginPath();
 			//ctx.fillstyle = "transparent";

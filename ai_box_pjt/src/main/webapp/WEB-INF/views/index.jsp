@@ -294,6 +294,8 @@ $(document).ready(function () {
 		$(this).addClass("active");
 	});
 
+	console.log("<%= request.getAttribute("user") %>");
+	
 	<% if (request.getAttribute("user") != null) { %>
 		<% User user = (User)request.getAttribute("user"); %>;
 		userId = '<%= user.getUser_id() %>';
@@ -312,10 +314,10 @@ $(document).ready(function () {
 			$('#tab10').css('display', '');
 			$('#tab11').css('display', '');
 			$('#tab15').css('display', '');
+			$('#tab16').css('display', '');
 		}
 		$('#tab13').css('display', '');
 		$('#tab14').css('display', '');
-		$('#tab16').css('display', '');
 		$('#newMenu').css('display', '');
 		$('#iframe').attr('src', '/' + '<%= request.getAttribute("pageUrl").toString() %>' + ".htm");
 	<% }%>
